@@ -1,0 +1,7 @@
+#!/bin/bash
+/usr/local/bin/iPDU $1
+if [ "$1" == "off" ]
+then
+echo "Running cleanup" >/tmp/cleanup
+./cleanUP
+fi

@@ -1,0 +1,39 @@
+#!/bin/bash
+
+kill_named_process()
+{
+        name=$1
+        pid=`pgrep "$1"`
+	arr=($pid)
+        if [[ "$pid" != "" ]]; then
+                kill -9 ${arr[${#arr[@]}-1]}
+		echo "killing ${arr[${#arr[@]}-1]}" >> /tmp/PID
+        fi
+}
+
+kill_named_process em100
+kill_named_process em100
+kill_named_process ttyd
+kill_named_process ttyd
+kill_named_process ttyd
+kill_named_process read_pipe
+kill_named_process read_pipe
+kill_named_process read_pipe_smbios
+kill_named_process read_pipe_smbios
+
+# We must close the screen terminal
+terminal=`screen -ls | awk '{ print $1 }' | grep -v "No" | grep -v "There" | grep -v "Remove" | awk -F"." '{ print $1 }'`
+if [ ${#terminal} != 1 ] 
+then
+for i in $terminal
+do
+	kill -9 $i
+	screen -wipe
+done
+fi
+#We have to reset the PCI bus
+sudo /home/vejmarie/Web/reset_bus
+em100 -x DP144197 -s
+em100 -x DP144198 -s
+touch /tmp/cleanUpDONE
+rm -rf firmwares/*

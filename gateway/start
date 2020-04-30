@@ -1,0 +1,15 @@
+# Please set the following variable
+export TLS_CERT_PATH=
+export TLS_KEY_PATH=
+# Previous one are in the case of using a self signed certificate
+export DNS_DOMAIN=
+# Previous one is in the case of using a fully qualified domain name with letsencrypt
+export CERT_STORAGE=
+export STATIC_ASSETS_DIR=
+export TTYD_HOST_CONSOLE_PORT=:7681
+export TTYD_EM100_BIOS_PORT=:7683
+export TTYD_EM100_ILO_PORT=:7682
+export CTRL_IP=
+export EXPECT_ILO_IP=
+go build server.go
+./server

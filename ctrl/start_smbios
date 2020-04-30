@@ -1,0 +1,5 @@
+#!/bin/bash
+cp /usr/share/local/images/SBIOS_OpenBMC.rom firmwares/SBIOS_OpenBMC.rom
+$HOME/build/ttyd/ttyd -p 7683 -R $HOME/Web/read_pipe_smbios &
+( unbuffer em100 -c MX25L25635E -x DP144198 -d $1 -r -t -v  -O 0xFE0000000 -p low ) >& smbiosem100
+sleep 2

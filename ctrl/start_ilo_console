@@ -1,0 +1,2 @@
+#!/bin/bash
+$HOME/build/ttyd/ttyd -p 7682 screen /dev/ttyUSB0 115200

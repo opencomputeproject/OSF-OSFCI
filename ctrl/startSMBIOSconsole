@@ -1,0 +1,2 @@
+export ILO_IP=
+sshpass -p "0penBmc" ssh -o StrictHostKeyChecking=no root@$ILO_IP 'obmc-console-client'
