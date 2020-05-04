@@ -169,7 +169,7 @@ func iloweb(w http.ResponseWriter, r *http.Request){
 	conn, err := net.DialTimeout("tcp", ExpectediLOIp+":443", 220*time.Millisecond)
 	if ( err != nil ) {
 		if ( DNSDomain != "" ) {
-			http.Redirect(w, r, "https://"+DNSDomain+"/ci", 301)
+			http.Redirect(w, r, "https://"+DNSDomain+"/ci", 302)
 		}
 		return
 	} else {
