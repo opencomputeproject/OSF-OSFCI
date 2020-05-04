@@ -15,6 +15,7 @@ import (
 	"crypto/tls"
 	"net"
 	"time"
+	"golang.org/x/crypto/acme/autocert"
 )
 
 
@@ -26,6 +27,7 @@ var TTYDHostConsole = os.Getenv("TTYD_HOST_CONSOLE_PORT")
 var TTYDem100Bios = os.Getenv("TTYD_EM100_BIOS_PORT")
 var TTYDem100iLO = os.Getenv("TTYD_EM100_ILO_PORT")
 var CTRLIp = os.Getenv("CTRL_IP")
+var certStorage = os.Getenv("CERT_STORAGE")
 var ExpectediLOIp = os.Getenv("EXPECT_ILO_IP")
 
 
@@ -191,7 +193,7 @@ func iloweb(w http.ResponseWriter, r *http.Request){
 	proxy.Transport = InsecureTransport
 	// Internal gateway IP address
 	// Must reroute on myself and port 443
-        url, _ := url.Parse("http://"+r.Header.Get("Host"))
+        url, _ = url.Parse("http://"+r.Header.Get("Host"))
 	r.URL.Host = "https://"+url.Hostname()+":443/"
 	r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 	proxy.ServeHTTP(w , r)
