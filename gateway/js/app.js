@@ -1,3 +1,7 @@
+
+var mylocalStorage = {};
+window.mylocalStorage = mylocalStorage;
+
 function clearDocument(){
 	$(document.body).empty();
 }
@@ -90,7 +94,13 @@ function main(){
 
 
 	clearDocument();
-	loadHTML("html/main.html");
+//	loadHTML("html/main.html");
+	loadHTML("html/navbar.html");
+	loadHTML("html/home.html");
+	if (( "string" !== typeof(mylocalStorage['secretKey']) ) & ( "string" !== typeof(mylocalStorage['accessKey']) ))
+	{
+		$('#signup').css("display", "");
+	}
 
 	var dropZoneiLo = document.getElementById('drop-zone-ilo');
 

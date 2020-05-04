@@ -128,6 +128,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 			b, _ := ioutil.ReadFile(staticAssetsDir+tail) // just pass the file name
 			w.Header().Set("Content-Type", "text/css; charset=utf-8")
                         w.Write(b)
+		case "images":
+			b, _ := ioutil.ReadFile(staticAssetsDir+tail) // just pass the file name
+			w.Header().Set("Content-Type", "image/png")
+			w.Write(b)
 		case "mp4":
 			b, _ := ioutil.ReadFile(staticAssetsDir+tail) // just pass the file name
                         w.Header().Set("Content-Type", "video/mp4")
