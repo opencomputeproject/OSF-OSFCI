@@ -152,8 +152,8 @@ func home(w http.ResponseWriter, r *http.Request) {
                         proxy.ServeHTTP(w , r)
 		case "":
                         b, _ := ioutil.ReadFile(staticAssetsDir+"/html/homepage.html") // just pass the file name
-                                // this is a potential template file we need to replace the http field
-                                // by the calling r.Host
+                        // this is a potential template file we need to replace the http field
+                        // by the calling r.Host
                         t := template.New("my template")
                         buf := &bytes.Buffer{}
                         t.Parse(string(b))
@@ -210,8 +210,9 @@ func main() {
     mux := http.NewServeMux()
 
     // Highest priority must be set to the signed request
-    mux.HandleFunc("/ci/",home)
     mux.HandleFunc("/",iloweb)
+    mux.HandleFunc("/ci/",home)
+
     if ( DNSDomain != "" ) {
         // if DNS_DOMAIN is set then we run in a production environment
         // we must get the directory where the certificates will be stored
