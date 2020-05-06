@@ -168,9 +168,17 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 func iloweb(w http.ResponseWriter, r *http.Request){
+
+
+	// If the request is for a favicon.ico file we are just returning
+	// we do not offer such icon currently ;)
+	head, _ := ShiftPath( r.URL.Path)
+	if ( head == "favicon.ico" ) {
+		return
+	}
+
 	// We must know if iLo is started or not ?
 	// if not then we have to reroute to the actual homepage
-	fmt.Printf("Contacting iLo\n")
 	// We can make a request to the website or
 	conn, err := net.DialTimeout("tcp", ExpectediLOIp+":443", 220*time.Millisecond)
 	if ( err != nil ) {
@@ -214,8 +222,8 @@ func main() {
     mux := http.NewServeMux()
 
     // Highest priority must be set to the signed request
-    mux.HandleFunc("/",iloweb)
     mux.HandleFunc("/ci/",home)
+    mux.HandleFunc("/",iloweb)
 
     if ( DNSDomain != "" ) {
         // if DNS_DOMAIN is set then we run in a production environment
