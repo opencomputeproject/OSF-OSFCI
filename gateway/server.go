@@ -2,6 +2,11 @@ package main
 
 import (
 	"net/http"
+        "base"
+	"crypto/tls"
+	"crypto/hmac"
+	"crypto/sha1"
+	"encoding/base64"
 	"os"
 	"log"
 	"strings"
@@ -12,9 +17,9 @@ import (
 	"fmt"
 	"net/url"
 	"net/http/httputil"
-	"crypto/tls"
 	"net"
 	"time"
+	"encoding/json"
 	"golang.org/x/crypto/acme/autocert"
 )
 
@@ -29,6 +34,8 @@ var TTYDem100iLO = os.Getenv("TTYD_EM100_ILO_PORT")
 var CTRLIp = os.Getenv("CTRL_IP")
 var certStorage = os.Getenv("CERT_STORAGE")
 var ExpectediLOIp = os.Getenv("EXPECT_ILO_IP")
+var credentialUri = os.Getenv("CREDENTIALS_URI")
+var credentialPort = os.Getenv("CREDENTIALS_TCPPORT")
 
 
 // httpsRedirect redirects http requests to https
@@ -49,6 +56,106 @@ func ShiftPath(p string) (head, tail string) {
     return p[1:i], p[i:]
 }
 
+func checkAccess(w http.ResponseWriter, r *http.Request) (bool){
+	var url = r.URL.Path
+	var command string
+	entries := strings.Split(strings.TrimSpace(url[1:]), "/") 
+	var login string
+
+	// The login is always accessible
+	if ( len(entries) > 2 ) {
+		command = entries[2]
+		login = entries[1]
+	} 
+	switch command {
+		case "getToken":
+				if ( r.Method == http.MethodGet || r.Method == http.MethodPost ) {
+					return true
+				} else {
+					return false
+				}
+		case "validateUser":
+				return true
+		case "resetPassword":
+				return true
+		case "generatePasswordLnkRst":
+				return true
+		case "createUser":
+				return true
+	}
+        if ( r.Header.Get("Authorization") != "" ) {
+		var method string
+		switch r.Method {
+			case http.MethodGet:
+				method = "GET"
+			case http.MethodPut:
+				method = "PUT"
+			case http.MethodPost:
+				method = "POST"
+			case http.MethodDelete:
+				method = "DELETE"
+		}
+                // Is this an AWS request ?
+                words := strings.Fields(r.Header.Get("Authorization"))
+                if ( words[0] == "JYP" ) {
+                        // Let's dump the various content
+                        keys := strings.Split(words[1],":")
+                        // We must retrieve the secret key used for encryption and calculate the header
+                        // if everything is ok (aka our computed value match) we are good
+
+			path := strings.Split( r.URL.Path, "/" )
+		        if ( len(path) < 3 ) {
+		                http.Error(w, "401 Malformed URI", 401)
+		                return false
+		        }
+		        username := path[2]
+
+			result:=base.HTTPGetRequest("http://"+r.Host+":9100"+"/user/"+username+"/userGetInternalInfo")
+
+			var return_data *base.User
+			return_data = new(base.User)
+                        json.Unmarshal([]byte(result),return_data)
+
+			// I am getting the Secret Key and the Nickname
+                        stringToSign := method + "\n\n"+r.Header.Get("Content-Type")+"\n"+r.Header.Get("myDate")+"\n"+r.URL.Path
+
+			secretKey := return_data.TokenSecret
+			nickname := username
+			if ( nickname != login ) {
+				return false
+			}
+                        mac := hmac.New(sha1.New, []byte(secretKey))
+                        mac.Write([]byte(stringToSign))
+                        expectedMAC := mac.Sum(nil)
+                        if ( base64.StdEncoding.EncodeToString(expectedMAC) == keys[1] ) {
+				return true
+                        }
+                }
+	}
+	return false
+}
+
+func user(w http.ResponseWriter, r *http.Request) {
+
+	if ( !checkAccess(w, r)  ) {
+		w.Write([]byte("Access denied"))
+		return
+	}
+
+	// parse the url
+	url, _ := url.Parse("http://"+credentialUri+credentialPort)
+
+	// create the reverse proxy
+	proxy := httputil.NewSingleHostReverseProxy(url)
+
+	// Update the headers to allow for SSL redirection
+	r.URL.Host = "http://"+r.Host+":9100"
+
+	r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
+
+	// Note that ServeHttp is non blocking and uses a go routine under the hood
+	proxy.ServeHTTP(w , r)
+}
 
 func home(w http.ResponseWriter, r *http.Request) {
 	head, tail := ShiftPath( r.URL.Path)
@@ -223,6 +330,7 @@ func main() {
 
     // Highest priority must be set to the signed request
     mux.HandleFunc("/ci/",home)
+    mux.HandleFunc("/user/", user)
     mux.HandleFunc("/",iloweb)
 
     if ( DNSDomain != "" ) {
