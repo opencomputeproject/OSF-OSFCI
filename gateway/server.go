@@ -17,7 +17,7 @@ import (
 	"fmt"
 	"net/url"
 	"net/http/httputil"
-//	"net"
+	"net"
 	"time"
 	"encoding/json"
 	"golang.org/x/crypto/acme/autocert"
@@ -280,15 +280,12 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 func iloweb(w http.ResponseWriter, r *http.Request){
-
-
 	// Let's print the session ID
         cookie, err := r.Cookie("osfci_cookie")
 	if err == nil {
 	        print(cookie.Value)
 	}
-	
-/*
+
 
 	// If the request is for a favicon.ico file we are just returning
 	// we do not offer such icon currently ;)
@@ -310,7 +307,6 @@ func iloweb(w http.ResponseWriter, r *http.Request){
 		conn.Close()
 	}
 	// Must specify the iLo Web address
-	fmt.Printf("iLo is answering - Forwarding the request\n")
 	url, _ := url.Parse("https://"+ExpectediLOIp+":443")
 	proxy := httputil.NewSingleHostReverseProxy(url)
 	var InsecureTransport http.RoundTripper = &http.Transport{
@@ -329,7 +325,7 @@ func iloweb(w http.ResponseWriter, r *http.Request){
 	r.URL.Host = "https://"+url.Hostname()+":443/"
 	r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 	proxy.ServeHTTP(w , r)
-*/
+
 }
 
 func main() {
