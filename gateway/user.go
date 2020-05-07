@@ -6,9 +6,14 @@ import (
     "net/http"
     "strings"
     "encoding/json"
+    "encoding/base64"
+    "io"
+    "crypto/rand"
     "fmt"
     "log"
     "time"
+    "context"
+    "github.com/go-session/session"
 )
 
 var StorageURI = os.Getenv("STORAGE_URI")
@@ -418,6 +423,23 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 					result.Lastlogin=string(time.Now().Format(time.RFC1123Z))
 					b, _ := json.Marshal(result)
 				        base.HTTPPutRequest("http://"+StorageURI+StorageTCPPORT+"/user/"+result.Nickname,b,"application/json")
+
+					// As the user might be willing to use OpenBMC we need to send him also a SESSION ID cookie
+					// which will be the only way to track him/her as we eveolve from a single app web base
+					// platform to a multiple one (our website and the OpenBMC one)
+					store, _ := session.Start(context.Background(), w, r)
+        				Data := make([]byte, 32)
+				        io.ReadFull(rand.Reader, Data)
+					sessionid := base64.URLEncoding.EncodeToString(Data)
+					// Let's print the session id
+					print(sessionid+"\n")
+					store.Set("sessionid", sessionid)
+					store.Save()
+					// We need to send back the cookie to the client
+					cookie := http.Cookie{Name: "osfci_cookie", Value: sessionid, Path: "/", HttpOnly: true, MaxAge: int(3600*24)}
+				        http.SetCookie(w, &cookie)
+
+
 					fmt.Fprintf(w,string(returnValue))
 				case "createUser":
 					createUser(username, w, r)

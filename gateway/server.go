@@ -17,7 +17,7 @@ import (
 	"fmt"
 	"net/url"
 	"net/http/httputil"
-	"net"
+//	"net"
 	"time"
 	"encoding/json"
 	"golang.org/x/crypto/acme/autocert"
@@ -158,6 +158,11 @@ func user(w http.ResponseWriter, r *http.Request) {
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
+        cookie, err := r.Cookie("osfci_cookie")
+	if err == nil {
+		print(cookie.Value)
+	}
+
 	head, tail := ShiftPath( r.URL.Path)
 	if ( head == "ci" ) {
 		head,_ = ShiftPath(tail)
@@ -277,6 +282,14 @@ func home(w http.ResponseWriter, r *http.Request) {
 func iloweb(w http.ResponseWriter, r *http.Request){
 
 
+	// Let's print the session ID
+        cookie, err := r.Cookie("osfci_cookie")
+	if err == nil {
+	        print(cookie.Value)
+	}
+	
+/*
+
 	// If the request is for a favicon.ico file we are just returning
 	// we do not offer such icon currently ;)
 	head, _ := ShiftPath( r.URL.Path)
@@ -316,6 +329,7 @@ func iloweb(w http.ResponseWriter, r *http.Request){
 	r.URL.Host = "https://"+url.Hostname()+":443/"
 	r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 	proxy.ServeHTTP(w , r)
+*/
 }
 
 func main() {
