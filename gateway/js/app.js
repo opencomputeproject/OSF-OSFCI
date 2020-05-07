@@ -91,6 +91,10 @@ function homebutton(){
 
 function start_ci() {
         clearDocument();
+        loadHTML("html/navbar.html");
+        loadJS("js/navbar.js");
+        navbarHover();
+        loginBtn();
         loadHTML("html/main.html");
         var dropZoneiLo = document.getElementById('drop-zone-ilo');
 
@@ -209,6 +213,7 @@ function start_ci() {
         homebutton();
 }
 
+
 var getUrlParameter = function getUrlParameter(sParam) {
     var sPageURL = window.location.search.substring(1),
         sURLVariables = sPageURL.split('&'),
@@ -223,6 +228,10 @@ var getUrlParameter = function getUrlParameter(sParam) {
         }
     }
 };
+
+function InteractiveSession() {
+	start_ci();
+}
 
 function BuildSignedAuth(uri, op, contentType, callback) {
 	var returnObject = {};

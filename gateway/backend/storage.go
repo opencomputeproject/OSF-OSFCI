@@ -22,7 +22,6 @@ func getEntry(username string) (string,int) {
 	// The first letter of the username is used as a directory entry
 	// if the directory exist we check for the usenarme.conf entry into it
 	// if it is there we return the content of the file
-	print(storageRoot + "/" + string(username[0]) + "\n")
 	_, err := os.Stat(storageRoot + "/" + string(username[0]))
 	if ( ! os.IsNotExist(err) ) {
 		// The directory exist we must now check if the file exist
@@ -141,7 +140,6 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 				}
 			}
                 case http.MethodPut:
-			print("Got a PUT Request \n")
 			// Update an existing record.
 			if (r.Header.Get("Content-Type") != "image/jpg" ) {
 				createEntry(username,string(base.HTTPGetBody(r)))	
@@ -149,7 +147,6 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 				createImage(username,string(base.HTTPGetBody(r)))
 			}
 		case http.MethodDelete:
-			print("Got a Delete Request \n")
 			deleteEntry(username,string(base.HTTPGetBody(r)))
                 default:
         }

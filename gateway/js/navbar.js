@@ -39,8 +39,8 @@ $('#MyAccount').on('click', function(e) {
 	myAccount();
 });
 
-$('#MyProjects').on('click', function(e) {
-        myProjects();
+$('#InteractiveSession').on('click', function(e) {
+        InteractiveSession();
 });
 	// We must check if we are logged in or not ?
 	// and replace the button text

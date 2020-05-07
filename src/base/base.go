@@ -270,7 +270,6 @@ func HTTPDeleteRequest(request string){
 // Put request to the storage backend
 
 func HTTPPutRequest(request string, content []byte, contentType string) (string){
-	print("Running a PUT Request \n")
 	client := &http.Client{}
 	httprequest, err := http.NewRequest("PUT", request, bytes.NewReader(content))
 	httprequest.Header.Set("Content-Type", contentType)
