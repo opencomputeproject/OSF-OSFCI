@@ -15,6 +15,8 @@ As to debug and allow the platform to be developped without having access to rea
 
 The proper way to execute it is by issuing the following command when you have created an out of tree build directory
 
+edit the build.sh script first and adapt the environment variable to your environment
+
 ./build.sh <PATH to the OSFCI Tree>
 
 # Authors
