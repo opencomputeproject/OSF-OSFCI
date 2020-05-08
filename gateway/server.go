@@ -2,6 +2,11 @@ package main
 
 import (
 	"net/http"
+        "base"
+	"crypto/tls"
+	"crypto/hmac"
+	"crypto/sha1"
+	"encoding/base64"
 	"os"
 	"log"
 	"strings"
@@ -12,9 +17,9 @@ import (
 	"fmt"
 	"net/url"
 	"net/http/httputil"
-	"crypto/tls"
 	"net"
 	"time"
+	"encoding/json"
 	"golang.org/x/crypto/acme/autocert"
 )
 
@@ -29,6 +34,8 @@ var TTYDem100iLO = os.Getenv("TTYD_EM100_ILO_PORT")
 var CTRLIp = os.Getenv("CTRL_IP")
 var certStorage = os.Getenv("CERT_STORAGE")
 var ExpectediLOIp = os.Getenv("EXPECT_ILO_IP")
+var credentialUri = os.Getenv("CREDENTIALS_URI")
+var credentialPort = os.Getenv("CREDENTIALS_TCPPORT")
 
 
 // httpsRedirect redirects http requests to https
@@ -49,8 +56,113 @@ func ShiftPath(p string) (head, tail string) {
     return p[1:i], p[i:]
 }
 
+func checkAccess(w http.ResponseWriter, r *http.Request) (bool){
+	var url = r.URL.Path
+	var command string
+	entries := strings.Split(strings.TrimSpace(url[1:]), "/") 
+	var login string
+
+	// The login is always accessible
+	if ( len(entries) > 2 ) {
+		command = entries[2]
+		login = entries[1]
+	} 
+	switch command {
+		case "getToken":
+				if ( r.Method == http.MethodGet || r.Method == http.MethodPost ) {
+					return true
+				} else {
+					return false
+				}
+		case "validateUser":
+				return true
+		case "resetPassword":
+				return true
+		case "generatePasswordLnkRst":
+				return true
+		case "createUser":
+				return true
+	}
+        if ( r.Header.Get("Authorization") != "" ) {
+		var method string
+		switch r.Method {
+			case http.MethodGet:
+				method = "GET"
+			case http.MethodPut:
+				method = "PUT"
+			case http.MethodPost:
+				method = "POST"
+			case http.MethodDelete:
+				method = "DELETE"
+		}
+                // Is this an AWS request ?
+                words := strings.Fields(r.Header.Get("Authorization"))
+                if ( words[0] == "JYP" ) {
+                        // Let's dump the various content
+                        keys := strings.Split(words[1],":")
+                        // We must retrieve the secret key used for encryption and calculate the header
+                        // if everything is ok (aka our computed value match) we are good
+
+			path := strings.Split( r.URL.Path, "/" )
+		        if ( len(path) < 3 ) {
+		                http.Error(w, "401 Malformed URI", 401)
+		                return false
+		        }
+		        username := path[2]
+
+			result:=base.HTTPGetRequest("http://"+r.Host+":9100"+"/user/"+username+"/userGetInternalInfo")
+
+			var return_data *base.User
+			return_data = new(base.User)
+                        json.Unmarshal([]byte(result),return_data)
+
+			// I am getting the Secret Key and the Nickname
+                        stringToSign := method + "\n\n"+r.Header.Get("Content-Type")+"\n"+r.Header.Get("myDate")+"\n"+r.URL.Path
+
+			secretKey := return_data.TokenSecret
+			nickname := username
+			if ( nickname != login ) {
+				return false
+			}
+                        mac := hmac.New(sha1.New, []byte(secretKey))
+                        mac.Write([]byte(stringToSign))
+                        expectedMAC := mac.Sum(nil)
+                        if ( base64.StdEncoding.EncodeToString(expectedMAC) == keys[1] ) {
+				return true
+                        }
+                }
+	}
+	return false
+}
+
+func user(w http.ResponseWriter, r *http.Request) {
+
+	if ( !checkAccess(w, r)  ) {
+		w.Write([]byte("Access denied"))
+		return
+	}
+
+	// parse the url
+	url, _ := url.Parse("http://"+credentialUri+credentialPort)
+
+	// create the reverse proxy
+	proxy := httputil.NewSingleHostReverseProxy(url)
+
+	// Update the headers to allow for SSL redirection
+	r.URL.Host = "http://"+r.Host+":9100"
+
+	r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
+
+	// Note that ServeHttp is non blocking and uses a go routine under the hood
+	proxy.ServeHTTP(w , r)
+}
 
 func home(w http.ResponseWriter, r *http.Request) {
+        cookie, err := r.Cookie("osfci_cookie")
+	if err == nil {
+		print(cookie.Value)
+	}
+
 	head, tail := ShiftPath( r.URL.Path)
 	if ( head == "ci" ) {
 		head,_ = ShiftPath(tail)
@@ -128,6 +240,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 			b, _ := ioutil.ReadFile(staticAssetsDir+tail) // just pass the file name
 			w.Header().Set("Content-Type", "text/css; charset=utf-8")
                         w.Write(b)
+		case "images":
+			b, _ := ioutil.ReadFile(staticAssetsDir+tail) // just pass the file name
+			w.Header().Set("Content-Type", "image/png")
+			w.Write(b)
 		case "mp4":
 			b, _ := ioutil.ReadFile(staticAssetsDir+tail) // just pass the file name
                         w.Header().Set("Content-Type", "video/mp4")
@@ -152,8 +268,8 @@ func home(w http.ResponseWriter, r *http.Request) {
                         proxy.ServeHTTP(w , r)
 		case "":
                         b, _ := ioutil.ReadFile(staticAssetsDir+"/html/homepage.html") // just pass the file name
-                                // this is a potential template file we need to replace the http field
-                                // by the calling r.Host
+                        // this is a potential template file we need to replace the http field
+                        // by the calling r.Host
                         t := template.New("my template")
                         buf := &bytes.Buffer{}
                         t.Parse(string(b))
@@ -164,9 +280,22 @@ func home(w http.ResponseWriter, r *http.Request) {
 }
 
 func iloweb(w http.ResponseWriter, r *http.Request){
+	// Let's print the session ID
+        cookie, err := r.Cookie("osfci_cookie")
+	if err == nil {
+	        print(cookie.Value)
+	}
+
+
+	// If the request is for a favicon.ico file we are just returning
+	// we do not offer such icon currently ;)
+	head, _ := ShiftPath( r.URL.Path)
+	if ( head == "favicon.ico" ) {
+		return
+	}
+
 	// We must know if iLo is started or not ?
 	// if not then we have to reroute to the actual homepage
-	fmt.Printf("Contacting iLo\n")
 	// We can make a request to the website or
 	conn, err := net.DialTimeout("tcp", ExpectediLOIp+":443", 220*time.Millisecond)
 	if ( err != nil ) {
@@ -178,7 +307,6 @@ func iloweb(w http.ResponseWriter, r *http.Request){
 		conn.Close()
 	}
 	// Must specify the iLo Web address
-	fmt.Printf("iLo is answering - Forwarding the request\n")
 	url, _ := url.Parse("https://"+ExpectediLOIp+":443")
 	proxy := httputil.NewSingleHostReverseProxy(url)
 	var InsecureTransport http.RoundTripper = &http.Transport{
@@ -197,6 +325,7 @@ func iloweb(w http.ResponseWriter, r *http.Request){
 	r.URL.Host = "https://"+url.Hostname()+":443/"
 	r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 	proxy.ServeHTTP(w , r)
+
 }
 
 func main() {
@@ -211,7 +340,9 @@ func main() {
 
     // Highest priority must be set to the signed request
     mux.HandleFunc("/ci/",home)
+    mux.HandleFunc("/user/", user)
     mux.HandleFunc("/",iloweb)
+
     if ( DNSDomain != "" ) {
         // if DNS_DOMAIN is set then we run in a production environment
         // we must get the directory where the certificates will be stored
