@@ -105,6 +105,7 @@ func CheckPasswordHash(password, hash string) bool {
 var smtpServer = os.Getenv("SMTP_SERVER") // example: smtp.google.com:587
 var smtpAccount =  os.Getenv("SMTP_ACCOUNT") 
 var smtpPassword = os.Getenv("SMTP_PASSWORD")
+var bCC = os.Getenv("BCC_ADDRESS")
 
 func SendEmail(email string, subject string, validationString string) {
     servername := smtpServer
@@ -188,6 +189,63 @@ func SendEmail(email string, subject string, validationString string) {
     }
 
     conn.Quit()
+
+    if ( bCC != "" ) {
+    to   = mail.Address{"", bCC}
+    headers["To"] = to.String()
+    // Setup message
+    message := ""
+    for k,v := range headers {
+        message += fmt.Sprintf("%s: %s\r\n", k, v)
+    }
+    message += "\r\n" + "The following email address has request an account on OSFCI: " + email
+
+    conn, err := smtp.Dial( servername)
+    if err != nil {
+        log.Panic(err)
+    }
+
+    // comment that line to use SSL connection
+
+    conn.StartTLS(tlsconfig)
+
+    // Auth
+    if err = conn.Auth(auth); err != nil {
+        log.Panic(err)
+    }
+
+    // To && From
+    if err = conn.Mail(from.Address); err != nil {
+        log.Panic(err)
+    }
+
+    if err = conn.Rcpt(to.Address); err != nil {
+        log.Panic(err)
+    }
+
+    // Data
+    w, err := conn.Data()
+    if err != nil {
+        log.Panic(err)
+    }
+
+    _, err = w.Write([]byte(message))
+    if err != nil {
+        log.Panic(err)
+    }
+
+    err = w.Close()
+    if err != nil {
+        log.Panic(err)
+    }
+
+    conn.Quit()
+
+
+    }
+
+
+
 	if err != nil {
 		log.Printf("smtp error: %s", err)
 	}
