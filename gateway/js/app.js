@@ -111,9 +111,7 @@ function start_ci() {
                   success: function(response){
 			var answer = JSON.parse(response);
 			if ( answer.Waittime == "0" ) {
-				console.log("we got a server it is called");
-				console.log(answer.Servername);
-				run_ci(answer.Servername);
+				run_ci(answer.Servername, parseInt(answer.RemainingTime));
 			} else {
 				console.log(response);
 				// We must display a warning message
@@ -144,12 +142,34 @@ function start_ci() {
         });
 }
 
-function run_ci(servername) {
+function run_ci(servername, RemainingSecond) {
 
 	// We received a test node we can start the CI in interactive
 	// and initiate a timer into the navbar ( 30 minutes )
 	// When the timer is expired we close our CI session and move
 	// To the next user or make a new request
+	var x = setInterval(function() {
+                   var days = Math.floor(RemainingSecond / ( 60 * 60 * 24));
+                   var hours = Math.floor((RemainingSecond % (60 * 60 * 24)) / (60 * 60));
+                   var minutes = Math.floor((RemainingSecond % ( 60 * 60)) / 60);
+                   var seconds = Math.floor((RemainingSecond % ( 60)) );
+
+                   $("#counter").html(days + "d " + hours + "h " + minutes + "m " + seconds + "s");
+                   RemainingSecond = RemainingSecond - 1;
+                   // If the count down is finished, write some text
+		   if ( RemainingSecond < 300 ) {
+			console.log("switching color");
+			$('#counter').css('color', '#ff8c00');
+		   }
+		   if ( RemainingSecond < 60 ) {
+			$('#counter').css("color", "#fb0000");
+		   }
+                   if (RemainingSecond < 0) {
+                          // We stop the timer
+                        clearInterval(x);
+                     	document.getElementById("demo").innerHTML = "EXPIRED";
+                    }
+                }, 1000);
 	
 
         loadHTML("html/main.html");
