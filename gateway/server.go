@@ -187,7 +187,6 @@ func home(w http.ResponseWriter, r *http.Request) {
 	// We must be sure that the end user still has an active server
 	// If that is not the case we deny the request
 	// And need to re route the end user to an end of session
-
 	switch ( head ) {
 		case "getServer":
 			// We need to have a valid cookie and associated Public Key / Private Key otherwise
@@ -239,7 +238,22 @@ func home(w http.ResponseWriter, r *http.Request) {
 				return_data,_ := json.Marshal(myoutput)
 				w.Write([]byte(return_data))
 			}
-
+		case "stopServer":
+			// We must get the server name
+			_,tail := ShiftPath(tail)
+			servername,_ := ShiftPath(tail)
+			// Ok we must look for this server into the ciServer list
+			// we must validate that the cookie if the right one
+			for i, _ := range ciServers.servers {
+				if ( ciServers.servers[i].servername == servername ) {
+					if ( ciServers.servers[i].currentOwner == cookie.Value ) {
+						// Ok we can free the server
+						// This is done by resetting the expiration
+						ciServers.servers[i].expiration = time.Now();
+						ciServers.servers[i].currentOwner = ""
+					}
+				}
+			}
 		case "console":
 			fmt.Printf("Console request\n");
 		        url, _ := url.Parse("http://"+CTRLIp+TTYDHostConsole)

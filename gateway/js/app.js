@@ -149,6 +149,9 @@ function run_ci(servername, RemainingSecond) {
 	// When the timer is expired we close our CI session and move
 	// To the next user or make a new request
 	$("#EndSession").css("display","");
+
+	// The home button and most of the navbar button must be disabled
+
 	var x = setInterval(function() {
                    var days = Math.floor(RemainingSecond / ( 60 * 60 * 24));
                    var hours = Math.floor((RemainingSecond % (60 * 60 * 24)) / (60 * 60));
@@ -166,12 +169,43 @@ function run_ci(servername, RemainingSecond) {
 			$('#counter').css("color", "#fb0000");
 		   }
                    if (RemainingSecond < 0) {
-                          // We stop the timer
+                        // We stop the timer
                         clearInterval(x);
+			// We have to reset the server and go back home !
                      	document.getElementById("demo").innerHTML = "EXPIRED";
                     }
                 }, 1000);
 	
+        // We must also attach the end session confirmation button !
+
+        $("#ConfirmSessionEnd").on("click", function() {
+                // Ok if we come there we have to inform the server that
+                // we want end our session. It must clean up the cache
+                // and power off my machine
+                // we can clean up my page and Display a thank you message
+                $('#iloem100console').removeAttr("src");
+                $('#smbiosem100console').removeAttr("src");
+                $('#iloconsole').removeAttr("src");
+                $.ajax({
+                        type: "GET",
+                        contentType: 'application/json',
+                        url: window.location.origin + '/ci/poweroff/',
+                        success: function(response){
+                                $.ajax({
+                                          type: "PUT",
+                                          contentType: 'application/json',
+                                          url: window.location.origin + '/ci/'+ 'stopServer/'+servername,
+                                          success: function(response){
+                                                // we move back to the main page
+						clearInterval(x);
+						$("#EndSession").css("display","none");
+                                                main();
+                                        }
+                                });
+                        }
+                });
+
+        });
 
         loadHTML("html/main.html");
         var dropZoneiLo = document.getElementById('drop-zone-ilo');
