@@ -134,7 +134,6 @@ function start_ci() {
   				if (secondWait < 0) {
 				    // We stop the timer
 				    clearInterval(x);
-				    document.getElementById("demo").innerHTML = "EXPIRED";
 				  }
 				}, 1000);
 			}
@@ -181,7 +180,30 @@ function run_ci(servername, RemainingSecond) {
                         // We stop the timer
                         clearInterval(x);
 			// We have to reset the server and go back home !
-                     	document.getElementById("demo").innerHTML = "EXPIRED";
+			$('#iloem100console').removeAttr("src");
+	                $('#smbiosem100console').removeAttr("src");
+	                $('#iloconsole').removeAttr("src");
+	                $.ajax({
+	                        type: "GET",
+	                        contentType: 'application/json',
+	                        url: window.location.origin + '/ci/poweroff/',
+	                        success: function(response){
+	                                $.ajax({
+	                                          type: "PUT",
+	                                          contentType: 'application/json',
+	                                          url: window.location.origin + '/ci/'+ 'stopServer/'+servername,
+	                                          success: function(response){
+	                                                // we move back to the main page
+	                                                clearInterval(x);
+	                                                $("#EndSession").css("display","none");
+	                                                $("#modalSession").modal('hide');
+	                                                $('#modalSession').on('hidden.bs.modal', function (e) {
+	                                                        main();
+	                                                });
+	                                        }
+	                                });
+	                        }
+	                });
                     }
                 }, 1000);
 	
