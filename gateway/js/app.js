@@ -148,6 +148,15 @@ function run_ci(servername, RemainingSecond) {
 	// and initiate a timer into the navbar ( 30 minutes )
 	// When the timer is expired we close our CI session and move
 	// To the next user or make a new request
+
+	// We have to hide the various button from the navbar
+	$('#loginNavbar').css("display","none");
+	$('#input-navbar').css("display","none");
+	$('#Home').css("display","none");
+	$('#features').css("display","none");
+	$('#help').css("display","none");
+	$('#dropdown').css("display","none");
+
 	$("#EndSession").css("display","");
 
 	// The home button and most of the navbar button must be disabled
