@@ -199,7 +199,10 @@ function run_ci(servername, RemainingSecond) {
                                                 // we move back to the main page
 						clearInterval(x);
 						$("#EndSession").css("display","none");
-                                                main();
+						$("#modalSession").modal('hide');
+						$('#modalSession').on('hidden.bs.modal', function (e) {
+							main();
+						});
                                         }
                                 });
                         }
