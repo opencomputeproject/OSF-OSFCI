@@ -12,12 +12,19 @@ import (
     "fmt"
     "log"
     "time"
-    "context"
-    "github.com/go-session/session"
 )
 
 var StorageURI = os.Getenv("STORAGE_URI")
 var StorageTCPPORT = os.Getenv("STORAGE_TCPPORT")
+
+type cacheEntry struct {
+        Nickname string
+ 	Cookie string
+	Expire time.Time
+}
+
+var cache []cacheEntry
+
 
 // Upercase is mandatory for JSON library parsing
 
@@ -318,6 +325,34 @@ func deleteUser(username string, w http.ResponseWriter, r *http.Request) (bool) 
         return true
 }
 
+func getSessionID(username string) (string) {
+	// We need to save the cookie into the user database (TODO)
+	// Is the user into the cache
+	for _, entry := range cache {
+		if ( entry.Nickname  == username ) {
+               		if ( entry.Expire.After(time.Now()) ) {
+				// Ok the Cookie is not expired
+				// We can return it and extend the lifecycle
+				entry.Expire = time.Now().Add(time.Second * time.Duration(base.MaxAge))
+				return(entry.Cookie)
+                       }
+		}
+        }
+	
+	// ok we must add an entry
+
+	var newEntry cacheEntry
+	newEntry.Nickname = username
+	newEntry.Expire = time.Now().Add(time.Second *time.Duration(base.MaxAge) )
+	Data := make([]byte, 32)
+        io.ReadFull(rand.Reader, Data)
+        cookie := base64.URLEncoding.EncodeToString(Data)
+	newEntry.Cookie = cookie 
+	cache = append(cache, newEntry)
+	return(newEntry.Cookie)
+
+}
+
 func userCallback(w http.ResponseWriter, r *http.Request) {
         var username,command  string
 
@@ -427,19 +462,10 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 					// As the user might be willing to use OpenBMC we need to send him also a SESSION ID cookie
 					// which will be the only way to track him/her as we eveolve from a single app web base
 					// platform to a multiple one (our website and the OpenBMC one)
-					store, _ := session.Start(context.Background(), w, r)
-        				Data := make([]byte, 32)
-				        io.ReadFull(rand.Reader, Data)
-					sessionid := base64.URLEncoding.EncodeToString(Data)
-					// Let's print the session id
-					print(sessionid+"\n")
-					store.Set("sessionid", sessionid)
-					store.Save()
+					sessionid := getSessionID(result.Nickname)
 					// We need to send back the cookie to the client
-					cookie := http.Cookie{Name: "osfci_cookie", Value: sessionid, Path: "/", HttpOnly: true, MaxAge: int(3600*24)}
+					cookie := http.Cookie{Name: "osfci_cookie", Value: sessionid, Path: "/", HttpOnly: true, MaxAge: int(base.MaxAge)}
 				        http.SetCookie(w, &cookie)
-
-
 					fmt.Fprintf(w,string(returnValue))
 				case "createUser":
 					createUser(username, w, r)

@@ -59,6 +59,8 @@ type User struct {
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/")
 var simpleLetters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 var randInit = 0
+var MaxAge = 3600*24
+var MaxServerAge = 60*30
 
 func randAlphaSlashPlus(n int) string {
     if ( randInit == 0 ) {

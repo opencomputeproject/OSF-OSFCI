@@ -89,12 +89,69 @@ function homebutton(){
         });
 }
 
+
+
 function start_ci() {
+
+	// This function can start only if I can get a server otherwise 
+	// it won't work
+
         clearDocument();
         loadHTML("html/navbar.html");
         loadJS("js/navbar.js");
         navbarHover();
         loginBtn();
+
+	// We request a test node to the gateway
+
+        $.ajax({
+                  type: "GET",
+                  contentType: 'application/json',
+                  url: window.location.origin + '/ci/'+ 'getServer',
+                  success: function(response){
+			var answer = JSON.parse(response);
+			if ( answer.Waittime == "0" ) {
+				console.log("we got a server it is called");
+				console.log(answer.Servername);
+				run_ci(answer.Servername);
+			} else {
+				console.log(response);
+				// We must display a warning message
+				loadHTML("html/wait.html");
+				// We can run a countdown and we can restart the start_ci if 
+				// the countdown arrive to 0
+				// Set the date we're counting down to
+				var secondWait = parseInt(answer.Waittime);
+				// Update the count down every 1 second
+			var x = setInterval(function() {
+				var days = Math.floor(secondWait / ( 60 * 60 * 24));
+				var hours = Math.floor((secondWait % (60 * 60 * 24)) / (60 * 60));
+				var minutes = Math.floor((secondWait % ( 60 * 60)) / 60);
+  				var seconds = Math.floor((secondWait % ( 60)) );
+
+  				$("#countdown").html(days + "d " + hours + "h " + minutes + "m " + seconds + "s");
+				$("#users").html(answer.Queue);
+				secondWait = secondWait - 1;
+				// If the count down is finished, write some text
+  				if (secondWait < 0) {
+				    // We stop the timer
+				    clearInterval(x);
+				    document.getElementById("demo").innerHTML = "EXPIRED";
+				  }
+				}, 1000);
+			}
+                  }
+        });
+}
+
+function run_ci(servername) {
+
+	// We received a test node we can start the CI in interactive
+	// and initiate a timer into the navbar ( 30 minutes )
+	// When the timer is expired we close our CI session and move
+	// To the next user or make a new request
+	
+
         loadHTML("html/main.html");
         var dropZoneiLo = document.getElementById('drop-zone-ilo');
 

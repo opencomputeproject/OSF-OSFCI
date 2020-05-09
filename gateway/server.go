@@ -19,6 +19,7 @@ import (
 	"net/http/httputil"
 	"net"
 	"time"
+	"sync"
 	"encoding/json"
 	"golang.org/x/crypto/acme/autocert"
 )
@@ -37,6 +38,20 @@ var ExpectediLOIp = os.Getenv("EXPECT_ILO_IP")
 var credentialUri = os.Getenv("CREDENTIALS_URI")
 var credentialPort = os.Getenv("CREDENTIALS_TCPPORT")
 
+type serverEntry struct {
+        servername string
+        ip string
+	currentOwner string
+	queue int
+	expiration time.Time
+}
+
+type serversList struct {
+	servers []serverEntry
+	mux sync.Mutex
+}
+
+var ciServers serversList
 
 // httpsRedirect redirects http requests to https
 func httpsRedirect(w http.ResponseWriter, r *http.Request) {
@@ -158,16 +173,70 @@ func user(w http.ResponseWriter, r *http.Request) {
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
-        cookie, err := r.Cookie("osfci_cookie")
-	if err == nil {
-		print(cookie.Value)
-	}
+
+	// The cookie allow us to track the current
+	// user on the node
+        cookie, _ := r.Cookie("osfci_cookie")
 
 	head, tail := ShiftPath( r.URL.Path)
 	if ( head == "ci" ) {
 		head,_ = ShiftPath(tail)
 	}
+
+	// If the request is different than a getServer
+	// We must be sure that the end user still has an active server
+	// If that is not the case we deny the request
+	// And need to re route the end user to an end of session
+
 	switch ( head ) {
+		case "getServer":
+			// We need to have a valid cookie and associated Public Key / Private Key otherwise
+			// We can't request a server
+			if ( cookie.Value != "" ) {
+				// To do so I must sent the cookie value to the user API and
+				// get a respond. If it is gone we must denied the demand
+				type returnValue struct {
+                                        Servername string
+                                        Waittime string
+					Queue string
+                                }
+                                var myoutput returnValue	
+				ciServers.mux.Lock()
+				actualTime := time.Now().Add(time.Second*3600*365*10)
+				index := 0
+				for i, _ := range ciServers.servers { 
+					if ( time.Now().After(ciServers.servers[i].expiration) ) {
+						// the server is available we can allocate it
+						ciServers.servers[i].expiration = time.Now().Add(time.Second*time.Duration(base.MaxServerAge))
+						ciServers.servers[i].currentOwner = cookie.Value
+						ciServers.mux.Unlock()
+
+						myoutput.Servername = ciServers.servers[i].servername
+						myoutput.Waittime = "0"
+						return_data,_ := json.Marshal(myoutput)
+						if ( ciServers.servers[i].queue > 0 ) {
+							ciServers.servers[i].queue = ciServers.servers[i].queue - 1
+						}
+						w.Write([]byte(return_data))
+						// We probably need to turn it off just to clean it
+						return
+					}
+					if ( actualTime.After(ciServers.servers[i].expiration) ) {
+						actualTime = ciServers.servers[i].expiration
+						index = i
+					}
+					
+				}
+				ciServers.mux.Unlock()
+				myoutput.Servername = ""
+				remainingTime := actualTime.Sub(time.Now())
+				myoutput.Waittime = fmt.Sprintf("%.0f", remainingTime.Seconds())
+				myoutput.Queue = fmt.Sprintf("%d",ciServers.servers[index].queue)
+				ciServers.servers[index].queue = ciServers.servers[index].queue + 1	
+				return_data,_ := json.Marshal(myoutput)
+				w.Write([]byte(return_data))
+			}
+
 		case "console":
 			fmt.Printf("Console request\n");
 		        url, _ := url.Parse("http://"+CTRLIp+TTYDHostConsole)
@@ -281,10 +350,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 func iloweb(w http.ResponseWriter, r *http.Request){
 	// Let's print the session ID
-        cookie, err := r.Cookie("osfci_cookie")
-	if err == nil {
-	        print(cookie.Value)
-	}
+//        cookie, err := r.Cookie("osfci_cookie")
 
 
 	// If the request is for a favicon.ico file we are just returning
@@ -342,6 +408,22 @@ func main() {
     mux.HandleFunc("/ci/",home)
     mux.HandleFunc("/user/", user)
     mux.HandleFunc("/",iloweb)
+
+    // We must build our server pool for the moment
+    // This is define by the environment variable
+    // But this could be done by a registration mechanism later
+    var newEntry serverEntry
+
+    newEntry.servername = "dl360"
+    newEntry.ip=CTRLIp
+    newEntry.currentOwner=""
+    // the server is expired
+    newEntry.expiration = time.Now()
+    newEntry.queue = 0
+
+    ciServers.mux.Lock()
+    ciServers.servers = append(ciServers.servers, newEntry)
+    ciServers.mux.Unlock()
 
     if ( DNSDomain != "" ) {
         // if DNS_DOMAIN is set then we run in a production environment
