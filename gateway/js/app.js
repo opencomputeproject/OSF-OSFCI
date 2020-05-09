@@ -148,6 +148,7 @@ function run_ci(servername, RemainingSecond) {
 	// and initiate a timer into the navbar ( 30 minutes )
 	// When the timer is expired we close our CI session and move
 	// To the next user or make a new request
+	$("#EndSession").css("display","");
 	var x = setInterval(function() {
                    var days = Math.floor(RemainingSecond / ( 60 * 60 * 24));
                    var hours = Math.floor((RemainingSecond % (60 * 60 * 24)) / (60 * 60));
