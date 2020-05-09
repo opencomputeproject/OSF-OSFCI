@@ -422,6 +422,17 @@ function logged()
 	mainpage();
 }
 
+function disconnect()
+{
+	delete mylocalStorage['accessKey'];
+	delete mylocalStorage['secretKey'];
+	delete mylocalStorage['username'];
+	// Wait 5s and redirect to mainpage
+	setTimeout(function () {
+		mainpage();
+    	}, 5000);
+}
+
 function mainpage(){
 	clearDocument();
 	// Must load the default home page
