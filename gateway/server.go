@@ -199,6 +199,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         Servername string
                                         Waittime string
 					Queue string
+					RemainingTime string
                                 }
                                 var myoutput returnValue	
 				ciServers.mux.Lock()
@@ -213,6 +214,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 						myoutput.Servername = ciServers.servers[i].servername
 						myoutput.Waittime = "0"
+						myoutput.RemainingTime = fmt.Sprintf("%d",base.MaxServerAge)
 						return_data,_ := json.Marshal(myoutput)
 						if ( ciServers.servers[i].queue > 0 ) {
 							ciServers.servers[i].queue = ciServers.servers[i].queue - 1
@@ -233,6 +235,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 				myoutput.Waittime = fmt.Sprintf("%.0f", remainingTime.Seconds())
 				myoutput.Queue = fmt.Sprintf("%d",ciServers.servers[index].queue)
 				ciServers.servers[index].queue = ciServers.servers[index].queue + 1	
+				myoutput.RemainingTime = fmt.Sprintf("%d",0)
 				return_data,_ := json.Marshal(myoutput)
 				w.Write([]byte(return_data))
 			}
