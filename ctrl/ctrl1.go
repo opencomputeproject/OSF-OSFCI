@@ -169,6 +169,8 @@ func home(w http.ResponseWriter, r *http.Request) {
                         go func() {
                             done <- cmd.Wait()
                         }()
+		case "bmcup":
+			
 		case "poweroff":
 			// We need to cleanup the em100
 			// We also need to clean up the screen command
