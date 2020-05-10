@@ -185,7 +185,7 @@ function run_ci(servername, RemainingSecond) {
 						$('#bmcbutton').css("display","");
 						$('#bmcbutton').on("click", function() {
 							// we must redirect to the home page
-							var win = window.open('https//'+window.location.hostname, '_blank');
+							var win = window.open('https://'+window.location.hostname, '_blank');
 							win.focus();
 						});
 						BMCUP=1;
