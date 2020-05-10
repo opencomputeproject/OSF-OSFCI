@@ -254,6 +254,18 @@ func home(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 			}
+		case "bmcup":
+		        conn, err := net.DialTimeout("tcp", ExpectediLOIp+":443", 220*time.Millisecond)
+			var Up string
+		        if ( err == nil ) {
+		                conn.Close()
+				// The controller is up				
+				Up = "1"
+		        } else {
+				Up = "0"
+			}
+			return_value,_ := json.Marshal(Up)
+			w.Write([]byte(return_value))
 		case "console":
 			fmt.Printf("Console request\n");
 		        url, _ := url.Parse("http://"+CTRLIp+TTYDHostConsole)

@@ -1,6 +1,7 @@
 
 var mylocalStorage = {};
 window.mylocalStorage = mylocalStorage;
+var BMCUP=0;
 
 function clearDocument(){
 	$(document.body).empty();
@@ -78,6 +79,7 @@ function homebutton(){
 		$('#iloem100console').removeAttr("src");
                 $('#smbiosem100console').removeAttr("src");
                 $('#iloconsole').removeAttr("src");
+		BMCUP=0;		
                 $.ajax({
                         type: "GET",
                         contentType: 'application/json',
@@ -169,6 +171,28 @@ function run_ci(servername, RemainingSecond) {
                    $("#counter").html(days + "d " + hours + "h " + minutes + "m " + seconds + "s");
                    RemainingSecond = RemainingSecond - 1;
                    // If the count down is finished, write some text
+
+		   // Let's check if the BMC is up and running
+		   // if yes we can activate the Go to BMC Web interface button !
+
+		   if ( RemainingSecond % 60 == 0 && BMCUP == 0 ) {
+			$.ajax({
+                                type: "GET",
+                                contentType: 'application/json',
+                                url: window.location.origin + '/ci/bmcup',
+                                success: function(response){
+					if ( response == "\"1\"" ) {
+						$('#bmcbutton').css("display","");
+						$('#bmcbutton').on("click", function() {
+							// we must redirect to the home page
+							var win = window.open('https//'+window.location.hostname, '_blank');
+							win.focus();
+						});
+						BMCUP=1;
+					}
+				}
+			});	
+		   }
 		   if ( RemainingSecond < 300 ) {
 			console.log("switching color");
 			$('#counter').css('color', '#ff8c00');
