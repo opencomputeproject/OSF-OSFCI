@@ -1,0 +1,40 @@
+FROM ubuntu:18.04
+
+# Add Maintainer Info
+LABEL maintainer="Jean-Marie Verdun <jean-marie.verdun@hpe.com>"
+
+# Set the Current Working Directory inside the container
+WORKDIR /app
+
+# Copy the source from the current directory to the Working Directory inside the container
+COPY . .
+
+# let's build
+RUN apt-get --allow-unauthenticated update --allow-insecure-repositories
+RUN apt-get update && apt install -qq -y locales
+RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    locale-gen
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+RUN apt install -y apt-utils
+RUN apt-get update && apt-get install --no-install-recommends -y ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN cat /etc/apt/sources.list
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && DEBIAN_FRONTEND=noninteractive  apt install -qq -y build-essential libssl-dev libcurl4-gnutls-dev libe
+xpat1-dev gettext unzip wget snapd squashfuse fuse snap-confine sudo python2.7-dev chrpath cpio diffstat gawk texinfo python3.8 python3.8-venv python3.8-di
+stutils python3.8-dev python3.8-gdbm python3.8-tk python3.8-lib2to3 idle-python3.8
+RUN apt-get -y install git
+RUN ln -s /usr/bin/python2.7 /usr/bin/python2
+RUN useradd -ms /bin/bash openbmc
+USER openbmc
+WORKDIR /home/openbmc
+
+STOPSIGNAL SIGRTMIN+3
+
+# Expose port 8080 to the outside world
+EXPOSE 443
+
+# Command to run the executable
+# CMD /app/start_container
+CMD [ "/sbin/init" ]
+
