@@ -279,7 +279,7 @@ function run_ci(servername, RemainingSecond) {
                     formData.append('fichier', file);
                 }
                 var xhr = new XMLHttpRequest();
-                xhr.open('POST', window.location+'/ilofirmware', true);
+                xhr.open('POST', window.location+'ilofirmware', true);
 
                 xhr.onload = function () {
                                   if (xhr.status === 200) {
@@ -334,7 +334,7 @@ function run_ci(servername, RemainingSecond) {
                     formData.append('fichier', file);
                 }
                 var xhr = new XMLHttpRequest();
-                xhr.open('POST', window.location+'/biosfirmware', true);
+                xhr.open('POST', window.location+'biosfirmware', true);
 
                 xhr.onload = function () {
                                   if (xhr.status === 200) {
