@@ -1,0 +1,18 @@
+#!/bin/bash
+USERNAME=$1
+GITHUBREPO=$2
+BRANCH=$3
+if [ ! -d /tmp/volume/$USERNAME ]
+then
+mkdir /tmp/volume/$USERNAME
+else
+rm /tmp/volume/$USERNAME/*
+fi
+docker run --name linuxboot_$USERNAME -v /tmp/volume/$USERNAME:/volume -e GITHUBREPO=$2 -e BRANCH=$3 linuxboot
+docker container rm linuxboot_$USERNAME
+if [ -f /tmp/volume/$USERNAME/linuxboot.bin ]
+cp /tmp/volume/$USERNAME/linuxboot.bin /usr/local/production/images/linuxboot_$USERNAME.bin
+exit 0
+fi
+
+
