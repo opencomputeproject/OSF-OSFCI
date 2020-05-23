@@ -35,8 +35,17 @@
 			<div class="container-fluid">
 				<div class="row" style="margin-top:10px; margin-bottom:10px">
 					<div class="col-sm">
-						<center><button id="btnsmbios" class="btn btn-success" type="start" >load standard bios</button></center>
-						<center><h5>Or</h5></center>
+						<div class="form-inline">
+							<center style="flex-grow:1">
+								<div class="form-group">
+									<button id="btnsmbios" class="btn btn-success" type="start" >load standard bios</button>
+									Or
+									<input type="text" class="form-control" id="formGroupExampleInput" placeholder="Build from your github repo" style="flex-grow:1">
+									<button id="btnbuildsmbios" class="btn btn-success" type="start" >build</button>
+									Or
+								</div>
+							</center>
+						</div>
 						<div class="upload-drop-zone" id="drop-zone-bios">
                                                     Just drag and drop your system bios here
                                                 </div>
