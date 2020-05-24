@@ -37,6 +37,7 @@ var certStorage = os.Getenv("CERT_STORAGE")
 var ExpectediLOIp = os.Getenv("EXPECT_ILO_IP")
 var credentialUri = os.Getenv("CREDENTIALS_URI")
 var credentialPort = os.Getenv("CREDENTIALS_TCPPORT")
+var COMPILEIp = os.Getenv("COMPILE_IP")
 
 type serverEntry struct {
         servername string
@@ -112,7 +113,7 @@ func checkAccess(w http.ResponseWriter, r *http.Request) (bool){
 		}
                 // Is this an AWS request ?
                 words := strings.Fields(r.Header.Get("Authorization"))
-                if ( words[0] == "JYP" ) {
+                if ( words[0] == "OSF" ) {
                         // Let's dump the various content
                         keys := strings.Split(words[1],":")
                         // We must retrieve the secret key used for encryption and calculate the header
