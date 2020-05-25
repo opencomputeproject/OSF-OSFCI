@@ -6,6 +6,7 @@ import (
 	"path"
 	"log"
         "os"
+	"os/exec"
 	"base"
 )
 
@@ -64,7 +65,6 @@ func home(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-var compileTcpPort = os.Getenv("COMPILE_TCPPORT")
 
 func main() {
     print("=============================== \n")
