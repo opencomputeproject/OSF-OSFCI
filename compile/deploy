@@ -1,0 +1,23 @@
+#!/bin/bash
+rm -rf osfci
+git clone https://github.com/HewlettPackard/osfci
+cd osfci/compile
+if [ ! -d /usr/local/production/bin ]
+then
+mkdir /usr/local/production/bin
+fi
+if [ ! -d /usr/local/production/docker ]
+then
+mkdir /usr/local/production/docker
+fi
+cp startLinuxbootBuild /usr/local/production/bin
+chmod -Rf 777 /usr/local/production/bin
+cp -Rf Docker* /usr/local/production/docker
+cp build_linuxboot /usr/local/production/docker
+docker image rm linuxboot
+docker build -t linuxboot -f /usr/local/production/docker/Dockerfile.linuxboot /usr/local/production/docker/
+basePath=`realpath ..`
+export GOPATH=$GOPATH:$basePath
+go get golang.org/x/crypto/bcrypt
+go build compile.go
+cp compile /usr/local/production/bin
