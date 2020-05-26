@@ -1,0 +1,11 @@
+#!/bin/bash
+pipe=/usr/local/production/tmp/bios_fifo
+while true
+do
+    if read line ; then
+        if [[ "$line" == 'quit' ]]; then
+            break
+        fi
+        echo $line
+    fi
+done <$pipe
