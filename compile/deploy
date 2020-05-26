@@ -30,6 +30,7 @@ export GOPATH=$GOPATH:$basePath
 go get golang.org/x/crypto/bcrypt
 go build compile.go
 cp compile /usr/local/production/bin
+cp ./readBiosFifo /usr/local/production/bin
 mkdir /tmp/ttyd
 cp ../ctrl/ttyd/ttyd.tar.gz /tmp/ttyd
 cd /tmp/ttyd
