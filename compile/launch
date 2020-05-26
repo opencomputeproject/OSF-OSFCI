@@ -1,0 +1,4 @@
+#!/bin/bash
+(nohup /usr/local/production/bin/ttyd -p 7681 ./readBiosFifo) >& out.ttyd &
+(nohup /usr/local/production/bin/compile) >& out.compile &
+
