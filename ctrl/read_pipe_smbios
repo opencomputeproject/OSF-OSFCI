@@ -2,10 +2,10 @@
 pipe=$HOME/Web/smbiosem100
 while true
 do
-    if read line <$pipe; then
+    if read line ; then
         if [[ "$line" == 'quit' ]]; then
             break
         fi
         echo $line
     fi
-done
+done <$pipe
