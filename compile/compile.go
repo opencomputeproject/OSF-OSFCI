@@ -13,6 +13,9 @@ import (
 var compileTcpPort = os.Getenv("COMPILE_TCPPORT")
 var startLinuxbootBuildBin = os.Getenv("LINUXBOOT_BUILD")
 
+// to check if a docker container is running
+// docker inspect -f '{{.State.Running}}' linuxboot_vejmarie2
+
 func ShiftPath(p string) (head, tail string) {
     p = path.Clean("/" + p)
     i := strings.Index(p[1:], "/") + 1
