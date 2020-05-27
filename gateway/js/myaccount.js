@@ -180,7 +180,7 @@ function myAccountCol1WarningControl()
 		$.ajax({
     			type: "DELETE",
                         headers: {
-                                "Authorization": "JYP " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
+                                "Authorization": "OSF " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
                                 "Content-Type" : "application/json",
                                 "myDate" : authString['formattedDate']
                         },
@@ -252,7 +252,7 @@ function myAccountCol1createControl()
                    url: window.location.origin + '/user/' + mylocalStorage['username'] + '/updateAccount',
                    type: 'PUT',
 		   headers: {
-                                "Authorization": "JYP " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
+                                "Authorization": "OSF " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
                                 "Content-Type" : "application/json",
                                 "myDate" : authString['formattedDate']
                               },
@@ -286,7 +286,7 @@ function myAccountCol1createControl()
 					url: Url,
 					type: 'POST',
 					headers: {
-                                			"Authorization": "JYP " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
+                                			"Authorization": "OSF " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
 			                                "Content-Type" : "application/json",
 			                                "myDate" : authString['formattedDate']
                               		},
@@ -386,7 +386,7 @@ function myAccountCol1()
 		     type: "GET",
 		     url: Url, 
 		     headers: {
-    				"Authorization": "JYP " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
+    				"Authorization": "OSF " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
 				"Content-Type" : "application/json",
 				"myDate" : authString['formattedDate']
   		              },

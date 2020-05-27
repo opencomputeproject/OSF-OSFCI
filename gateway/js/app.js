@@ -76,8 +76,14 @@ function homebutton(){
                 });
         });
 	$('#btnpoweroff').on('click', function () {
+		$('#iloem100console').contents().find("head").remove();
+                $('#iloem100console').contents().find("body").remove();
 		$('#iloem100console').removeAttr("src");
+		$('#smbiosem100console').contents().find("head").remove();
+                $('#smbiosem100console').contents().find("body").remove();
                 $('#smbiosem100console').removeAttr("src");
+		$('#iloconsole').contents().find("head").remove();
+                $('#iloconsole').contents().find("body").remove();
                 $('#iloconsole').removeAttr("src");
 		BMCUP=0;		
                 $.ajax({
@@ -204,8 +210,14 @@ function run_ci(servername, RemainingSecond) {
                         // We stop the timer
                         clearInterval(x);
 			// We have to reset the server and go back home !
+	                $('#iloem100console').contents().find("head").remove();
+       		        $('#iloem100console').contents().find("body").remove();
 			$('#iloem100console').removeAttr("src");
+	                $('#smbiosem100console').contents().find("head").remove();
+       		        $('#smbiosem100console').contents().find("body").remove();
 	                $('#smbiosem100console').removeAttr("src");
+	                $('#iloconsole').contents().find("head").remove();
+	                $('#iloconsole').contents().find("body").remove();
 	                $('#iloconsole').removeAttr("src");
 	                $.ajax({
 	                        type: "GET",
@@ -378,8 +390,32 @@ function run_ci(servername, RemainingSecond) {
                 return false;
         }
 
+	$('#btnbuildsmbios').on('click', function(e) {
 
-
+		// We must put the value to the compile server as to kick a build
+		// That request has to be signed and must be protected by the 
+		// user credential as to avoid server side overload
+		 Data = $('#githubLinuxboot').val()+' hpe/dl360';
+		 Url_rel = '/ci/buildbiosfirmware/'+mylocalStorage['username'];
+		 BuildSignedAuth(Url_rel, 'PUT' , "text/plain", function(authString) {
+		 $.ajax({
+	         	 url: window.location.origin + Url_rel,
+		         type: 'PUT',
+			 headers: {
+		              "Authorization": "OSF " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
+		              "Content-Type" : "text/plain",
+		              "myDate" : authString['formattedDate']
+	                 },
+		         data: Data,
+		         contentType: 'text/plain',
+		         success: function(response) {
+				// The process to build the code is running
+				// the response contain the code from the ttyd which has kicked off the build
+				// We can allocate that code to the BIOS iframe and we shall be receiving build input
+	        	 }
+	        	 });
+	             	});
+	});
         homebutton();
 }
 
@@ -408,6 +444,7 @@ function BuildSignedAuth(uri, op, contentType, callback) {
 	var currentDate = new Date;
         var formattedDate = currentDate.toGMTString().replace( /GMT/, '+0000');
 	var stringToSign = op +'\n\n'+contentType+'\n'+formattedDate+'\n'+uri
+	console.log(stringToSign)
 	returnObject['formattedDate'] = formattedDate;
         const buffer = new TextEncoder( 'utf-8' ).encode( stringToSign );
 	if ( mylocalStorage['secretKey'] !== undefined && mylocalStorage['secretKey'].length > 0)

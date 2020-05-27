@@ -37,6 +37,8 @@ var certStorage = os.Getenv("CERT_STORAGE")
 var ExpectediLOIp = os.Getenv("EXPECT_ILO_IP")
 var credentialUri = os.Getenv("CREDENTIALS_URI")
 var credentialPort = os.Getenv("CREDENTIALS_TCPPORT")
+var compileUri = os.Getenv("COMPILE_URI")
+var compileTcpPort = os.Getenv("COMPILE_TCPPORT")
 
 type serverEntry struct {
         servername string
@@ -71,17 +73,7 @@ func ShiftPath(p string) (head, tail string) {
     return p[1:i], p[i:]
 }
 
-func checkAccess(w http.ResponseWriter, r *http.Request) (bool){
-	var url = r.URL.Path
-	var command string
-	entries := strings.Split(strings.TrimSpace(url[1:]), "/") 
-	var login string
-
-	// The login is always accessible
-	if ( len(entries) > 2 ) {
-		command = entries[2]
-		login = entries[1]
-	} 
+func checkAccess(w http.ResponseWriter, r *http.Request, login string, command string) (bool){
 	switch command {
 		case "getToken":
 				if ( r.Method == http.MethodGet || r.Method == http.MethodPost ) {
@@ -112,18 +104,13 @@ func checkAccess(w http.ResponseWriter, r *http.Request) (bool){
 		}
                 // Is this an AWS request ?
                 words := strings.Fields(r.Header.Get("Authorization"))
-                if ( words[0] == "JYP" ) {
+                if ( words[0] == "OSF" ) {
                         // Let's dump the various content
                         keys := strings.Split(words[1],":")
                         // We must retrieve the secret key used for encryption and calculate the header
                         // if everything is ok (aka our computed value match) we are good
 
-			path := strings.Split( r.URL.Path, "/" )
-		        if ( len(path) < 3 ) {
-		                http.Error(w, "401 Malformed URI", 401)
-		                return false
-		        }
-		        username := path[2]
+		        username := login
 
 			result:=base.HTTPGetRequest("http://"+r.Host+":9100"+"/user/"+username+"/userGetInternalInfo")
 
@@ -151,8 +138,18 @@ func checkAccess(w http.ResponseWriter, r *http.Request) (bool){
 }
 
 func user(w http.ResponseWriter, r *http.Request) {
+	
+        var command string
+        entries := strings.Split(strings.TrimSpace(r.URL.Path[1:]), "/")
+        var login string
 
-	if ( !checkAccess(w, r)  ) {
+        // The login is always accessible
+        if ( len(entries) > 2 ) {
+                command = entries[2]
+                login = entries[1]
+        }
+
+	if ( !checkAccess(w, r, login, command)  ) {
 		w.Write([]byte("Access denied"))
 		return
 	}
@@ -182,6 +179,12 @@ func home(w http.ResponseWriter, r *http.Request) {
 	if ( head == "ci" ) {
 		head,_ = ShiftPath(tail)
 	}
+	// Some commands are superseed by a username so we shall identify
+	// if that is the case. If the command is unknown then we can assume
+	// we are getting a username as a head parameter and must get the 
+	// remaining part
+
+
 
 	// If the request is different than a getServer
 	// We must be sure that the end user still has an active server
@@ -362,6 +365,26 @@ func home(w http.ResponseWriter, r *http.Request) {
                         proxy := httputil.NewSingleHostReverseProxy(url)
                         r.URL.Host = "http://"+CTRLIp
                         r.URL.Path = "/biosfirmware"
+                        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
+                        proxy.ServeHTTP(w , r)
+		case "buildbiosfirmware":
+			_, tail = ShiftPath( r.URL.Path)
+                        keys := strings.Split(tail,"/")
+			login := keys[2]
+			command := keys[1]
+		        if ( !checkAccess(w, r, login, command)  ) {
+        		        w.Write([]byte("Access denied"))
+	               		 return
+        		}
+			// We have to forward the request to the compile server
+			// which will start the compilation process and return
+			// the code to connect to the ttyd daemon
+			fmt.Printf("Forward biosfirmware upload\n");
+                        url, _ := url.Parse("http://"+compileUri+compileTcpPort)
+                        proxy := httputil.NewSingleHostReverseProxy(url)
+                        r.URL.Host = "http://"+compileUri+compileTcpPort
+			fmt.Printf("Tail %s\n",tail)
+                        r.URL.Path = tail
                         r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
                         proxy.ServeHTTP(w , r)
 		case "":

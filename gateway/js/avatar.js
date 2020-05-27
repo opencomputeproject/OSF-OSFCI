@@ -11,7 +11,7 @@ function readURL(input) {
 	           url: window.location.origin + '/user/' + mylocalStorage['username'] + '/updateAvatar',
 	           type: 'PUT',
 		   headers: {
-	                "Authorization": "JYP " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
+	                "Authorization": "OSF " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
 	                "Content-Type" : "image/jpg",
 	                "myDate" : authString['formattedDate']
                    },
@@ -36,7 +36,7 @@ $.ajax({
        url: window.location.origin + '/user/' + mylocalStorage['username'] + '/getAvatar',
        type: 'GET',
        headers: {
-		"Authorization": "JYP " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
+		"Authorization": "OSF " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
 		"Content-Type" : "application/json",
 		"myDate" : authString['formattedDate']
                 },

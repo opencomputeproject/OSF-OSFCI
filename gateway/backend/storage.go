@@ -155,7 +155,6 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 func main() {
     print("=============================== \n")
     print("| Starting storage backend    |\n")
-    print("| (c) 2019 CADCloud           |\n")
     print("| Development version -       |\n")
     print("| Private use only            |\n")
     print("=============================== \n")

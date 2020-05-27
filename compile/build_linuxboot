@@ -1,8 +1,12 @@
 #!/bin/bash
+# This script is executed within a Docker container
+
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin
-export GOPATH=:/go/src/base:/home/linuxboot/mainboards/intel/generic
-git clone https://github.com/linuxboot/mainboards
-cd mainboards/intel/generic
+export GOPATH=:/go/src/base:/home/linuxboot/mainboards/$BOARDS
+git clone $GITHUBREPO
+cd mainboards
+git checkout $BRANCH
+cd $BOARDS
 make fetch
 go build github.com/u-root/u-root
 export PATH=$PATH:.

@@ -402,6 +402,7 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 			case "userGetInternalInfo":
 				var result *base.User
                                 // Serve the resource.
+				fmt.Printf("Requesting %s\n", username)
                                 result=userGetInternalInfo(username)
                                 b, _ := json.Marshal(*result)
                                 fmt.Fprint(w, string(b))
@@ -487,7 +488,6 @@ func main() {
     // http to https redirection
     print("=============================== \n")
     print("| Starting user credentials  |\n")
-    print("| (c) 2019 CADCloud           |\n")
     print("| Development version -       |\n")
     print("| Private use only            |\n")
     print("=============================== \n")

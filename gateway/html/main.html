@@ -35,7 +35,17 @@
 			<div class="container-fluid">
 				<div class="row" style="margin-top:10px; margin-bottom:10px">
 					<div class="col-sm">
-						<center><button id="btnsmbios" class="btn btn-success" type="start" >load standard bios</button></center>
+						<div class="form-inline">
+							<center style="flex-grow:1">
+								<div class="form-group">
+									<button id="btnsmbios" class="btn btn-success" type="start" style="margin-right:5px">load standard bios</button>
+									Or
+									<input type="text" class="form-control" id="githubLinuxboot" placeholder="Specify a github repo and a branch (space seperated)" style="flex-grow:1; margin-left:5px">
+									<button id="btnbuildsmbios" class="btn btn-success" type="start" style="margin-left:5px">build</button>
+									<button id="btnLoadbuiltsmbios" class="btn btn-success" type="start" style="margin-left:5px; margin-right:5px">Load my Firmware</button>
+								</div>
+							</center>
+						</div>
 						<center><h5>Or</h5></center>
 						<div class="upload-drop-zone" id="drop-zone-bios">
                                                     Just drag and drop your system bios here
