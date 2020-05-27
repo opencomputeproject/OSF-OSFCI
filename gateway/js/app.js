@@ -76,8 +76,14 @@ function homebutton(){
                 });
         });
 	$('#btnpoweroff').on('click', function () {
+		$('#iloem100console').contents().find("head").remove();
+                $('#iloem100console').contents().find("body").remove();
 		$('#iloem100console').removeAttr("src");
+		$('#smbiosem100console').contents().find("head").remove();
+                $('#smbiosem100console').contents().find("body").remove();
                 $('#smbiosem100console').removeAttr("src");
+		$('#iloconsole').contents().find("head").remove();
+                $('#iloconsole').contents().find("body").remove();
                 $('#iloconsole').removeAttr("src");
 		BMCUP=0;		
                 $.ajax({
