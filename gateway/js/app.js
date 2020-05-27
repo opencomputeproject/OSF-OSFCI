@@ -210,8 +210,14 @@ function run_ci(servername, RemainingSecond) {
                         // We stop the timer
                         clearInterval(x);
 			// We have to reset the server and go back home !
+	                $('#iloem100console').contents().find("head").remove();
+       		        $('#iloem100console').contents().find("body").remove();
 			$('#iloem100console').removeAttr("src");
+	                $('#smbiosem100console').contents().find("head").remove();
+       		        $('#smbiosem100console').contents().find("body").remove();
 	                $('#smbiosem100console').removeAttr("src");
+	                $('#iloconsole').contents().find("head").remove();
+	                $('#iloconsole').contents().find("body").remove();
 	                $('#iloconsole').removeAttr("src");
 	                $.ajax({
 	                        type: "GET",
