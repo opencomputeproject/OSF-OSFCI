@@ -43,6 +43,7 @@ var compileTcpPort = os.Getenv("COMPILE_TCPPORT")
 type serverEntry struct {
         servername string
         ip string
+        bmcIp string
 	currentOwner string
 	queue int
 	expiration time.Time
@@ -258,13 +259,29 @@ func home(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 		case "bmcup":
-		        conn, err := net.DialTimeout("tcp", ExpectediLOIp+":443", 220*time.Millisecond)
+		       bmcIp := ""
+		        if ( cookie.Value != "" ) {
+		                // We must get the IP address from the cache
+		                for i, _ := range ciServers.servers {
+		                        if ( ciServers.servers[i].currentOwner == cookie.Value ) {
+		                                if ( time.Now().Before(ciServers.servers[i].expiration) ) {
+	                                        // We still own the server and we can go to the BMC
+	                                        bmcIp = ciServers.servers[i].bmcIp
+	                                	}
+	                        	}
+	                	}
+		        } 
 			var Up string
-		        if ( err == nil ) {
-		                conn.Close()
-				// The controller is up				
-				Up = "1"
-		        } else {
+			if ( bmcIp != "" ) {
+			        conn, err := net.DialTimeout("tcp", bmcIp+":443", 220*time.Millisecond)
+			        if ( err == nil ) {
+			                conn.Close()
+					// The controller is up				
+					Up = "1"
+			        } else {
+					Up = "0"
+				}
+			} else {
 				Up = "0"
 			}
 			return_value,_ := json.Marshal(Up)
@@ -402,7 +419,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 func iloweb(w http.ResponseWriter, r *http.Request){
 	// Let's print the session ID
-//        cookie, err := r.Cookie("osfci_cookie")
+        cookie, err := r.Cookie("osfci_cookie")
 
 
 	// If the request is for a favicon.ico file we are just returning
@@ -412,10 +429,33 @@ func iloweb(w http.ResponseWriter, r *http.Request){
 		return
 	}
 
+	// We must validate if the user is coming with a cookie
+	// if yes we must look to which server it is allocated
+	// if it is not allocated to any then we probably need to reroute him
+	// to the homepage !
+
+	bmcIp := ""
+	if ( cookie.Value != "" ) {
+		// We must get the IP address from the cache
+		for i, _ := range ciServers.servers {
+			if ( ciServers.servers[i].currentOwner == cookie.Value ) {
+				if ( time.Now().Before(ciServers.servers[i].expiration) ) {
+					// We still own the server and we can go to the BMC
+					bmcIp = ciServers.servers[i].bmcIp
+				}
+			}
+		}
+	} else {
+		if ( DNSDomain != "" ) {
+                        http.Redirect(w, r, "https://"+DNSDomain+"/ci", 302)
+                }
+                return
+	}	
+
 	// We must know if iLo is started or not ?
 	// if not then we have to reroute to the actual homepage
 	// We can make a request to the website or
-	conn, err := net.DialTimeout("tcp", ExpectediLOIp+":443", 220*time.Millisecond)
+	conn, err := net.DialTimeout("tcp", bmcIp+":443", 220*time.Millisecond)
 	if ( err != nil ) {
 		if ( DNSDomain != "" ) {
 			http.Redirect(w, r, "https://"+DNSDomain+"/ci", 302)
@@ -425,7 +465,7 @@ func iloweb(w http.ResponseWriter, r *http.Request){
 		conn.Close()
 	}
 	// Must specify the iLo Web address
-	url, _ := url.Parse("https://"+ExpectediLOIp+":443")
+	url, _ := url.Parse("https://"+bmcIp+":443")
 	proxy := httputil.NewSingleHostReverseProxy(url)
 	var InsecureTransport http.RoundTripper = &http.Transport{
 		Dial: (&net.Dialer{
@@ -471,6 +511,8 @@ func main() {
     newEntry.currentOwner=""
     // the server is expired
     newEntry.expiration = time.Now()
+    // by the way its bmc interface is
+    newEntry.bmcIp=ExpectediLOIp 
     newEntry.queue = 0
 
     ciServers.mux.Lock()
