@@ -9,7 +9,7 @@ mkdir /tmp/volume/$USERNAME
 else
 rm /tmp/volume/$USERNAME/*
 fi
-$BINARIES_PATH/ttyd -p 7681 docker run --name linuxboot_$USERNAME -v /tmp/volume/$USERNAME:/volume -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e BOARDS=$BOARDS --rm=true  linuxboot >& $PIPE_PATH/bios_fifo
+docker run --name linuxboot_$USERNAME -v /tmp/volume/$USERNAME:/volume -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e BOARDS=$BOARDS --rm=true  linuxboot >& $PIPE_PATH/bios_fifo
 if [ -f /tmp/volume/$USERNAME/linuxboot.bin ]
 then
 cp /tmp/volume/$USERNAME/linuxboot.bin $FIRMWARES_PATH/linuxboot_$USERNAME.bin
