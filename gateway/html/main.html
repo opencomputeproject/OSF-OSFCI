@@ -3,21 +3,21 @@
 			<div class="container-fluid">
 				<div class="row" style="margin-top:10px; margin-bottom:10px">
 					<div class="col-sm">
-						<center><button id="btnilo" class="btn btn-success" type="start" >load standard OpenBMC firmware</button></center>
+						<center><button id="btnbmc" class="btn btn-success" type="start" >load standard OpenBMC firmware</button></center>
 						<center><h5>Or</h5></center>
-						<div class="upload-drop-zone" id="drop-zone-ilo">
-					            Just drag and drop your ilo firmware here
+						<div class="upload-drop-zone" id="drop-zone-bmc">
+					            Just drag and drop your bmc firmware here
 						</div>
 						<!-- Progress Bar -->
 					 	<div class="progress">
-					            <div id="progress-ilo" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+					            <div id="progress-bmc" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
 					              <span class="sr-only">0% Complete</span>
 					            </div>
 						</div>
 						<!-- Upload Finished -->
-						<div id="ilouploaded" class="js-upload-finished" style="display:none; margin-top:10px;">
+						<div id="bmcuploaded" class="js-upload-finished" style="display:none; margin-top:10px;">
 							<div class="list-group">
-								<a href="#" id="ilofirmwarefeedback"class="list-group-item list-group-item-success">
+								<a href="#" id="bmcfirmwarefeedback"class="list-group-item list-group-item-success">
 									<span class="badge alert-success pull-right">Success</span>
 								</a>
 							</div>
@@ -25,7 +25,7 @@
 					</div>
 					<div class="col-sm">
 						<div class="embed-responsive embed-responsive-16by9" style="margin-top:10px">
-			                          <iframe class="embed-responsive-item" id="iloem100console" allowfullscreen style="background-color:#444444;"></iframe>
+			                          <iframe class="embed-responsive-item" id="bmcem100console" allowfullscreen style="background-color:#444444;"></iframe>
 			                        </div>
 					</div>
 				</div>
@@ -85,7 +85,7 @@
 					</div>
 					<div class="col-sm">
 						<div class="embed-responsive embed-responsive-16by9" style="margin-top:10px">
-						 <iframe div="iloconsole" class="embed-responsive-item" id="iloconsole" src="" allowfullscreen style="background-color:#444444;"></iframe>
+						 <iframe div="bmcconsole" class="embed-responsive-item" id="bmcconsole" src="" allowfullscreen style="background-color:#444444;"></iframe>
 						</div>
 					</div>
 				</div>

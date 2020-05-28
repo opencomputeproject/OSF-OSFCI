@@ -1,5 +1,5 @@
 #!/bin/bash
-pipe=./iloem100
+pipe=$PIPE_PATH/bmcem100
 while true
 do
     if read line ; then

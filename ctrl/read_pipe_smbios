@@ -1,5 +1,5 @@
 #!/bin/bash
-pipe=$HOME/Web/smbiosem100
+pipe=$PIPE_PATH/smbiosem100
 while true
 do
     if read line ; then
