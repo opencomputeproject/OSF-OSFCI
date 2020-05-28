@@ -466,7 +466,12 @@ func iloweb(w http.ResponseWriter, r *http.Request){
                 }
                 return
 	}	
-
+	if ( bmcIp == "" ) {
+                if ( DNSDomain != "" ) {
+                        http.Redirect(w, r, "https://"+DNSDomain+"/ci", 302)
+                }
+                return
+        }
 	// We must know if iLo is started or not ?
 	// if not then we have to reroute to the actual homepage
 	// We can make a request to the website or
