@@ -1,7 +1,4 @@
 #!/bin/bash
-rm -rf osfci
-git clone https://github.com/HewlettPackard/osfci
-cd osfci/compile
 if [ ! -d $1/bin ]
 then
 mkdir $1/bin
