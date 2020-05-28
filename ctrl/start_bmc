@@ -1,6 +1,7 @@
 #!/bin/bash
 cp /usr/share/local/images/ilo_dl360_OpenBMC.rom $FIRMWARES_PATH
-$HOME/build/ttyd/ttyd -p 7681 -R $BINARIES_PATH/read_pipe &
-$HOME/build/ttyd/ttyd -p 7682 screen /dev/ttyUSB0 115200  &
+export LD_LIBRARY_PATH=$OLD_LIBRARIES
+$BINARIES/ttyd -p 7681 -R $BINARIES_PATH/read_pipe &
+$BINARIES/ttyd/ttyd -p 7682 screen /dev/ttyUSB0 115200  &
 ( unbuffer em100 -c MX25L25635E -x DP144197 -d $1 -r -t -v  -O 0xFE0000000 -p low ) >& $PIPE_PATH/bmcem100
 sleep 2

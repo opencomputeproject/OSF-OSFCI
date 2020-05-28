@@ -1,7 +1,8 @@
 #!/bin/bash
+export LD_LIBRARY_PATH=$OLD_LIBRARIES
 $BINARIES_PATH/iPDU $1
 if [ "$1" == "off" ]
 then
 echo "Running cleanup" >/tmp/cleanup
-./cleanUP
+$BINARIES_PATH/cleanUP
 fi
