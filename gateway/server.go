@@ -174,7 +174,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 	// The cookie allow us to track the current
 	// user on the node
-        cookie, _ := r.Cookie("osfci_cookie")
+        cookie, cookieErr := r.Cookie("osfci_cookie")
 
 	head, tail := ShiftPath( r.URL.Path)
 	if ( head == "ci" ) {
@@ -195,52 +195,54 @@ func home(w http.ResponseWriter, r *http.Request) {
 		case "getServer":
 			// We need to have a valid cookie and associated Public Key / Private Key otherwise
 			// We can't request a server
-			if ( cookie.Value != "" ) {
-				// To do so I must sent the cookie value to the user API and
-				// get a respond. If it is gone we must denied the demand
-				type returnValue struct {
-                                        Servername string
-                                        Waittime string
-					Queue string
-					RemainingTime string
-                                }
-                                var myoutput returnValue	
-				ciServers.mux.Lock()
-				actualTime := time.Now().Add(time.Second*3600*365*10)
-				index := 0
-				for i, _ := range ciServers.servers { 
-					if ( time.Now().After(ciServers.servers[i].expiration) ) {
-						// the server is available we can allocate it
-						ciServers.servers[i].expiration = time.Now().Add(time.Second*time.Duration(base.MaxServerAge))
-						ciServers.servers[i].currentOwner = cookie.Value
-						ciServers.mux.Unlock()
-
-						myoutput.Servername = ciServers.servers[i].servername
-						myoutput.Waittime = "0"
-						myoutput.RemainingTime = fmt.Sprintf("%d",base.MaxServerAge)
-						return_data,_ := json.Marshal(myoutput)
-						if ( ciServers.servers[i].queue > 0 ) {
-							ciServers.servers[i].queue = ciServers.servers[i].queue - 1
+			if ( cookieErr == nil ) {
+				if ( cookie.Value != "" ) {
+					// To do so I must sent the cookie value to the user API and
+					// get a respond. If it is gone we must denied the demand
+					 type returnValue struct {
+       	                                 Servername string
+       	                                 Waittime string
+						Queue string
+						RemainingTime string
+       		                         }
+       		                         var myoutput returnValue	
+					ciServers.mux.Lock()
+					actualTime := time.Now().Add(time.Second*3600*365*10)
+					index := 0
+					for i, _ := range ciServers.servers { 
+						if ( time.Now().After(ciServers.servers[i].expiration) ) {
+							// the server is available we can allocate it
+							ciServers.servers[i].expiration = time.Now().Add(time.Second*time.Duration(base.MaxServerAge))
+							ciServers.servers[i].currentOwner = cookie.Value
+							ciServers.mux.Unlock()
+	
+							myoutput.Servername = ciServers.servers[i].servername
+							myoutput.Waittime = "0"
+							myoutput.RemainingTime = fmt.Sprintf("%d",base.MaxServerAge)
+							return_data,_ := json.Marshal(myoutput)
+							if ( ciServers.servers[i].queue > 0 ) {
+								ciServers.servers[i].queue = ciServers.servers[i].queue - 1
+							}
+							w.Write([]byte(return_data))
+							// We probably need to turn it off just to clean it
+							return
 						}
-						w.Write([]byte(return_data))
-						// We probably need to turn it off just to clean it
-						return
+						if ( actualTime.After(ciServers.servers[i].expiration) ) {
+							actualTime = ciServers.servers[i].expiration
+							index = i
+						}
+						
 					}
-					if ( actualTime.After(ciServers.servers[i].expiration) ) {
-						actualTime = ciServers.servers[i].expiration
-						index = i
-					}
-					
+					ciServers.mux.Unlock()
+					myoutput.Servername = ""
+					remainingTime := actualTime.Sub(time.Now())
+					myoutput.Waittime = fmt.Sprintf("%.0f", remainingTime.Seconds())
+					myoutput.Queue = fmt.Sprintf("%d",ciServers.servers[index].queue)
+					ciServers.servers[index].queue = ciServers.servers[index].queue + 1	
+					myoutput.RemainingTime = fmt.Sprintf("%d",0)
+					return_data,_ := json.Marshal(myoutput)
+					w.Write([]byte(return_data))
 				}
-				ciServers.mux.Unlock()
-				myoutput.Servername = ""
-				remainingTime := actualTime.Sub(time.Now())
-				myoutput.Waittime = fmt.Sprintf("%.0f", remainingTime.Seconds())
-				myoutput.Queue = fmt.Sprintf("%d",ciServers.servers[index].queue)
-				ciServers.servers[index].queue = ciServers.servers[index].queue + 1	
-				myoutput.RemainingTime = fmt.Sprintf("%d",0)
-				return_data,_ := json.Marshal(myoutput)
-				w.Write([]byte(return_data))
 			}
 		case "stopServer":
 			// We must get the server name
@@ -248,37 +250,43 @@ func home(w http.ResponseWriter, r *http.Request) {
 			servername,_ := ShiftPath(tail)
 			// Ok we must look for this server into the ciServer list
 			// we must validate that the cookie if the right one
-			for i, _ := range ciServers.servers {
-				if ( ciServers.servers[i].servername == servername ) {
-					if ( ciServers.servers[i].currentOwner == cookie.Value ) {
-						// Ok we can free the server
-						// This is done by resetting the expiration
-						ciServers.servers[i].expiration = time.Now();
-						ciServers.servers[i].currentOwner = ""
+			if ( cookieErr == nil ) {
+				for i, _ := range ciServers.servers {
+					if ( ciServers.servers[i].servername == servername ) {
+						if ( ciServers.servers[i].currentOwner == cookie.Value ) {
+							// Ok we can free the server
+							// This is done by resetting the expiration
+							ciServers.servers[i].expiration = time.Now();
+							ciServers.servers[i].currentOwner = ""
+						}
 					}
 				}
 			}
 		case "bmcup":
 		       bmcIp := ""
-		        if ( cookie.Value != "" ) {
-		                // We must get the IP address from the cache
-		                for i, _ := range ciServers.servers {
-		                        if ( ciServers.servers[i].currentOwner == cookie.Value ) {
-		                                if ( time.Now().Before(ciServers.servers[i].expiration) ) {
-	                                        // We still own the server and we can go to the BMC
-	                                        bmcIp = ciServers.servers[i].bmcIp
-	                                	}
-	                        	}
-	                	}
-		        } 
 			var Up string
-			if ( bmcIp != "" ) {
-			        conn, err := net.DialTimeout("tcp", bmcIp+":443", 220*time.Millisecond)
-			        if ( err == nil ) {
-			                conn.Close()
-					// The controller is up				
-					Up = "1"
-			        } else {
+			if ( cookieErr == nil ) {
+			        if ( cookie.Value != "" ) {
+			                // We must get the IP address from the cache
+			                for i, _ := range ciServers.servers {
+			                        if ( ciServers.servers[i].currentOwner == cookie.Value ) {
+			                                if ( time.Now().Before(ciServers.servers[i].expiration) ) {
+		                                        // We still own the server and we can go to the BMC
+		                                        bmcIp = ciServers.servers[i].bmcIp
+		                                	}
+		                        	}
+		                	}
+			        } 
+				if ( bmcIp != "" ) {
+				        conn, err := net.DialTimeout("tcp", bmcIp+":443", 220*time.Millisecond)
+				        if ( err == nil ) {
+				                conn.Close()
+						// The controller is up				
+						Up = "1"
+				        } else {
+						Up = "0"
+					}
+				} else {
 					Up = "0"
 				}
 			} else {
@@ -435,15 +443,22 @@ func iloweb(w http.ResponseWriter, r *http.Request){
 	// to the homepage !
 
 	bmcIp := ""
-	if ( cookie.Value != "" ) {
-		// We must get the IP address from the cache
-		for i, _ := range ciServers.servers {
-			if ( ciServers.servers[i].currentOwner == cookie.Value ) {
-				if ( time.Now().Before(ciServers.servers[i].expiration) ) {
-					// We still own the server and we can go to the BMC
-					bmcIp = ciServers.servers[i].bmcIp
+	if ( err == nil ) {
+		if ( cookie.Value != "" ) {
+			// We must get the IP address from the cache
+			for i, _ := range ciServers.servers {
+				if ( ciServers.servers[i].currentOwner == cookie.Value ) {
+					if ( time.Now().Before(ciServers.servers[i].expiration) ) {
+						// We still own the server and we can go to the BMC
+						bmcIp = ciServers.servers[i].bmcIp
+					}
 				}
 			}
+		} else {
+			if ( DNSDomain != "" ) {
+       	                 http.Redirect(w, r, "https://"+DNSDomain+"/ci", 302)
+       	         }
+       	         return
 		}
 	} else {
 		if ( DNSDomain != "" ) {
