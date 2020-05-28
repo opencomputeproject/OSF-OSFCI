@@ -3,5 +3,5 @@ $BINARIES_PATH/iPDU $1
 if [ "$1" == "off" ]
 then
 echo "Running cleanup" >/tmp/cleanup
-./cleanUP
+$BINARIES_PATH/cleanUP
 fi
