@@ -1,36 +1,33 @@
 #!/bin/bash
-rm -rf osfci
-git clone https://github.com/HewlettPackard/osfci
-cd osfci/compile
-if [ ! -d /usr/local/production/bin ]
+if [ ! -d $1/bin ]
 then
-mkdir /usr/local/production/bin
+mkdir $1/bin
 fi
-if [ ! -d /usr/local/production/tmp ]
+if [ ! -d $1/tmp ]
 then
-mkdir /usr/local/production/tmp
-mkfifo /usr/local/production/tmp/bios_fifo
+mkdir $1/tmp
+mkfifo $1/tmp/bios_fifo
 fi
-if [ ! -d /usr/local/production/docker ]
+if [ ! -d $1/docker ]
 then
-mkdir /usr/local/production/docker
+mkdir $1/docker
 fi
-if [ ! -d /usr/local/production/images ]
+if [ ! -d $1/images ]
 then
-mkdir /usr/local/production/images
+mkdir $1/images
 fi
-cp startLinuxbootBuild /usr/local/production/bin
-chmod -Rf 777 /usr/local/production/bin
-cp -Rf Docker* /usr/local/production/docker
-cp build_linuxboot /usr/local/production/docker
+cp startLinuxbootBuild $1/bin
+chmod -Rf 777 $1/bin
+cp -Rf Docker* $1/docker
+cp build_linuxboot $1/docker
 docker image rm linuxboot
-docker build -t linuxboot -f /usr/local/production/docker/Dockerfile.linuxboot /usr/local/production/docker/
+docker build -t linuxboot -f $1/docker/Dockerfile.linuxboot $1/docker/
 basePath=`realpath ..`
 export GOPATH=$GOPATH:$basePath
 go get golang.org/x/crypto/bcrypt
 go build compile.go
-cp compile /usr/local/production/bin
-cp ./readBiosFifo /usr/local/production/bin
+cp compile $1/bin
+cp ./readBiosFifo $1/bin
 mkdir /tmp/ttyd
 cp ../ctrl/ttyd/ttyd.tar.gz /tmp/ttyd
 cd /tmp/ttyd
@@ -41,4 +38,4 @@ mkdir build
 cd build
 cmake ..
 make
-cp ttyd /usr/local/production/bin
+cp ttyd $1/bin

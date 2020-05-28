@@ -2,17 +2,18 @@
 USERNAME=$1
 GITHUBREPO=$2
 BRANCH=$3
+BOARDS=$4
 if [ ! -d /tmp/volume/$USERNAME ]
 then
 mkdir /tmp/volume/$USERNAME
 else
 rm /tmp/volume/$USERNAME/*
 fi
-docker run --name linuxboot_vejmarie2 -v /tmp/volume/vejmarie2:/volume -e GITHUBREPO=https://github.com/vejmarie/mainboards -e BRANCH=hpe -e BOARDS=hpe/dl360gen10 --rm=true  linuxboot >& /usr/local/production/tmp/bios_fifo
+docker run --name linuxboot_$USERNAME -v /tmp/volume/$USERNAME:/volume -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e BOARDS=$BOARDS --rm=true  linuxboot >& $PIPE_PATH/bios_fifo
 if [ -f /tmp/volume/$USERNAME/linuxboot.bin ]
 then
-cp /tmp/volume/$USERNAME/linuxboot.bin /usr/local/production/images/linuxboot_$USERNAME.bin
-echo "Image successfully generated ...n" > /usr/local/production/tmp/bios_fifo
+cp /tmp/volume/$USERNAME/linuxboot.bin $FIRMWARES_PATH/linuxboot_$USERNAME.bin
+echo "Image successfully generated ...n" > $PIPE_PATH/bios_fifo
 exit 0
 fi
 
