@@ -31,10 +31,10 @@ var DNSDomain = os.Getenv("DNS_DOMAIN")
 var staticAssetsDir = os.Getenv("STATIC_ASSETS_DIR")
 var TTYDHostConsole = os.Getenv("TTYD_HOST_CONSOLE_PORT")
 var TTYDem100Bios = os.Getenv("TTYD_EM100_BIOS_PORT")
-var TTYDem100iLO = os.Getenv("TTYD_EM100_ILO_PORT")
+var TTYDem100BMC = os.Getenv("TTYD_EM100_BMC_PORT")
 var CTRLIp = os.Getenv("CTRL_IP")
 var certStorage = os.Getenv("CERT_STORAGE")
-var ExpectediLOIp = os.Getenv("EXPECT_ILO_IP")
+var ExpectedBMCIp = os.Getenv("EXPECT_BMC_IP")
 var credentialUri = os.Getenv("CREDENTIALS_URI")
 var credentialPort = os.Getenv("CREDENTIALS_TCPPORT")
 var compileUri = os.Getenv("COMPILE_URI")
@@ -329,10 +329,10 @@ func home(w http.ResponseWriter, r *http.Request) {
                         var req *http.Request
                         req, _ = http.NewRequest("GET","http://"+CTRLIp+"/poweroff", nil)
                         _, _  = client.Do(req)
-		case "iloconsole":
-                        url, _ := url.Parse("http://"+CTRLIp+TTYDem100iLO)
+		case "bmcconsole":
+                        url, _ := url.Parse("http://"+CTRLIp+TTYDem100BMC)
                         proxy := httputil.NewSingleHostReverseProxy(url)
-                        r.URL.Host = "http://"+CTRLIp+TTYDem100iLO
+                        r.URL.Host = "http://"+CTRLIp+TTYDem100BMC
                         filePath :=  strings.Split(tail,"/")
                         r.URL.Path = "/"
                         if ( len(filePath) > 2 ) {
@@ -340,15 +340,15 @@ func home(w http.ResponseWriter, r *http.Request) {
                         }
                         r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
                         proxy.ServeHTTP(w , r)
-		case "startilo":
+		case "startbmc":
 			// we must forward the request to the relevant test server
 			client := &http.Client{}
 			var req *http.Request
-			req, _ = http.NewRequest("GET","http://"+CTRLIp+"/startilo", nil)
+			req, _ = http.NewRequest("GET","http://"+CTRLIp+"/startbmc", nil)
 		        _, _  = client.Do(req)
 
 			client = &http.Client{}
-                        req, _ = http.NewRequest("GET","http://"+CTRLIp+"/startiloconsole", nil)
+                        req, _ = http.NewRequest("GET","http://"+CTRLIp+"/startbmcconsole", nil)
                         _, _  = client.Do(req)
 		case "startsmbios":
 			// we must forward the request to the relevant test server
@@ -374,13 +374,13 @@ func home(w http.ResponseWriter, r *http.Request) {
 			b, _ := ioutil.ReadFile(staticAssetsDir+tail) // just pass the file name
                         w.Header().Set("Content-Type", "video/mp4")
                         w.Write(b)
-		case "ilofirmware":
+		case "bmcfirmware":
 			// We must forward the request
-			fmt.Printf("Forward ilofirmware upload\n");
+			fmt.Printf("Forward bmcfirmware upload\n");
                         url, _ := url.Parse("http://"+CTRLIp)
                         proxy := httputil.NewSingleHostReverseProxy(url)
                         r.URL.Host = "http://"+CTRLIp
-                        r.URL.Path = "/ilofirmware"
+                        r.URL.Path = "/bmcfirmware"
                         r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
                         proxy.ServeHTTP(w , r)
 		case "biosfirmware":
@@ -425,7 +425,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func iloweb(w http.ResponseWriter, r *http.Request){
+func bmcweb(w http.ResponseWriter, r *http.Request){
 	// Let's print the session ID
         cookie, err := r.Cookie("osfci_cookie")
 
@@ -519,7 +519,7 @@ func main() {
     // Highest priority must be set to the signed request
     mux.HandleFunc("/ci/",home)
     mux.HandleFunc("/user/", user)
-    mux.HandleFunc("/",iloweb)
+    mux.HandleFunc("/",bmcweb)
 
     // We must build our server pool for the moment
     // This is define by the environment variable
@@ -532,7 +532,7 @@ func main() {
     // the server is expired
     newEntry.expiration = time.Now()
     // by the way its bmc interface is
-    newEntry.bmcIp=ExpectediLOIp 
+    newEntry.bmcIp=ExpectedBMCIp 
     newEntry.queue = 0
 
     ciServers.mux.Lock()

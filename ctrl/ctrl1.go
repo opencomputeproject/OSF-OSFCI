@@ -29,7 +29,7 @@ func ShiftPath(p string) (head, tail string) {
 func home(w http.ResponseWriter, r *http.Request) {
 	head,_ := ShiftPath( r.URL.Path)
 	switch ( head ) {
-		case "ilofirmware":
+		case "bmcfirmware":
                         switch r.Method {
                                 case http.MethodPost:
                                         r.Body = http.MaxBytesReader(w, r.Body, 64<<20+4096)
@@ -50,7 +50,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 					// we must forward the request to the relevant test server
 		                        fmt.Printf("Ilo start received\n")
 		                        args := []string { firmwaresPath+"/"+handler.Filename }
-		                        cmd := exec.Command(binariesPath+"/start_ilo", args...)
+		                        cmd := exec.Command(binariesPath+"/start_bmc", args...)
 		                        cmd.Start()
 		                        done := make(chan error, 1)
 		                        go func() {
@@ -113,11 +113,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 		                        }
 
                         }
-		case "startilo":
-			// we must forward the request to the relevant test server
-			fmt.Printf("Ilo start received\n")
+		case "startbmc":
+			fmt.Printf("BMC start received\n")
 			args := []string { firmwaresPath+"/ilo_dl360_OpenBMC.rom" }
-                        cmd := exec.Command(binariesPath+"/start_ilo", args...)
+                        cmd := exec.Command(binariesPath+"/start_bmc", args...)
                         cmd.Start()
 			done := make(chan error, 1)
                         go func() {

@@ -38,19 +38,19 @@ function loadJS(filename){
         jQuery.ajaxSetup({async:true});
 }
 
-var firmwareilouploaded=0;
+var firmwarebmcuploaded=0;
 var firmwarebiosuploaded=0;
 
 
 function homebutton(){
-	$('#btnilo').on('click', function () {
+	$('#btnbmc').on('click', function () {
 		$.ajax({
     			type: "GET",
 	                contentType: 'application/json',
-    			url: window.location.origin + '/ci/startilo/',
+    			url: window.location.origin + '/ci/startbmc/',
 			success: function(response){
-				console.log("Ilo em100 started");
-				$('#iloem100console').attr("src", window.location+"/console");
+				console.log("Bmc em100 started");
+				$('#bmcem100console').attr("src", window.location+"/console");
     			}
         	});
 	});
@@ -70,21 +70,21 @@ function homebutton(){
                         contentType: 'application/json',
                         url: window.location.origin + '/ci/poweron/',
                         success: function(response){
-                                console.log("Ilo console started");
-                                $('#iloconsole').attr("src", window.location+"/iloconsole");
+                                console.log("Bmc console started");
+                                $('#bmcconsole').attr("src", window.location+"/bmcconsole");
                         }
                 });
         });
 	$('#btnpoweroff').on('click', function () {
-		$('#iloem100console').contents().find("head").remove();
-                $('#iloem100console').contents().find("body").remove();
-		$('#iloem100console').removeAttr("src");
+		$('#bmcem100console').contents().find("head").remove();
+                $('#bmcem100console').contents().find("body").remove();
+		$('#bmcem100console').removeAttr("src");
 		$('#smbiosem100console').contents().find("head").remove();
                 $('#smbiosem100console').contents().find("body").remove();
                 $('#smbiosem100console').removeAttr("src");
-		$('#iloconsole').contents().find("head").remove();
-                $('#iloconsole').contents().find("body").remove();
-                $('#iloconsole').removeAttr("src");
+		$('#bmcconsole').contents().find("head").remove();
+                $('#bmcconsole').contents().find("body").remove();
+                $('#bmcconsole').removeAttr("src");
 		BMCUP=0;		
                 $.ajax({
                         type: "GET",
@@ -210,15 +210,15 @@ function run_ci(servername, RemainingSecond) {
                         // We stop the timer
                         clearInterval(x);
 			// We have to reset the server and go back home !
-	                $('#iloem100console').contents().find("head").remove();
-       		        $('#iloem100console').contents().find("body").remove();
-			$('#iloem100console').removeAttr("src");
+	                $('#bmcem100console').contents().find("head").remove();
+       		        $('#bmcem100console').contents().find("body").remove();
+			$('#bmcem100console').removeAttr("src");
 	                $('#smbiosem100console').contents().find("head").remove();
        		        $('#smbiosem100console').contents().find("body").remove();
 	                $('#smbiosem100console').removeAttr("src");
-	                $('#iloconsole').contents().find("head").remove();
-	                $('#iloconsole').contents().find("body").remove();
-	                $('#iloconsole').removeAttr("src");
+	                $('#bmcconsole').contents().find("head").remove();
+	                $('#bmcconsole').contents().find("body").remove();
+	                $('#bmcconsole').removeAttr("src");
 	                $.ajax({
 	                        type: "GET",
 	                        contentType: 'application/json',
@@ -250,9 +250,9 @@ function run_ci(servername, RemainingSecond) {
                 // we want end our session. It must clean up the cache
                 // and power off my machine
                 // we can clean up my page and Display a thank you message
-                $('#iloem100console').removeAttr("src");
+                $('#bmcem100console').removeAttr("src");
                 $('#smbiosem100console').removeAttr("src");
-                $('#iloconsole').removeAttr("src");
+                $('#bmcconsole').removeAttr("src");
                 $.ajax({
                         type: "GET",
                         contentType: 'application/json',
@@ -278,10 +278,10 @@ function run_ci(servername, RemainingSecond) {
         });
 
         loadHTML("html/main.html");
-        var dropZoneiLo = document.getElementById('drop-zone-ilo');
+        var dropZonebmc = document.getElementById('drop-zone-bmc');
 
 
-        var startUploadiLo = function(files) {
+        var startUploadbmc = function(files) {
                 var formData = new FormData();
                 for(var i = 0; i < files.length; i++){
                     var file = files[i];
@@ -291,31 +291,31 @@ function run_ci(servername, RemainingSecond) {
                     formData.append('fichier', file);
                 }
                 var xhr = new XMLHttpRequest();
-                xhr.open('POST', window.location+'ilofirmware', true);
+                xhr.open('POST', window.location+'bmcfirmware', true);
 
                 xhr.onload = function () {
                                   if (xhr.status === 200) {
                                     // File(s) uploaded
-                                    $('#ilouploaded').show();
-                                    $('#ilofirmwarefeedback').html("<span class=\"badge alert-success pull-right\">Success</span>"+file.name);
-                                    $('#iloem100console').attr("src", window.location+"/console");
+                                    $('#bmcuploaded').show();
+                                    $('#bmcfirmwarefeedback').html("<span class=\"badge alert-success pull-right\">Success</span>"+file.name);
+                                    $('#bmcem100console').attr("src", window.location+"/console");
                                   } else {
                                     alert('Something went wrong uploading the file.');
                                   }
                              };
                 xhr.upload.addEventListener('progress', function(e) {
                         var percent = e.loaded / e.total * 100;
-                        $('#progress-ilo').css("width",Math.floor(percent)+"%");
+                        $('#progress-bmc').css("width",Math.floor(percent)+"%");
                 }, false);
                 xhr.send(formData);
         }
 
-        dropZoneiLo.ondrop = function(e) {
+        dropZonebmc.ondrop = function(e) {
                 e.preventDefault();
-                if ( firmwareilouploaded == 0 ) {
+                if ( firmwarebmcuploaded == 0 ) {
                         this.className = 'upload-drop-zone';
-                        firmwareilouploaded =1;
-                        startUploadiLo(e.dataTransfer.files)
+                        firmwarebmcuploaded =1;
+                        startUploadbmc(e.dataTransfer.files)
                 }
                 else
                 {
@@ -323,12 +323,12 @@ function run_ci(servername, RemainingSecond) {
                 }
         }
 
-        dropZoneiLo.ondragover = function() {
+        dropZonebmc.ondragover = function() {
                 this.className = 'upload-drop-zone drop';
                 return false;
         }
 
-        dropZoneiLo.ondragleave = function() {
+        dropZonebmc.ondragleave = function() {
                 this.className = 'upload-drop-zone';
                 return false;
         }
