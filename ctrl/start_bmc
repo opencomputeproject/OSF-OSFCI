@@ -1,5 +1,5 @@
 #!/bin/bash
-cp /usr/share/local/images/ilo_dl360_OpenBMC.rom $FIRMWARES_PATH
+cp $ORIGINAL_BMC $FIRMWARES_PATH
 export LD_LIBRARY_PATH=$OLD_LIBRARIES
 $BINARIES_PATH/ttyd -p 7681 -R $BINARIES_PATH/read_pipe &
 $BINARIES_PATH/ttyd -p 7682 screen /dev/ttyUSB0 115200  &
