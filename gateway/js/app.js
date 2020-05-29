@@ -395,7 +395,7 @@ function run_ci(servername, RemainingSecond) {
 		// We must put the value to the compile server as to kick a build
 		// That request has to be signed and must be protected by the 
 		// user credential as to avoid server side overload
-		 Data = $('#githubLinuxboot').val()+' hpe/dl360';
+		 Data = $('#githubLinuxboot').val()+' hpe/dl360gen10';
 		 Url_rel = '/ci/buildbiosfirmware/'+mylocalStorage['username'];
 		 BuildSignedAuth(Url_rel, 'PUT' , "text/plain", function(authString) {
 		 $.ajax({
