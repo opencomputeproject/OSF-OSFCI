@@ -13,8 +13,11 @@ docker run --name linuxboot_$USERNAME -v /tmp/volume/$USERNAME:/volume -e GITHUB
 if [ -f /tmp/volume/$USERNAME/linuxboot.bin ]
 then
 cp /tmp/volume/$USERNAME/linuxboot.bin $FIRMWARES_PATH/linuxboot_$USERNAME.bin
-echo "Image successfully generated ...n" > $PIPE_PATH/bios_fifo
+echo "Image successfully generated ..." > $PIPE_PATH/bios_fifo
+echo "Injecting the linux kernel to a BIOS image ..." > $PIPE_PATH/bios_fifo
+echo "$BINARIES_PATH/utk $FIRMWARES_PATH/default.rom replace_pe32 Shell linuxboot_$USERNAME.bin save test_$USERNAME.rom" > $PIPE_PATH/bios_fifo
+$BINARIES_PATH/utk $FIRMWARES_PATH/default.rom replace_pe32 Shell linuxboot_$USERNAME.bin save $FIRMWARES_PATH/test_$USERNAME.rom
+echo "$BINARIES_PATH/shadow test_$USERNAME.rom" > $PIPE_PATH/bios_fifo
+$BINARIES_PATH/shadow $FIRMWARES_PATH/test_$USERNAME.rom
 exit 0
 fi
-
-
