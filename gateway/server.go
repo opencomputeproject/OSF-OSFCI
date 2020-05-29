@@ -317,6 +317,17 @@ func home(w http.ResponseWriter, r *http.Request) {
                         }
                         r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
                         proxy.ServeHTTP(w , r)
+		case "smbiosbuildconsole":
+                        url, _ := url.Parse("http://"+compileUri+":7681")
+                        proxy := httputil.NewSingleHostReverseProxy(url)
+                        r.URL.Host = "http://"+compileUri+TTYDem100Bios
+                        filePath :=  strings.Split(tail,"/")
+                        r.URL.Path = "/"
+                        if ( len(filePath) > 2 ) {
+                                r.URL.Path = r.URL.Path + filePath[2]
+                        }
+                        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
+                        proxy.ServeHTTP(w , r)
 		case "poweron":
 			fmt.Printf("Poweron request\n");
 			client := &http.Client{}
