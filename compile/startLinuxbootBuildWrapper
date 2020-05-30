@@ -1,0 +1,2 @@
+#!/bin/bash
+( $BINARIES_PATH/startLinuxbootBuild "$@" ) >& $PIPE_PATH/bios_fifo

@@ -12,6 +12,9 @@ import (
 
 var compileTcpPort = os.Getenv("COMPILE_TCPPORT")
 var startLinuxbootBuildBin = os.Getenv("LINUXBOOT_BUILD")
+var binariesPath = os.Getenv("BINARIES_PATH")
+var ttydCommand *exec.Cmd
+var dockerCommand *exec.Cmd
 
 // to check if a docker container is running
 // docker inspect -f '{{.State.Running}}' linuxboot_vejmarie2
@@ -51,18 +54,28 @@ func home(w http.ResponseWriter, r *http.Request) {
 					// 4 - Boards (which is a directory contained into the github repo)
 					// The github repo must have a format which is
 					// Second parameter shall be a string array
-		                        var args []string 
-		                        args = append (args, username)
-		                        args = append (args, githubRepo)
-		                        args = append (args, githubBranch)
-		                        args = append (args, board)
-					for i := 0 ; i < len(args) ; i++ {
-						print(args[i]+"\n")
-					}
 
-		                        cmd := exec.Command(startLinuxbootBuildBin, args...)
-		                        cmd.Start()
-					go cmd.Wait()
+                                        var argsTtyd []string
+                                        argsTtyd = append (argsTtyd,"-p")
+                                        argsTtyd = append (argsTtyd,"7681")
+                                        argsTtyd = append (argsTtyd,binariesPath+"/readBiosFifo")
+                                        ttydCommand := exec.Command(binariesPath + "/ttyd", argsTtyd...)
+                                        ttydCommand.Start()
+                                        go ttydCommand.Wait()
+
+                                        var args []string
+                                        args = append (args, username)
+                                        args = append (args, githubRepo)
+                                        args = append (args, githubBranch)
+                                        args = append (args, board)
+                                        for i := 0 ; i < len(args) ; i++ {
+                                                print(args[i]+"\n")
+                                        }
+
+                                        dockerCommand := exec.Command(startLinuxbootBuildBin, args...)
+                                        dockerCommand.Start()
+                                        go dockerCommand.Wait()
+
                         }
 		default:
 	}
