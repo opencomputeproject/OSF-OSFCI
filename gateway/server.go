@@ -423,6 +423,16 @@ func home(w http.ResponseWriter, r *http.Request) {
                         r.URL.Path = tail
                         r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
                         proxy.ServeHTTP(w , r)
+		case "loadbuiltsmbios":
+			// we must tell to the controller node that he needs to download the BIOS
+			// from our user from the compile node and to start the em100
+			_, tail = ShiftPath( r.URL.Path)
+                        keys := strings.Split(tail,"/")
+                        login := keys[2]
+                        client := &http.Client{}
+                        var req *http.Request
+                        req, _ = http.NewRequest("GET","http://"+CTRLIp+"/loadfromcompilesmbios/"+login, nil)
+                        _, _  = client.Do(req)
 		case "":
                         b, _ := ioutil.ReadFile(staticAssetsDir+"/html/homepage.html") // just pass the file name
                         // this is a potential template file we need to replace the http field
