@@ -11,10 +11,13 @@ import (
 	"time"
 	"os"
 	"io"
+	"base"
 )
 
 var binariesPath = os.Getenv("BINARIES_PATH")
 var firmwaresPath = os.Getenv("FIRMWARES_PATH")
+var compileUri = os.Getenv("COMPILE_URI")
+var compileTcpPort = os.Getenv("COMPILE_TCPPORT")
 
 func ShiftPath(p string) (head, tail string) {
     p = path.Clean("/" + p)
@@ -113,6 +116,40 @@ func home(w http.ResponseWriter, r *http.Request) {
 		                        }
 
                         }
+		case "loadfromcompilesmbios":
+			// We must get the username from the request
+			_, tail := ShiftPath( r.URL.Path)
+                        keys := strings.Split(tail,"/")
+                        login := keys[2]
+			// We have to retreive the BIOS from the compile server
+			myfirmware := base.HTTPGetRequest("http://"+compileUri + compileTcpPort + "/getFirmware/"+login)
+                        // f, err := os.Create("firmwares/linuxboot_"+login+".rom", os.O_WRONLY|os.O_CREATE, 0666)
+                        f, err := os.Create("firmwares/linuxboot_"+login+".rom")
+			defer f.Close()
+			f.Write([]byte(myfirmware))
+
+					fmt.Printf("System BIOS start received\n")
+                                        args := []string { firmwaresPath+"/"+"firmwares/linuxboot_"+login+".rom" }
+                                        cmd := exec.Command(binariesPath+"/start_smbios", args...)
+                                        cmd.Start()
+                                        done := make(chan error, 1)
+                                        go func() {
+                                            done <- cmd.Wait()
+                                        }()
+                                        conn, err := net.DialTimeout("tcp", "localhost:7683", 220*time.Millisecond)
+                                        max_loop := 5
+                                        for ( err != nil && max_loop > 0 ) {
+                                                conn, err = net.DialTimeout("tcp", "localhost:7683", 220*time.Millisecond)
+                                        }
+                                        if ( err != nil ) {
+                                                // Daemon has not started
+                                                // Let's report an error
+                                                w.Write([]byte("Error"))
+                                                return
+                                        } else {
+                                                conn.Close()
+                                        }
+
 		case "startbmc":
 			fmt.Printf("BMC start received\n")
 			args := []string { firmwaresPath+"/ilo_dl360_OpenBMC.rom" }

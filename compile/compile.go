@@ -13,8 +13,8 @@ import (
 var compileTcpPort = os.Getenv("COMPILE_TCPPORT")
 var startLinuxbootBuildBin = os.Getenv("LINUXBOOT_BUILD")
 var binariesPath = os.Getenv("BINARIES_PATH")
-var ttydCommand *exec.Cmd
-var dockerCommand *exec.Cmd
+var ttydCommand *exec.Cmd = nil
+var dockerCommand *exec.Cmd = nil
 
 // to check if a docker container is running
 // docker inspect -f '{{.State.Running}}' linuxboot_vejmarie2
@@ -32,6 +32,14 @@ func ShiftPath(p string) (head, tail string) {
 func home(w http.ResponseWriter, r *http.Request) {
 	head,tail := ShiftPath( r.URL.Path)
 	switch ( head ) {
+		case "getFirmware":
+			login := tail[1:]
+			// We must retreive the username BIOS and return it as the response body
+			f, _ := os.Open("firmwares/linuxboot_"+login+".rom")
+                        defer f.Close()
+			firmware := make([]byte,64*1024*1024)
+                        _,_=f.Read(firmware)
+			w.Write(firmware)
 		case "buildilofirmware":
                         switch r.Method {
                                 case http.MethodPut:

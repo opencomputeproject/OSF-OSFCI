@@ -391,7 +391,6 @@ function run_ci(servername, RemainingSecond) {
         }
 
 	$('#btnbuildsmbios').on('click', function(e) {
-
 		// We must put the value to the compile server as to kick a build
 		// That request has to be signed and must be protected by the 
 		// user credential as to avoid server side overload
@@ -409,16 +408,43 @@ function run_ci(servername, RemainingSecond) {
 		         data: Data,
 		         contentType: 'text/plain',
 		         success: function(response) {
-				// The process to build the code is running
+				// The process to load the code is running
 				// the response contain the code from the ttyd which has kicked off the build
 				// We can allocate that code to the BIOS iframe and we shall be receiving build input
 	                        $('#smbiosem100console').contents().find("head").remove();
        		                $('#smbiosem100console').contents().find("body").remove();
-                                $('#smbiosem100console').attr("src", window.location+"/smbiosbuildconsole");
+                                $('#smbiosem100console').attr("src", window.location+"/smbiosconsole");
 	        	 }
 	        	 });
 	             	});
 	});
+
+	$('#btnLoadbuiltsmbios').on('click', function(e) {
+		Url_rel = '/ci/loadbuiltsmbios/'+mylocalStorage['username'];
+		BuildSignedAuth(Url_rel, 'PUT' , "text/plain", function(authString) {
+		$.ajax({
+			url: window.location.origin + Url_rel,
+                         type: 'PUT',
+                         headers: {
+                              "Authorization": "OSF " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
+                              "Content-Type" : "text/plain",
+                              "myDate" : authString['formattedDate']
+                         },
+                         data: Data,
+                         contentType: 'text/plain',
+                         success: function(response) {
+                                // The process to build the code is running
+                                // the response contain the code from the ttyd which has kicked off the build
+                                // We can allocate that code to the BIOS iframe and we shall be receiving build input
+                                $('#smbiosem100console').contents().find("head").remove();
+                                $('#smbiosem100console').contents().find("body").remove();
+                                $('#smbiosem100console').attr("src", window.location+"/smbiosbuildconsole");
+                         }
+                         });
+                        });	
+	});
+
+
         homebutton();
 }
 
