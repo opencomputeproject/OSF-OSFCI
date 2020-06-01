@@ -413,7 +413,7 @@ function run_ci(servername, RemainingSecond) {
 				// We can allocate that code to the BIOS iframe and we shall be receiving build input
 	                        $('#smbiosem100console').contents().find("head").remove();
        		                $('#smbiosem100console').contents().find("body").remove();
-                                $('#smbiosem100console').attr("src", window.location+"/smbiosconsole");
+                                $('#smbiosem100console').attr("src", window.location+"/smbiosbuildconsole");
 	        	 }
 	        	 });
 	             	});
