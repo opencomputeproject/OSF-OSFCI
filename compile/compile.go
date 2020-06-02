@@ -13,6 +13,7 @@ import (
 var compileTcpPort = os.Getenv("COMPILE_TCPPORT")
 var startLinuxbootBuildBin = os.Getenv("LINUXBOOT_BUILD")
 var binariesPath = os.Getenv("BINARIES_PATH")
+var firmwaresPath = os.Getenv("FIRMWARES_PATH")
 var ttydCommand *exec.Cmd = nil
 var dockerCommand *exec.Cmd = nil
 
@@ -35,7 +36,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		case "getFirmware":
 			login := tail[1:]
 			// We must retreive the username BIOS and return it as the response body
-			f, _ := os.Open("firmwares/linuxboot_"+login+".rom")
+			f, _ := os.Open(firmwaresPath+"/test_"+login+".rom")
                         defer f.Close()
 			firmware := make([]byte,64*1024*1024)
                         _,_=f.Read(firmware)

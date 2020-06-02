@@ -119,17 +119,16 @@ func home(w http.ResponseWriter, r *http.Request) {
 		case "loadfromcompilesmbios":
 			// We must get the username from the request
 			_, tail := ShiftPath( r.URL.Path)
-                        keys := strings.Split(tail,"/")
-                        login := keys[2]
+                        login := tail[1:]
 			// We have to retreive the BIOS from the compile server
 			myfirmware := base.HTTPGetRequest("http://"+compileUri + compileTcpPort + "/getFirmware/"+login)
                         // f, err := os.Create("firmwares/linuxboot_"+login+".rom", os.O_WRONLY|os.O_CREATE, 0666)
-                        f, err := os.Create("firmwares/linuxboot_"+login+".rom")
+                        f, err := os.Create(firmwaresPath+"/linuxboot_"+login+".rom")
 			defer f.Close()
 			f.Write([]byte(myfirmware))
 
 					fmt.Printf("System BIOS start received\n")
-                                        args := []string { firmwaresPath+"/"+"firmwares/linuxboot_"+login+".rom" }
+                                        args := []string { firmwaresPath+"/linuxboot_"+login+".rom" }
                                         cmd := exec.Command(binariesPath+"/start_smbios", args...)
                                         cmd.Start()
                                         done := make(chan error, 1)
