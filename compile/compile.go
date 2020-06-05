@@ -33,6 +33,13 @@ func ShiftPath(p string) (head, tail string) {
 func home(w http.ResponseWriter, r *http.Request) {
 	head,tail := ShiftPath( r.URL.Path)
 	switch ( head ) {
+		case "cleanUp":
+			if ( ttydCommand != nil ) {
+                                ttydCommand.Process.Kill()
+                        }
+                        if ( dockerCommand != nil ) {
+                                dockerCommand.Process.Kill()
+                        }
 		case "getFirmware":
 			login := tail[1:]
 			// We must retreive the username BIOS and return it as the response body
@@ -78,6 +85,8 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         ttydCommand.Start()
                                         go func() {
 						ttydCommand.Wait()
+						// This command is respinning itself
+						ttydCommand.Process.Kill()
 						ttydCommand = nil
 					}()
 
