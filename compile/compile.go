@@ -8,6 +8,7 @@ import (
         "os"
 	"os/exec"
 	"base"
+	"golang.org/x/sys/unix"
 )
 
 var compileTcpPort = os.Getenv("COMPILE_TCPPORT")
@@ -33,14 +34,25 @@ func ShiftPath(p string) (head, tail string) {
 func home(w http.ResponseWriter, r *http.Request) {
 	head,tail := ShiftPath( r.URL.Path)
 	switch ( head ) {
+		case "cleanUp":
+			if ( ttydCommand != nil ) {
+                                unix.Kill(-ttydCommand.Process.Pid, unix.SIGKILL)
+                                unix.Kill(ttydCommand.Process.Pid, unix.SIGKILL)
+                        }
+                        if ( dockerCommand != nil ) {
+                                unix.Kill(-dockerCommand.Process.Pid, unix.SIGKILL)
+                                unix.Kill(dockerCommand.Process.Pid, unix.SIGKILL)
+                        }
 		case "getFirmware":
 			login := tail[1:]
 			// We must retreive the username BIOS and return it as the response body
 			if ( ttydCommand != nil ) {
-                                ttydCommand.Process.Kill()
+				unix.Kill(-ttydCommand.Process.Pid, unix.SIGKILL)
+                                unix.Kill(ttydCommand.Process.Pid, unix.SIGKILL)
                         }
                         if ( dockerCommand != nil ) {
-                                dockerCommand.Process.Kill()
+				unix.Kill(-dockerCommand.Process.Pid, unix.SIGKILL)
+                                unix.Kill(dockerCommand.Process.Pid, unix.SIGKILL)
                         }
 			f, _ := os.Open(firmwaresPath+"/test_"+login+".rom")
                         defer f.Close()
@@ -78,7 +90,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         ttydCommand.Start()
                                         go func() {
 						ttydCommand.Wait()
-						ttydCommand = nil
+						// This command is respinning itself
 					}()
 
                                         var args []string
@@ -94,7 +106,6 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         dockerCommand.Start()
                                         go func() {
 						dockerCommand.Wait()
-						dockerCommand = nil
 					}()
 
                         }
