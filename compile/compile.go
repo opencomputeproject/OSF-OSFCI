@@ -86,7 +86,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         argsTtyd = append (argsTtyd,"-p")
                                         argsTtyd = append (argsTtyd,"7681")
                                         argsTtyd = append (argsTtyd,binariesPath+"/readBiosFifo")
-                                        ttydCommand := exec.Command(binariesPath + "/ttyd", argsTtyd...)
+                                        ttydCommand = exec.Command(binariesPath + "/ttyd", argsTtyd...)
                                         ttydCommand.Start()
                                         go func() {
 						ttydCommand.Wait()
@@ -102,7 +102,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                                 print(args[i]+"\n")
                                         }
 
-                                        dockerCommand := exec.Command(startLinuxbootBuildBin, args...)
+                                        dockerCommand = exec.Command(startLinuxbootBuildBin, args...)
                                         dockerCommand.Start()
                                         go func() {
 						dockerCommand.Wait()
