@@ -79,7 +79,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         go func() {
 						ttydCommand.Wait()
 						ttydCommand = nil
-					}
+					}()
 
                                         var args []string
                                         args = append (args, username)
@@ -95,7 +95,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         go func() {
 						dockerCommand.Wait()
 						dockerCommand = nil
-					}
+					}()
 
                         }
 		default:
