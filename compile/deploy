@@ -26,6 +26,7 @@ docker build -t linuxboot -f $1/docker/Dockerfile.linuxboot $1/docker/
 basePath=`realpath ..`
 export GOPATH=$GOPATH:$basePath
 go get golang.org/x/crypto/bcrypt
+go get golang.org/x/sys/unix
 go build compile.go
 cp compile $1/bin
 # We need UTK from fiano project
