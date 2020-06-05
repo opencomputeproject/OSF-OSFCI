@@ -32,7 +32,7 @@ cp compile $1/bin
 # We need UTK from fiano project
 git clone https://github.com/linuxboot/fiano
 cd fiano/cmds/utk
-go get go get github.com/linuxboot/fiano/pkg/utk
+go get github.com/linuxboot/fiano/pkg/utk
 go build utk.go
 cp utk $1/bin
 cd ../../..
