@@ -36,6 +36,12 @@ func home(w http.ResponseWriter, r *http.Request) {
 		case "getFirmware":
 			login := tail[1:]
 			// We must retreive the username BIOS and return it as the response body
+			if ( ttydCommand != nil ) {
+                                ttydCommand.Process.Kill()
+                        }
+                        if ( dockerCommand != nil ) {
+                                dockerCommand.Process.Kill()
+                        }
 			f, _ := os.Open(firmwaresPath+"/test_"+login+".rom")
                         defer f.Close()
 			firmware := make([]byte,64*1024*1024)
@@ -70,7 +76,10 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         argsTtyd = append (argsTtyd,binariesPath+"/readBiosFifo")
                                         ttydCommand := exec.Command(binariesPath + "/ttyd", argsTtyd...)
                                         ttydCommand.Start()
-                                        go ttydCommand.Wait()
+                                        go func() {
+						ttydCommand.Wait()
+						ttydCommand = nil
+					}
 
                                         var args []string
                                         args = append (args, username)
@@ -83,7 +92,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 
                                         dockerCommand := exec.Command(startLinuxbootBuildBin, args...)
                                         dockerCommand.Start()
-                                        go dockerCommand.Wait()
+                                        go func() {
+						dockerCommand.Wait()
+						dockerCommand = nil
+					}
 
                         }
 		default:
