@@ -36,8 +36,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	switch ( head ) {
 		case "cleanUp":
 			if ( ttydCommand != nil ) {
-                                unix.Kill(-ttydCommand.Process.Pid, unix.SIGKILL)
-                                unix.Kill(ttydCommand.Process.Pid, unix.SIGKILL)
+                                unix.Kill(ttydCommand.Process.Pid, unix.SIGINT)
                         }
                         if ( dockerCommand != nil ) {
                                 unix.Kill(-dockerCommand.Process.Pid, unix.SIGKILL)
@@ -47,8 +46,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 			login := tail[1:]
 			// We must retreive the username BIOS and return it as the response body
 			if ( ttydCommand != nil ) {
-				unix.Kill(-ttydCommand.Process.Pid, unix.SIGKILL)
-                                unix.Kill(ttydCommand.Process.Pid, unix.SIGKILL)
+				unix.Kill(ttydCommand.Process.Pid, unix.SIGINT)
                         }
                         if ( dockerCommand != nil ) {
 				unix.Kill(-dockerCommand.Process.Pid, unix.SIGKILL)
@@ -85,8 +83,13 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         var argsTtyd []string
                                         argsTtyd = append (argsTtyd,"-p")
                                         argsTtyd = append (argsTtyd,"7681")
+                                        argsTtyd = append (argsTtyd,"-s")
+                                        argsTtyd = append (argsTtyd,"9")
                                         argsTtyd = append (argsTtyd,binariesPath+"/readBiosFifo")
                                         ttydCommand = exec.Command(binariesPath + "/ttyd", argsTtyd...)
+					ttydCommand.SysProcAttr = &unix.SysProcAttr{
+                                                Setsid: true,
+                                        }
                                         ttydCommand.Start()
                                         go func() {
 						ttydCommand.Wait()
