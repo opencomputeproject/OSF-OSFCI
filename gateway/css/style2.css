@@ -1,0 +1,32 @@
+body {
+    background-color: #383838;
+    font-family: "FontAwesome";
+    color:  #d6d6d6;
+    
+}
+
+a:link {
+    color:#d6d6d6;
+  }
+  
+  /* visited link */
+  a:visited {
+    color: #d6d6d6;
+  }
+  
+  /* mouse over link */
+  a:hover {
+    color: green;
+  }
+  
+  /* selected link */
+  a:active {
+    color: blue;
+  }
+
+  h2{ 
+      text-decoration: underline;
+  }
+
+  #imgindent    {margin-left: 100px;}
+  
