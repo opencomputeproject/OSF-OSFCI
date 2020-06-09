@@ -531,6 +531,11 @@ function mainpage(){
 	navbarHover();
 	loginBtn();
 	loadHTML("html/home.html");
+	$('#background').css('background-image', 'url(images/landing.png)');
+        $(document).ready(function () {
+                    $('#background').animate({ opacity: 1 }, { duration: 2000 });
+                    $('#background').fadeIn(3000);
+        });
 
 	if (( "string" !== typeof(mylocalStorage['secretKey']) ) & ( "string" !== typeof(mylocalStorage['accessKey']) ))
 	{
@@ -569,6 +574,11 @@ function main(){
 		navbarHover();
 		loginBtn();
 		loadHTML("html/home.html");
+		$('#background').css('background-image', 'url(images/landing.png)');
+                $(document).ready(function () {
+                    $('#background').animate({ opacity: 1 }, { duration: 2000 });
+                    $('#background').fadeIn(3000);
+                });
 		if (( "string" !== typeof(mylocalStorage['secretKey']) ) & ( "string" !== typeof(mylocalStorage['accessKey']) ))
 		{
 			$('#signup').css("display", "");
