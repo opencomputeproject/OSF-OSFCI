@@ -60,3 +60,12 @@ $('#InteractiveSession').on('click', function(e) {
 $("#Home").on("click", function(event) {
 	mainpage();
 });
+
+$('#features').on("click", function(event) {
+        clearDocument();
+        loadHTML("html/navbar.html");
+        loadJS("js/navbar.js");
+        navbarHover();
+        loginBtn();
+	loadHTML("html/features.html");
+});
