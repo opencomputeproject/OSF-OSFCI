@@ -2,8 +2,7 @@ body {
     background-color: #383838;
     font-family: "FontAwesome";
     color:  #d6d6d6;
-    
-}
+    }
 
 a:link {
     color:#d6d6d6;
@@ -28,5 +27,14 @@ a:link {
       text-decoration: underline;
   }
 
-  #imgindent    {margin-left: 100px;}
-  
+ img {
+    width: 100%;
+    max-width: 800px;
+    height: auto;
+
+  }
+
+section img{
+    width: auto;
+    height: auto;
+  }
