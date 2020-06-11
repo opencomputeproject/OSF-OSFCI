@@ -531,7 +531,7 @@ function mainpage(){
 	navbarHover();
 	loginBtn();
 	loadHTML("html/home.html");
-	$('#background').css('background-image', 'url(images/landing.png)');
+	$('#background').css('background-image', 'url(images/landing.png)').fadeIn(3000);
         $(document).ready(function () {
                     $('#background').animate({ opacity: 1 }, { duration: 2000 });
                     $('#background').fadeIn(3000);
@@ -574,7 +574,7 @@ function main(){
 		navbarHover();
 		loginBtn();
 		loadHTML("html/home.html");
-		$('#background').css('background-image', 'url(images/landing.png)');
+		$('#background').css('background-image', 'url(images/landing.png)').fadeIn(3000);
                 $(document).ready(function () {
                     $('#background').animate({ opacity: 1 }, { duration: 2000 });
                     $('#background').fadeIn(3000);
