@@ -175,6 +175,25 @@ func home(w http.ResponseWriter, r *http.Request) {
 	// The cookie allow us to track the current
 	// user on the node
         cookie, cookieErr := r.Cookie("osfci_cookie")
+	cacheIndex := -1
+	// We have to find the entry into the cache
+	// if the cookie exist and return a Value
+
+	if ( cookieErr == nil ) {
+		if ( cookie.Value != "" ) {
+		       for i, _ := range ciServers.servers {
+	                        if ( ciServers.servers[i].currentOwner == cookie.Value ) {
+					// Before indexing we must validate that the server is still ours 
+					if ( time.Now().After(ciServers.servers[i].expiration) ) {
+						ciServers.servers[i].expiration = time.Now();
+       		                                ciServers.servers[i].currentOwner = ""
+					} else {
+						cacheIndex=i
+					}
+                                }
+                       }
+		}
+	}
 
 	head, tail := ShiftPath( r.URL.Path)
 	if ( head == "ci" ) {
@@ -184,8 +203,6 @@ func home(w http.ResponseWriter, r *http.Request) {
 	// if that is the case. If the command is unknown then we can assume
 	// we are getting a username as a head parameter and must get the 
 	// remaining part
-
-
 
 	// If the request is different than a getServer
 	// We must be sure that the end user still has an active server
@@ -227,6 +244,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 							// We probably need to turn it off just to clean it
 							return
 						}
+						// We can check also if the user is just coming back ?
+						// used to calculate potential wait time
 						if ( actualTime.After(ciServers.servers[i].expiration) ) {
 							actualTime = ciServers.servers[i].expiration
 							index = i
@@ -265,28 +284,16 @@ func home(w http.ResponseWriter, r *http.Request) {
 		case "bmcup":
 		       bmcIp := ""
 			var Up string
-			if ( cookieErr == nil ) {
-			        if ( cookie.Value != "" ) {
-			                // We must get the IP address from the cache
-			                for i, _ := range ciServers.servers {
-			                        if ( ciServers.servers[i].currentOwner == cookie.Value ) {
-			                                if ( time.Now().Before(ciServers.servers[i].expiration) ) {
-		                                        // We still own the server and we can go to the BMC
-		                                        bmcIp = ciServers.servers[i].bmcIp
-		                                	}
-		                        	}
-		                	}
-			        } 
-				if ( bmcIp != "" ) {
-				        conn, err := net.DialTimeout("tcp", bmcIp+":443", 220*time.Millisecond)
-				        if ( err == nil ) {
-				                conn.Close()
-						// The controller is up				
-						Up = "1"
-				        } else {
-						Up = "0"
-					}
-				} else {
+			if ( cacheIndex != -1 ) {
+				bmcIp = ciServers.servers[cacheIndex].bmcIp
+                      	}
+			if ( bmcIp != "" ) {
+			        conn, err := net.DialTimeout("tcp", bmcIp+":443", 220*time.Millisecond)
+			        if ( err == nil ) {
+			                conn.Close()
+					// The controller is up				
+					Up = "1"
+			        } else {
 					Up = "0"
 				}
 			} else {
@@ -295,78 +302,93 @@ func home(w http.ResponseWriter, r *http.Request) {
 			return_value,_ := json.Marshal(Up)
 			w.Write([]byte(return_value))
 		case "console":
-			fmt.Printf("Console request\n");
-		        url, _ := url.Parse("http://"+CTRLIp+TTYDHostConsole)
-		        proxy := httputil.NewSingleHostReverseProxy(url)
-		        r.URL.Host = "http://"+CTRLIp+TTYDHostConsole
-			filePath :=  strings.Split(tail,"/")
-			r.URL.Path = "/"
-			if ( len(filePath) > 2 ) {
-				r.URL.Path = r.URL.Path + filePath[2]
+			if ( cacheIndex != -1 ) {
+				fmt.Printf("Console request\n");
+			        url, _ := url.Parse("http://"+CTRLIp+TTYDHostConsole)
+			        proxy := httputil.NewSingleHostReverseProxy(url)
+			        r.URL.Host = "http://"+CTRLIp+TTYDHostConsole
+				filePath :=  strings.Split(tail,"/")
+				r.URL.Path = "/"
+				if ( len(filePath) > 2 ) {
+					r.URL.Path = r.URL.Path + filePath[2]
+				}
+			        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
+				proxy.ServeHTTP(w , r)
 			}
-		        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
-			proxy.ServeHTTP(w , r)
 		case "smbiosconsole":
-                        url, _ := url.Parse("http://"+CTRLIp+TTYDem100Bios)
-                        proxy := httputil.NewSingleHostReverseProxy(url)
-                        r.URL.Host = "http://"+CTRLIp+TTYDem100Bios
-                        filePath :=  strings.Split(tail,"/")
-                        r.URL.Path = "/"
-                        if ( len(filePath) > 2 ) {
-                                r.URL.Path = r.URL.Path + filePath[2]
-                        }
-                        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
-                        proxy.ServeHTTP(w , r)
+			if ( cacheIndex != -1 ) {
+	                        url, _ := url.Parse("http://"+CTRLIp+TTYDem100Bios)
+	                        proxy := httputil.NewSingleHostReverseProxy(url)
+	                        r.URL.Host = "http://"+CTRLIp+TTYDem100Bios
+	                        filePath :=  strings.Split(tail,"/")
+	                        r.URL.Path = "/"
+	                        if ( len(filePath) > 2 ) {
+	                                r.URL.Path = r.URL.Path + filePath[2]
+	                        }
+	                        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
+	                        proxy.ServeHTTP(w , r)
+			}
 		case "smbiosbuildconsole":
-                        url, _ := url.Parse("http://"+compileUri+":7681")
-                        proxy := httputil.NewSingleHostReverseProxy(url)
-                        r.URL.Host = "http://"+compileUri+TTYDem100Bios
-                        filePath :=  strings.Split(tail,"/")
-                        r.URL.Path = "/"
-                        if ( len(filePath) > 2 ) {
-                                r.URL.Path = r.URL.Path + filePath[2]
-                        }
-                        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
-                        proxy.ServeHTTP(w , r)
+			if ( cacheIndex != -1 ) {
+	                        url, _ := url.Parse("http://"+compileUri+":7681")
+	                        proxy := httputil.NewSingleHostReverseProxy(url)
+	                        r.URL.Host = "http://"+compileUri+TTYDem100Bios
+	                        filePath :=  strings.Split(tail,"/")
+	                        r.URL.Path = "/"
+	                        if ( len(filePath) > 2 ) {
+	                                r.URL.Path = r.URL.Path + filePath[2]
+	                        }
+	                        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
+	                        proxy.ServeHTTP(w , r)
+			}
 		case "poweron":
-			fmt.Printf("Poweron request\n");
-			client := &http.Client{}
-                        var req *http.Request
-                        req, _ = http.NewRequest("GET","http://"+CTRLIp+"/poweron", nil)
-                        _, _  = client.Do(req)
+			if ( cacheIndex != -1 ) {
+				fmt.Printf("Poweron request\n");
+				client := &http.Client{}
+	                        var req *http.Request
+	                        req, _ = http.NewRequest("GET","http://"+CTRLIp+"/poweron", nil)
+	                        _, _  = client.Do(req)
+			}
 		case "poweroff":
-			fmt.Printf("Poweroff request\n");
-			client := &http.Client{}
-                        var req *http.Request
-                        req, _ = http.NewRequest("GET","http://"+CTRLIp+"/poweroff", nil)
-                        _, _  = client.Do(req)
+			if ( cacheIndex != -1 ) {
+				fmt.Printf("Poweroff request\n");
+				client := &http.Client{}
+	                        var req *http.Request
+	                        req, _ = http.NewRequest("GET","http://"+CTRLIp+"/poweroff", nil)
+	                        _, _  = client.Do(req)
+			}
 		case "bmcconsole":
-                        url, _ := url.Parse("http://"+CTRLIp+TTYDem100BMC)
-                        proxy := httputil.NewSingleHostReverseProxy(url)
-                        r.URL.Host = "http://"+CTRLIp+TTYDem100BMC
-                        filePath :=  strings.Split(tail,"/")
-                        r.URL.Path = "/"
-                        if ( len(filePath) > 2 ) {
-                                r.URL.Path = r.URL.Path + filePath[2]
-                        }
-                        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
-                        proxy.ServeHTTP(w , r)
+			if ( cacheIndex != -1 ) {
+	                        url, _ := url.Parse("http://"+CTRLIp+TTYDem100BMC)
+	                        proxy := httputil.NewSingleHostReverseProxy(url)
+	                        r.URL.Host = "http://"+CTRLIp+TTYDem100BMC
+	                        filePath :=  strings.Split(tail,"/")
+	                        r.URL.Path = "/"
+	                        if ( len(filePath) > 2 ) {
+	                                r.URL.Path = r.URL.Path + filePath[2]
+	                        }
+	                        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
+	                        proxy.ServeHTTP(w , r)
+			}
 		case "startbmc":
-			// we must forward the request to the relevant test server
-			client := &http.Client{}
-			var req *http.Request
-			req, _ = http.NewRequest("GET","http://"+CTRLIp+"/startbmc", nil)
-		        _, _  = client.Do(req)
-
-			client = &http.Client{}
-                        req, _ = http.NewRequest("GET","http://"+CTRLIp+"/startbmcconsole", nil)
-                        _, _  = client.Do(req)
+			if ( cacheIndex != -1 ) {
+				// we must forward the request to the relevant test server
+				client := &http.Client{}
+				var req *http.Request
+				req, _ = http.NewRequest("GET","http://"+CTRLIp+"/startbmc", nil)
+			        _, _  = client.Do(req)
+				client = &http.Client{}
+	                        req, _ = http.NewRequest("GET","http://"+CTRLIp+"/startbmcconsole", nil)
+	                        _, _  = client.Do(req)
+			}
 		case "startsmbios":
-			// we must forward the request to the relevant test server
-                        client := &http.Client{}
-                        var req *http.Request
-                        req, _ = http.NewRequest("GET","http://"+CTRLIp+"/startsmbios", nil)
-                        _, _  = client.Do(req)
+			if ( cacheIndex != -1 ) {
+				// we must forward the request to the relevant test server
+	                        client := &http.Client{}
+	                        var req *http.Request
+	                        req, _ = http.NewRequest("GET","http://"+CTRLIp+"/startsmbios", nil)
+	                        _, _  = client.Do(req)
+			}
 		case "js":
 			b, _ := ioutil.ReadFile(staticAssetsDir+tail) // just pass the file name
                         w.Write(b)
@@ -386,53 +408,61 @@ func home(w http.ResponseWriter, r *http.Request) {
                         w.Header().Set("Content-Type", "video/mp4")
                         w.Write(b)
 		case "bmcfirmware":
-			// We must forward the request
-			fmt.Printf("Forward bmcfirmware upload\n");
-                        url, _ := url.Parse("http://"+CTRLIp)
-                        proxy := httputil.NewSingleHostReverseProxy(url)
-                        r.URL.Host = "http://"+CTRLIp
-                        r.URL.Path = "/bmcfirmware"
-                        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
-                        proxy.ServeHTTP(w , r)
+			if ( cacheIndex != -1 ) {
+				// We must forward the request
+				fmt.Printf("Forward bmcfirmware upload\n");
+	                        url, _ := url.Parse("http://"+CTRLIp)
+	                        proxy := httputil.NewSingleHostReverseProxy(url)
+	                        r.URL.Host = "http://"+CTRLIp
+	                        r.URL.Path = "/bmcfirmware"
+	                        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
+	                        proxy.ServeHTTP(w , r)
+			}
 		case "biosfirmware":
-			// We must forward the request
-                        fmt.Printf("Forward biosfirmware upload\n");
-                        url, _ := url.Parse("http://"+CTRLIp)
-                        proxy := httputil.NewSingleHostReverseProxy(url)
-                        r.URL.Host = "http://"+CTRLIp
-                        r.URL.Path = "/biosfirmware"
-                        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
-                        proxy.ServeHTTP(w , r)
+			if ( cacheIndex != -1 ) {
+				// We must forward the request
+	                        fmt.Printf("Forward biosfirmware upload\n");
+	                        url, _ := url.Parse("http://"+CTRLIp)
+	                        proxy := httputil.NewSingleHostReverseProxy(url)
+	                        r.URL.Host = "http://"+CTRLIp
+	                        r.URL.Path = "/biosfirmware"
+	                        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
+	                        proxy.ServeHTTP(w , r)
+			}
 		case "buildbiosfirmware":
-			_, tail = ShiftPath( r.URL.Path)
-                        keys := strings.Split(tail,"/")
-			login := keys[2]
-			command := keys[1]
-		        if ( !checkAccess(w, r, login, command)  ) {
-        		        w.Write([]byte("Access denied"))
-	               		 return
-        		}
-			// We have to forward the request to the compile server
-			// which will start the compilation process and return
-			// the code to connect to the ttyd daemon
-			fmt.Printf("Forward biosfirmware upload\n");
-                        url, _ := url.Parse("http://"+compileUri+compileTcpPort)
-                        proxy := httputil.NewSingleHostReverseProxy(url)
-                        r.URL.Host = "http://"+compileUri+compileTcpPort
-			fmt.Printf("Tail %s\n",tail)
-                        r.URL.Path = tail
-                        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
-                        proxy.ServeHTTP(w , r)
+			if ( cacheIndex != -1 ) {
+				_, tail = ShiftPath( r.URL.Path)
+	                        keys := strings.Split(tail,"/")
+				login := keys[2]
+				command := keys[1]
+			        if ( !checkAccess(w, r, login, command)  ) {
+       	 		        w.Write([]byte("Access denied"))
+		               		 return
+       		 		}
+				// We have to forward the request to the compile server
+				// which will start the compilation process and return
+				// the code to connect to the ttyd daemon
+				fmt.Printf("Forward biosfirmware upload\n");
+       		                url, _ := url.Parse("http://"+compileUri+compileTcpPort)
+       		                proxy := httputil.NewSingleHostReverseProxy(url)
+       		                r.URL.Host = "http://"+compileUri+compileTcpPort
+				fmt.Printf("Tail %s\n",tail)
+       		                r.URL.Path = tail
+       		                r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
+       		                proxy.ServeHTTP(w , r)
+			}
 		case "loadbuiltsmbios":
-			// we must tell to the controller node that he needs to download the BIOS
-			// from our user from the compile node and to start the em100
-			_, tail = ShiftPath( r.URL.Path)
-                        keys := strings.Split(tail,"/")
-                        login := keys[2]
-                        client := &http.Client{}
-                        var req *http.Request
-                        req, _ = http.NewRequest("GET","http://"+CTRLIp+"/loadfromcompilesmbios/"+login, nil)
-                        _, _  = client.Do(req)
+			if ( cacheIndex != -1 ) {
+				// we must tell to the controller node that he needs to download the BIOS
+				// from our user from the compile node and to start the em100
+				_, tail = ShiftPath( r.URL.Path)
+       		                keys := strings.Split(tail,"/")
+       		                login := keys[2]
+       		                client := &http.Client{}
+       		                var req *http.Request
+       		                req, _ = http.NewRequest("GET","http://"+CTRLIp+"/loadfromcompilesmbios/"+login, nil)
+       		                _, _  = client.Do(req)
+			}
 		case "":
                         b, _ := ioutil.ReadFile(staticAssetsDir+"/html/homepage.html") // just pass the file name
                         // this is a potential template file we need to replace the http field
