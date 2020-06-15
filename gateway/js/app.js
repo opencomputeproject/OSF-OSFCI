@@ -233,9 +233,8 @@ function run_ci(servername, RemainingSecond) {
 	                                                clearInterval(x);
 	                                                $("#EndSession").css("display","none");
 	                                                $("#modalSession").modal('hide');
-	                                                $('#modalSession').on('hidden.bs.modal', function (e) {
-	                                                        main();
-	                                                });
+							// We can be brutal here as we have timed out
+							main();
 	                                        }
 	                                });
 	                        }
