@@ -33,6 +33,7 @@ var TTYDHostConsole = os.Getenv("TTYD_HOST_CONSOLE_PORT")
 var TTYDem100Bios = os.Getenv("TTYD_EM100_BIOS_PORT")
 var TTYDem100BMC = os.Getenv("TTYD_EM100_BMC_PORT")
 var CTRLIp = os.Getenv("CTRL_IP")
+var CTRLTcpPort = os.Getenv("CTRL_TCPPORT")
 var certStorage = os.Getenv("CERT_STORAGE")
 var ExpectedBMCIp = os.Getenv("EXPECT_BMC_IP")
 var credentialUri = os.Getenv("CREDENTIALS_URI")
@@ -43,6 +44,7 @@ var compileTcpPort = os.Getenv("COMPILE_TCPPORT")
 type serverEntry struct {
         servername string
         ip string
+        tcpPort string
 	compileIp string
         bmcIp string
 	currentOwner string
@@ -318,9 +320,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 		case "console":
 			if ( cacheIndex != -1 ) {
 				fmt.Printf("Console request\n");
-			        url, _ := url.Parse("http://"+ciServers.servers[cacheIndex].ip+TTYDHostConsole)
+			        url, _ := url.Parse("http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+TTYDHostConsole)
 			        proxy := httputil.NewSingleHostReverseProxy(url)
-			        r.URL.Host = "http://"+ciServers.servers[cacheIndex].ip+TTYDHostConsole
+			        r.URL.Host = "http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+TTYDHostConsole
 				filePath :=  strings.Split(tail,"/")
 				r.URL.Path = "/"
 				if ( len(filePath) > 2 ) {
@@ -331,9 +333,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 			}
 		case "smbiosconsole":
 			if ( cacheIndex != -1 ) {
-	                        url, _ := url.Parse("http://"+ciServers.servers[cacheIndex].ip+TTYDem100Bios)
+	                        url, _ := url.Parse("http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+TTYDem100Bios)
 	                        proxy := httputil.NewSingleHostReverseProxy(url)
-	                        r.URL.Host = "http://"+ciServers.servers[cacheIndex].ip+TTYDem100Bios
+	                        r.URL.Host = "http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+TTYDem100Bios
 	                        filePath :=  strings.Split(tail,"/")
 	                        r.URL.Path = "/"
 	                        if ( len(filePath) > 2 ) {
@@ -360,7 +362,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 				fmt.Printf("Poweron request\n");
 				client := &http.Client{}
 	                        var req *http.Request
-	                        req, _ = http.NewRequest("GET","http://"+ciServers.servers[cacheIndex].ip+"/poweron", nil)
+	                        req, _ = http.NewRequest("GET","http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+"/poweron", nil)
 	                        _, _  = client.Do(req)
 			}
 		case "poweroff":
@@ -368,14 +370,14 @@ func home(w http.ResponseWriter, r *http.Request) {
 				fmt.Printf("Poweroff request\n");
 				client := &http.Client{}
 	                        var req *http.Request
-	                        req, _ = http.NewRequest("GET","http://"+ciServers.servers[cacheIndex].ip+"/poweroff", nil)
+	                        req, _ = http.NewRequest("GET","http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+"/poweroff", nil)
 	                        _, _  = client.Do(req)
 			}
 		case "bmcconsole":
 			if ( cacheIndex != -1 ) {
-	                        url, _ := url.Parse("http://"+ciServers.servers[cacheIndex].ip+TTYDem100BMC)
+	                        url, _ := url.Parse("http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+TTYDem100BMC)
 	                        proxy := httputil.NewSingleHostReverseProxy(url)
-	                        r.URL.Host = "http://"+ciServers.servers[cacheIndex].ip+TTYDem100BMC
+	                        r.URL.Host = "http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+TTYDem100BMC
 	                        filePath :=  strings.Split(tail,"/")
 	                        r.URL.Path = "/"
 	                        if ( len(filePath) > 2 ) {
@@ -389,10 +391,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 				// we must forward the request to the relevant test server
 				client := &http.Client{}
 				var req *http.Request
-				req, _ = http.NewRequest("GET","http://"+ciServers.servers[cacheIndex].ip+"/startbmc", nil)
+				req, _ = http.NewRequest("GET","http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+"/startbmc", nil)
 			        _, _  = client.Do(req)
 				client = &http.Client{}
-	                        req, _ = http.NewRequest("GET","http://"+ciServers.servers[cacheIndex].ip+"/startbmcconsole", nil)
+	                        req, _ = http.NewRequest("GET","http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+"/startbmcconsole", nil)
 	                        _, _  = client.Do(req)
 			}
 		case "startsmbios":
@@ -400,7 +402,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 				// we must forward the request to the relevant test server
 	                        client := &http.Client{}
 	                        var req *http.Request
-	                        req, _ = http.NewRequest("GET","http://"+ciServers.servers[cacheIndex].ip+"/startsmbios", nil)
+	                        req, _ = http.NewRequest("GET","http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+"/startsmbios", nil)
 	                        _, _  = client.Do(req)
 			}
 		case "js":
@@ -425,10 +427,12 @@ func home(w http.ResponseWriter, r *http.Request) {
 			if ( cacheIndex != -1 ) {
 				// We must forward the request
 				fmt.Printf("Forward bmcfirmware upload\n");
-	                        url, _ := url.Parse("http://"+ciServers.servers[cacheIndex].ip)
+	                        url, _ := url.Parse("http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort)
 	                        proxy := httputil.NewSingleHostReverseProxy(url)
-	                        r.URL.Host = "http://"+ciServers.servers[cacheIndex].ip
-	                        r.URL.Path = "/bmcfirmware"
+	                        r.URL.Host = "http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort
+				_, tail = ShiftPath( r.URL.Path)
+				path :=  strings.Split(tail,"/")
+	                        r.URL.Path = "/bmcfirmware/"+path[2]
 	                        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 	                        proxy.ServeHTTP(w , r)
 			}
@@ -436,10 +440,12 @@ func home(w http.ResponseWriter, r *http.Request) {
 			if ( cacheIndex != -1 ) {
 				// We must forward the request
 	                        fmt.Printf("Forward biosfirmware upload\n");
-	                        url, _ := url.Parse("http://"+ciServers.servers[cacheIndex].ip)
+	                        url, _ := url.Parse("http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort)
 	                        proxy := httputil.NewSingleHostReverseProxy(url)
-	                        r.URL.Host = "http://"+ciServers.servers[cacheIndex].ip
-	                        r.URL.Path = "/biosfirmware"
+				r.URL.Host = "http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort
+				_, tail = ShiftPath( r.URL.Path)
+                                path :=  strings.Split(tail,"/")
+	                        r.URL.Path = "/biosfirmware/"+path[2]
 	                        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 	                        proxy.ServeHTTP(w , r)
 			}
@@ -474,7 +480,7 @@ func home(w http.ResponseWriter, r *http.Request) {
        		                login := keys[2]
        		                client := &http.Client{}
        		                var req *http.Request
-       		                req, _ = http.NewRequest("GET","http://"+ciServers.servers[cacheIndex].ip+"/loadfromcompilesmbios/"+login, nil)
+       		                req, _ = http.NewRequest("GET","http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+"/loadfromcompilesmbios/"+login, nil)
        		                _, _  = client.Do(req)
 			}
 		case "":
@@ -593,6 +599,7 @@ func main() {
 
     newEntry.servername = "dl360"
     newEntry.ip=CTRLIp
+    newEntry.tcpPort=CTRLTcpPort
     newEntry.compileIp=compileUri
     newEntry.currentOwner=""
     // the server is expired
