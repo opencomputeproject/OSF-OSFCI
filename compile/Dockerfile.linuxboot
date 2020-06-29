@@ -31,7 +31,7 @@ RUN rm -Rf go*
 ENV PATH /usr/local/go/bin:$PATH
 ENV GOPATH=/app
 RUN go get github.com/linuxboot/fiano/pkg/utk
-RUN ls fiano/cmds/utk
+RUN git clone https://github.com/linuxboot/fiano
 RUN go build fiano/cmds/utk/utk.go
 RUN cp utk /usr/bin
 RUN ln -s /usr/bin/python2.7 /usr/bin/python2
