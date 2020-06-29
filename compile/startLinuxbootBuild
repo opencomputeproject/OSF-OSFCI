@@ -12,12 +12,9 @@ fi
 docker run --name linuxboot_$USERNAME -v /tmp/volume/$USERNAME:/volume -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e BOARDS=$BOARDS --rm=true  linuxboot 
 if [ -f /tmp/volume/$USERNAME/linuxboot.bin ]
 then
-cp /tmp/volume/$USERNAME/linuxboot.bin $FIRMWARES_PATH/linuxboot_$USERNAME.bin
-echo "Image successfully generated ..." 
-echo "Injecting the linux kernel to a BIOS image ..." 
-echo "utk default.rom replace_pe32 Shell linuxboot.bin save test.rom" 
 \rm $FIRMWARES_PATH/test_$USERNAME.rom
-$BINARIES_PATH/utk $FIRMWARES_PATH/default.rom replace_pe32 Shell $FIRMWARES_PATH/linuxboot_$USERNAME.bin save $FIRMWARES_PATH/test_$USERNAME.rom
+cp /tmp/volume/$USERNAME/linuxboot.rom $FIRMWARES_PATH/test_$USERNAME.rom
+echo "Image successfully generated ..." 
 echo "shadow test_$USERNAME.rom" 
 $BINARIES_PATH/shadow $FIRMWARES_PATH/test_$USERNAME.rom
 echo "DONE !" > $PIPE_PATH/bios_fifo
