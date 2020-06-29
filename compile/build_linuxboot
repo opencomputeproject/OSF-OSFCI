@@ -12,5 +12,7 @@ go build github.com/u-root/u-root
 export PATH=$PATH:.
 make uroot
 make bzImage
-cp ./linux/arch/x86/boot/bzImage linuxboot.bin
-cp linuxboot.bin /volume
+cp /volume/default.rom ROM.bin
+make kernel
+make image.bin
+cp image.bin /volume/linuxboot.rom
