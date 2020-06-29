@@ -10,8 +10,6 @@ cd $BOARDS
 make fetch
 go build github.com/u-root/u-root
 export PATH=$PATH:.
-make uroot
-make bzImage
 cp /volume/default.rom ROM.bin
 make kernel
 make image.bin
