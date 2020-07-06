@@ -5,7 +5,7 @@ export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/lo
 export GOPATH=:/go/src/base:/home/linuxboot/mainboards/$BOARDS
 git clone $GITHUBREPO
 cd mainboards
-git checkout $BRANCH
+git checkout -b $BRANCH origin/$BRANCH
 cd $BOARDS
 make fetch
 go build github.com/u-root/u-root
