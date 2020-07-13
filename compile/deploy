@@ -1,4 +1,8 @@
 #!/bin/bash
+if [ ! -d $1 ]
+then
+mkdir $1
+fi
 if [ ! -d $1/bin ]
 then
 mkdir $1/bin
