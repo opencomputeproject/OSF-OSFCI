@@ -70,6 +70,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 					githubRepo := keywords[0]
 					githubBranch := keywords[1]
 					board := keywords[2]
+					proxy := os.Getenv("PROXY")
 					// We have to fork the build
 					// The script is startLinuxbootBuild
 					// It is getting 3 parameters
@@ -101,6 +102,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         args = append (args, githubRepo)
                                         args = append (args, githubBranch)
                                         args = append (args, board)
+                                        args = append (args, proxy)
                                         for i := 0 ; i < len(args) ; i++ {
                                                 print(args[i]+"\n")
                                         }
