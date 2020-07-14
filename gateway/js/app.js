@@ -429,7 +429,6 @@ function run_ci(servername, RemainingSecond) {
                               "Content-Type" : "text/plain",
                               "myDate" : authString['formattedDate']
                          },
-                         data: Data,
                          contentType: 'text/plain',
                          success: function(response) {
                                 // The process to build the code is running
