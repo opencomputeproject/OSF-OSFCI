@@ -33,7 +33,7 @@ done
 fi
 #We have to reset the PCI bus
 sudo /home/vejmarie/Web/reset_bus
-em100 -x DP144197 -s
-em100 -x DP144198 -s
+$BINARIES_PATH/em100 -x DP144197 -s
+$BINARIES_PATH/em100 -x DP144198 -s
 touch /tmp/cleanUpDONE
 rm -rf firmwares/*
