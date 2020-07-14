@@ -35,6 +35,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 		case "bmcfirmware":
                         switch r.Method {
                                 case http.MethodPost:
+					_,tail := ShiftPath( r.URL.Path)
+                                        path :=  strings.Split(tail,"/")
+                                        username := path[1]
                                         r.Body = http.MaxBytesReader(w, r.Body, 64<<20+4096)
                                         err := r.ParseMultipartForm(64<<20+4096)
                                         if ( err != nil ) {
@@ -43,7 +46,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         file,handler,_ := r.FormFile("fichier")
 
                                         defer file.Close()
-                                        f, err := os.OpenFile("firmwares/"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+                                        f, err := os.OpenFile(firmwaresPath+"/_"+username+"_"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
                                         if err != nil {
                                                fmt.Println(err)
                                                return
@@ -52,7 +55,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         io.Copy(f, file)
 					// we must forward the request to the relevant test server
 		                        fmt.Printf("Ilo start received\n")
-		                        args := []string { firmwaresPath+"/"+handler.Filename }
+		                        args := []string { firmwaresPath+"/_"+username+"_"+handler.Filename }
 		                        cmd := exec.Command(binariesPath+"/start_bmc", args...)
 		                        cmd.Start()
 		                        done := make(chan error, 1)
@@ -77,6 +80,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 		case "biosfirmware":
 			switch r.Method {
                                 case http.MethodPost:
+					_,tail := ShiftPath( r.URL.Path)
+					path :=  strings.Split(tail,"/")
+					username := path[1]
                                         r.Body = http.MaxBytesReader(w, r.Body, 64<<20+4096)
                                         err := r.ParseMultipartForm(64<<20+4096)
                                         if ( err != nil ) {
@@ -85,7 +91,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         file,handler,_ := r.FormFile("fichier")
 
                                         defer file.Close()
-                                        f, err := os.OpenFile("firmwares/"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+                                        f, err := os.OpenFile(firmwaresPath+"/_"+username+"_"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
                                         if err != nil {
                                                fmt.Println(err)
                                                return
@@ -94,7 +100,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         io.Copy(f, file)
 					// we must forward the request to the relevant test server
 		                        fmt.Printf("System BIOS start received\n")
-		                        args := []string { firmwaresPath+"/"+handler.Filename }
+		                        args := []string { firmwaresPath+"/_"+username+"_"+handler.Filename }
 		                        cmd := exec.Command(binariesPath+"/start_smbios", args...)
 		                        cmd.Start()
 		                        done := make(chan error, 1)
@@ -235,12 +241,12 @@ func main() {
     print("| Development version -       |\n")
     print("=============================== \n")
 
-
+    var ctrlTcpPort = os.Getenv("CTRL_TCPPORT")
     mux := http.NewServeMux()
 
     // Highest priority must be set to the signed request
     mux.HandleFunc("/",home)
 
 
-    log.Fatal(http.ListenAndServe(":80", mux))
+    log.Fatal(http.ListenAndServe(ctrlTcpPort, mux))
 }

@@ -28,6 +28,9 @@ a:link {
   }
 
  img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
     width: 100%;
     max-width: 800px;
     height: auto;
@@ -35,6 +38,7 @@ a:link {
   }
 
 section img{
+    display: inline;
     width: auto;
     height: auto;
   }

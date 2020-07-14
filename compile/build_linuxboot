@@ -3,14 +3,17 @@
 
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin
 export GOPATH=:/go/src/base:/home/linuxboot/mainboards/$BOARDS
+if [ "$PROXY" != "" ]
+then
+git config --global https.proxy $PROXY
+fi
 git clone $GITHUBREPO
 cd mainboards
-git checkout $BRANCH
+git checkout -b $BRANCH origin/$BRANCH
 cd $BOARDS
 make fetch
 go build github.com/u-root/u-root
 export PATH=$PATH:.
-make uroot
-make bzImage
-cp ./linux/arch/x86/boot/bzImage linuxboot.bin
-cp linuxboot.bin /volume
+cp /volume/default.rom ROM.bin
+make image.bin
+cp image.bin /volume/linuxboot.rom

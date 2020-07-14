@@ -1,4 +1,8 @@
 #!/bin/bash
+if [ ! -d $1 ]
+then
+mkdir $1
+fi
 if [ ! -d $1/bin ]
 then
 mkdir $1/bin
@@ -21,6 +25,26 @@ cp startLinuxbootBuildWrapper $1/bin
 chmod -Rf 777 $1/bin
 cp -Rf Docker* $1/docker
 cp build_linuxboot $1/docker
+# We need to take care of potential PROXY and put them into 
+# the Docker files
+if [ "$http_proxy" != "" ]
+then
+cat $1/docker/Dockerfile.linuxboot | sed "s,# let's build,RUN echo \"Acquire::http::proxy \"$http_proxy\";\" > \/etc\/apt\/apt.conf.d\/proxy.conf\nENV http_proxy $http_proxy\n# https\n," > $1/docker/Docker.temp
+cp $1/docker/Docker.temp $1/docker/Dockerfile.linuxboot
+rm $1/docker/Docker.temp
+cat $1/docker/Dockerfile.openbmc | sed "s,# let's build,RUN echo \"Acquire::http::proxy \"$http_proxy\";\" > \/etc\/apt\/apt.conf.d\/proxy.conf\nENV http_proxy $http_proxy\n# https\n," > $1/docker/Docker.temp
+cp $1/docker/Docker.temp $1/docker/Dockerfile.openbmc
+rm $1/docker/Docker.temp
+fi
+if [ "https_proxy" != "" ]
+then
+cat $1/docker/Dockerfile.linuxboot | sed "s,# https,ENV https_proxy $https_proxy\n," > $1/docker/Docker.temp
+cp $1/docker/Docker.temp $1/docker/Dockerfile.linuxboot
+rm $1/docker/Docker.temp
+cat $1/docker/Dockerfile.openbmc | sed "s,# https,ENV https_proxy $https_proxy\n," > $1/docker/Docker.temp
+cp $1/docker/Docker.temp $1/docker/Dockerfile.openbmc
+rm $1/docker/Docker.temp
+fi
 docker image rm linuxboot
 docker build -t linuxboot -f $1/docker/Dockerfile.linuxboot $1/docker/
 basePath=`realpath ..`
