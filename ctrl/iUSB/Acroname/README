@@ -1,0 +1,19 @@
+This directory contains support for Acroname USB HUB 2x4.
+That hub is designed to support 2 host connectivity and 4 end point
+This allow to build up a flip flop between the controller node and
+the test node to share USB storage, or any USB devices we might
+be needing to scale up the CI
+
+Default status is Upstream 0 is connected to ctrl node, while Upstream 1 is connected to test node
+The C++ code is used to switch to Port1 up to the time the server is powered off.
+
+More informations can be obtained on Acroname website: https://www.acroname.com
+
+That code requires to be compiled the Acroname development environement (BrainStem2)
+which requires the acceptance of Acroname licence
+
+g++ switch.cpp -I$(ACROSDK)/lib -L$(ACROSDK)/lib/libBrainStem2.a -ludev -pthread
+./arc Swap_ports.reflex
+
+To Load: ./ReflexLoader -L -i Swap_Ports.map -d 6D91E0FE INTERNAL 0
+To execute it: ./ReflexLoader -E -d 6D91E0FE INTERNAL 0

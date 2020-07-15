@@ -1,0 +1,67 @@
+// This code default back Acroname USB 2x4 module to Upstream Port 0
+// when Upstream port 1 is lost
+// Upstream Port 0 is always turned on as being the master
+// (c) 2020 Hewlett Packard Entreprise LC
+// To compile ./arc Swap_ports.reflex
+// To Load: ./ReflexLoader -L -i Swap_Ports.map -d 6D91E0FE INTERNAL 0
+// To execute: it ./ReflexLoader -E -d 6D91E0FE INTERNAL 0
+// To keep it active at boot time:
+
+#include <aUSBHub2x4.reflex>
+
+// Create a reference to HUB2x4 module.
+aUSBHub2x4 hub;
+#define DELAY 500000
+
+// Create a shared memory location for,
+pad[0:0] char usbmode;
+pad[1:1] char counter;
+
+reflex mapEnable() {
+    hub.usb.setUpstreamMode(0);
+    usbmode = 0;
+}
+
+
+reflex transportDown() {
+    if ( usbmode == 0 ) {
+            usbmode = 1;
+    }
+    else
+    {
+            // In the case of a system boot
+	    // the USB upstream might be temporarly lost due
+	    // to bus reset and training
+	    // we must switch back only during a true power off operation
+	    counter = 0;
+	    hub.timer[0].setMode(timerModeRepeat);
+            hub.timer[0].setExpiration(DELAY);
+    }
+}
+
+reflex transportUp() {
+	// if the transport came back on the same port
+	// then we need to cancel the timer and pursue
+	char currentPort;
+	hub.usb.getUpstreamState(currentPort);
+	if ( currentPort == usbmode ) {
+		hub.timer[0].setExpiration(0);
+		hub.timer[0].setMode(timerModeSingle);
+	}
+}
+
+reflex timer[0].expiration()
+{
+// We time out after 4 seconds. 
+// The idea here is to give enough time to the USB stack from the
+// kexec kernel to get back up. Roughly when we kexec, there is
+// a PCI reset which happening, if the link do not come back up
+// it means the server crashed and we have to give back host connectivity
+// to Port 0. This parameter can be increased or decreased depending
+// on server boot performance
+ 	if ( usbmode == 1 && counter == 8 ) {
+                     hub.usb.setUpstreamMode(0);
+                     usbmode = 0;
+         }
+         counter++;
+}
