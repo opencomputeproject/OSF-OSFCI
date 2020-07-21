@@ -40,6 +40,8 @@ var credentialUri = os.Getenv("CREDENTIALS_URI")
 var credentialPort = os.Getenv("CREDENTIALS_TCPPORT")
 var compileUri = os.Getenv("COMPILE_URI")
 var compileTcpPort = os.Getenv("COMPILE_TCPPORT")
+var StorageURI = os.Getenv("STORAGE_URI")
+var StorageTCPPORT = os.Getenv("STORAGE_TCPPORT")
 
 type serverEntry struct {
         servername string
@@ -297,6 +299,16 @@ func home(w http.ResponseWriter, r *http.Request) {
 				}
 				ciServers.mux.Unlock()
 			}
+		case "getosinstallers":
+			// Must get a directory content from the storage backend
+			// So we forward the request to the storage backend
+			client := &http.Client{}
+			var req *http.Request
+                        req, _ = http.NewRequest("GET","http://"+StorageURI+StorageTCPPORT+"/distros/", nil)
+                        resp, _  := client.Do(req)
+			defer resp.Body.Close()
+			body,_ := ioutil.ReadAll(resp.Body)
+			w.Write([]byte(body));
 		case "bmcup":
 		       bmcIp := ""
 			var Up string

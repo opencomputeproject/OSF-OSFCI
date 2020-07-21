@@ -277,7 +277,32 @@ function run_ci(servername, RemainingSecond) {
         });
 
         loadHTML("html/main.html");
+
         var dropZonebmc = document.getElementById('drop-zone-bmc');
+
+	// We must get the O/S installer list from the server side
+	$.ajax({
+                        type: "GET",
+                        contentType: 'application/json',
+                        url: window.location.origin + '/ci/getosinstallers/',
+                        success: function(response){
+                                console.log("O/S installer list");
+				console.log(response);
+				if ( response != "" ) {
+					// The list is not empty
+					// We must parse the JSON content
+					// the object contain an array of string
+					var obj = JSON.parse(response)
+					console.log(obj.files)
+					if ( obj.files.length > 0 ) {
+						$('#osChoices').append('<div id="innerOSChoice" class="dropdown-menu" aria-labelledby="dropdownMenuButton"></div>');
+						obj.files.forEach(function(value) {
+							$('#innerOSChoice').append('<a class="dropdown-item">'+value+'</a>');
+						});
+					}
+				}
+                        }
+        });
 
 
         var startUploadbmc = function(files) {
