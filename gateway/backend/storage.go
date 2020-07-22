@@ -132,6 +132,9 @@ func distrosCallback(w http.ResponseWriter, r *http.Request) {
 			answer = answer + "] }"
 		}
 		w.Write([]byte(answer))
+	} else {
+		// We must serve the file
+		http.ServeFile(w,r, storageRoot+"/distros/"+path[2])
 	}
 }
 
