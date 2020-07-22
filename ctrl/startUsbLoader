@@ -1,3 +1,7 @@
 #!/bin/bash
-echo "USB Loader"
+filename="${1##*/}"
+echo "Loading $filename"
+echo $DISTROS_PATH
+\rm -rf $DISTROS_PATH/*
+wget -O $1 http://$STORAGE_URI$STORAGE_TCPPORT/distros/$filename
 while true; do sleep 10000; done
