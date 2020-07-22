@@ -32,6 +32,7 @@ var staticAssetsDir = os.Getenv("STATIC_ASSETS_DIR")
 var TTYDHostConsole = os.Getenv("TTYD_HOST_CONSOLE_PORT")
 var TTYDem100Bios = os.Getenv("TTYD_EM100_BIOS_PORT")
 var TTYDem100BMC = os.Getenv("TTYD_EM100_BMC_PORT")
+var TTYDOSLoader = os.Getenv("TTYD_OS_LOADER")
 var CTRLIp = os.Getenv("CTRL_IP")
 var CTRLTcpPort = os.Getenv("CTRL_TCPPORT")
 var certStorage = os.Getenv("CERT_STORAGE")
@@ -300,15 +301,32 @@ func home(w http.ResponseWriter, r *http.Request) {
 				ciServers.mux.Unlock()
 			}
 		case "getosinstallers":
-			// Must get a directory content from the storage backend
-			// So we forward the request to the storage backend
-			client := &http.Client{}
-			var req *http.Request
-                        req, _ = http.NewRequest("GET","http://"+StorageURI+StorageTCPPORT+"/distros/", nil)
-                        resp, _  := client.Do(req)
-			defer resp.Body.Close()
-			body,_ := ioutil.ReadAll(resp.Body)
-			w.Write([]byte(body));
+			// Must get a directory content from the storage backend if there is no further option
+			// if their is an option (aka a file name), it means that we have to inform the
+			// current user controller to load that file
+			// and startup the associated ttyd
+			path := strings.Split( r.URL.Path, "/" )
+			if ( len(path) < 3 ) {
+		                http.Error(w, "401 Malformed URI", 401)
+        		}
+		        if ( len(path) == 4 && path[3] == "" ) {
+				// So we forward the request to the storage backend
+				client := &http.Client{}
+				var req *http.Request
+	                        req, _ = http.NewRequest("GET","http://"+StorageURI+StorageTCPPORT+"/distros/", nil)
+	                        resp, _  := client.Do(req)
+				defer resp.Body.Close()
+				body,_ := ioutil.ReadAll(resp.Body)
+				w.Write([]byte(body));
+			} else {
+				// we got a file name we have to forward the request to the controller node
+				// we must  request to the relevant test server
+                                client := &http.Client{}
+                                var req *http.Request
+
+                                req, _ = http.NewRequest("GET","http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+"/getosinstallers/"+path[3], nil)
+                                _, _  = client.Do(req)
+			}
 		case "bmcup":
 		       bmcIp := ""
 			var Up string
@@ -369,6 +387,19 @@ func home(w http.ResponseWriter, r *http.Request) {
 	                        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 	                        proxy.ServeHTTP(w , r)
 			}
+		case "osloaderconsole":
+                        if ( cacheIndex != -1 ) {
+                                url, _ := url.Parse("http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+TTYDOSLoader)
+                                proxy := httputil.NewSingleHostReverseProxy(url)
+                                r.URL.Host = "http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+TTYDOSLoader
+                                filePath :=  strings.Split(tail,"/")
+                                r.URL.Path = "/"
+                                if ( len(filePath) > 2 ) {
+                                        r.URL.Path = r.URL.Path + filePath[2]
+                                }
+                                r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
+                                proxy.ServeHTTP(w , r)
+                        }
 		case "poweron":
 			if ( cacheIndex != -1 ) {
 				fmt.Printf("Poweron request\n");
