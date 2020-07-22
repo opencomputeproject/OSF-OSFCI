@@ -12,10 +12,12 @@ import (
 	"os"
 	"io"
 	"base"
+	"golang.org/x/sys/unix"
 )
 
 var binariesPath = os.Getenv("BINARIES_PATH")
 var firmwaresPath = os.Getenv("FIRMWARES_PATH")
+var distrosPath = os.Getenv("DISTROS_PATH")
 var compileUri = os.Getenv("COMPILE_URI")
 var compileTcpPort = os.Getenv("COMPILE_TCPPORT")
 
@@ -32,6 +34,26 @@ func ShiftPath(p string) (head, tail string) {
 func home(w http.ResponseWriter, r *http.Request) {
 	head,_ := ShiftPath( r.URL.Path)
 	switch ( head ) {
+		case "getosinstallers":
+			_,tail := ShiftPath( r.URL.Path)
+			file :=  strings.Split(tail,"/")
+			// file[1] does contain the name of the server which is needed
+			// The file is seating into the storage server ... We have to transfer it
+			// into a local storage (ideally a RAMFS to avoid potential storage impact
+			// and accelerating transfer)
+			// but all of this is performed within an external script as it needs to
+			// be piped to a ttyd as to provide end user feedback
+			fmt.Printf("Usb load received\n")
+                        args := []string { distrosPath+"/"+file[1] }
+                        cmd := exec.Command(binariesPath+"/load_usb", args...)
+			cmd.SysProcAttr = &unix.SysProcAttr{
+                                                Setsid: true,
+                        }
+                        cmd.Start()
+                        done := make(chan error, 1)
+                        go func() {
+				done <- cmd.Wait()
+			}()
 		case "bmcfirmware":
                         switch r.Method {
                                 case http.MethodPost:

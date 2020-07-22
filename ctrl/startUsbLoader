@@ -1,0 +1,3 @@
+#!/bin/bash
+echo "USB Loader"
+while true; do sleep 10000; done

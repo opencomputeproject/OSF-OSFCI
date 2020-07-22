@@ -277,8 +277,52 @@ function run_ci(servername, RemainingSecond) {
         });
 
         loadHTML("html/main.html");
+
         var dropZonebmc = document.getElementById('drop-zone-bmc');
 
+	// We must get the O/S installer list from the server side
+	$.ajax({
+                        type: "GET",
+                        contentType: 'application/json',
+                        url: window.location.origin + '/ci/getosinstallers/',
+                        success: function(response){
+				if ( response != "" ) {
+					console.log(response);
+					// The list is not empty
+					// We must parse the JSON content
+					// the object contain an array of string
+					var obj = JSON.parse(response)
+					if ( obj.files.length > 0 ) {
+						$('#osChoices').append('<div id="innerOSChoice" class="dropdown-menu" aria-labelledby="dropdownMenuButton"></div>');
+						obj.files.forEach(function(value) {
+							var singleWord;
+							var tag;
+							singleWord = value.split(".");
+							tag = singleWord[0];
+							if ( singleWord.len > 2 ) {
+								for ( i = 1 ; i < (singleWord.length - 1 ) ; i++ ) {
+									tag = tag + '_' + singleWord[i];
+								}
+							}
+							$('#innerOSChoice').append('<a class="dropdown-item" id='+tag+'>'+value+'</a>');
+							$('#'+tag).click(function(event){
+								// we can push for a system uploading request
+								console.log(value);
+								$.ajax({
+									type: "GET",
+						                        contentType: 'application/json',
+						                        url: window.location.origin + '/ci/getosinstallers/'+value,
+						                        success: function(response){
+										    // The console shall be up now
+						                                    $('#osloader').attr("src", window.location+"/osloaderconsole");
+										}
+									});
+							})
+						});
+					}
+				}
+                        }
+        });
 
         var startUploadbmc = function(files) {
                 var formData = new FormData();

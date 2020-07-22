@@ -108,6 +108,33 @@ func deleteEntry(username string, content string) (int) {
 	return 1
 }
 
+func distrosCallback(w http.ResponseWriter, r *http.Request) {
+	// We must breakdown the words, because directory filename is the last word
+	path := strings.Split( r.URL.Path, "/" )
+	if ( len(path) < 3 ) {
+                http.Error(w, "401 Malformed URI", 401)
+	}
+	if ( path[2] == "" ) {
+		// We must provide the directory content from distros
+		files,_ := ioutil.ReadDir(storageRoot+"/distros")
+		var answer string
+		var count int
+		if len(files) > 0 {
+			answer = "{ \"files\": ["
+			count = 0
+			for _, file := range files {
+			    if count == 1 {
+				answer = answer + ","
+			    }
+		            answer = answer + "\"" + file.Name() + "\""
+			    count = 1
+                	}
+			answer = answer + "] }"
+		}
+		w.Write([]byte(answer))
+	}
+}
+
 func userCallback(w http.ResponseWriter, r *http.Request) {
         var username string
 	var filecontent string
@@ -164,6 +191,7 @@ func main() {
     var StorageTCPPORT = os.Getenv("STORAGE_TCPPORT")
 
     mux.HandleFunc("/user/", userCallback)
+    mux.HandleFunc("/distros/", distrosCallback)
 
     log.Fatal(http.ListenAndServe(StorageURI+StorageTCPPORT, mux))
 }

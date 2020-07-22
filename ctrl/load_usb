@@ -1,0 +1,3 @@
+#!/bin/bash
+# we must run the application into a screen
+$BINARIES_PATH/ttyd -p 7684 screen -d -m -t usb $BINARIES_PATH/startLoadUsb "$@"
