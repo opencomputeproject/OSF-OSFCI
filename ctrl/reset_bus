@@ -1,5 +1,37 @@
 #!/bin/bash
 IFS=$'\n'
+usbtree=( $($BINARIES_PATH/uhubctl) )
+current_hub=""
+em100_counter=0
+for i in ${usbtree[@]}
+do
+        test_value=`echo $i | grep "Current status"`
+        if [ "$test_value" == "" ]
+        then
+                is_em100=`echo $i | grep "04b4:1235"`
+                if [ "$is_em100" != "" ]
+                then
+                        port=`echo $i | awk '{ print $2 }' | sed 's/://'`
+                        echo "em100 found on $current_hub port $port"
+                        current_em100[$em100_counter]="-l $current_hub -p $port"
+em100_counter=$((em100_counter + 1))
+                fi
+        else
+                current_hub=`echo $i | awk '{ print $5 }'`
+                echo $current_hub
+        fi
+done
+unset IFS
+if [ "$em100_counter" != "0" ]
+then
+        $BINARIES_PATH/uhubctl ${current_em100[0]} -a off
+        $BINARIES_PATH/uhubctl ${current_em100[1]} -a off
+        sleep 5
+        $BINARIES_PATH/uhubctl ${current_em100[0]} -a on
+        $BINARIES_PATH/uhubctl ${current_em100[1]} -a on
+exit 0
+fi
+IFS=$'\n'
 device_list=( $(lsusb -d $EM100_DEVID) )
 counter=0
 for i in ${device_list[@]}
