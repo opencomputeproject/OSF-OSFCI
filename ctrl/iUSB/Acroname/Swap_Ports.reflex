@@ -52,14 +52,14 @@ reflex transportUp() {
 
 reflex timer[0].expiration()
 {
-// We time out after 4 seconds. 
+// We time out after 16 seconds. 
 // The idea here is to give enough time to the USB stack from the
 // kexec kernel to get back up. Roughly when we kexec, there is
 // a PCI reset which happening, if the link do not come back up
 // it means the server crashed and we have to give back host connectivity
 // to Port 0. This parameter can be increased or decreased depending
 // on server boot performance
- 	if ( usbmode == 1 && counter == 8 ) {
+ 	if ( usbmode == 1 && counter == 32 ) {
                      hub.usb.setUpstreamMode(0);
                      usbmode = 0;
          }
