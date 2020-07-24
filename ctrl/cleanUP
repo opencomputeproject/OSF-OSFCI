@@ -32,8 +32,8 @@ do
 done
 fi
 #We have to reset the PCI bus
-sudo /home/vejmarie/Web/reset_bus
-$BINARIES_PATH/em100 -x DP144197 -s
-$BINARIES_PATH/em100 -x DP144198 -s
+sudo $BINARIES_PATH/reset_bus
+$BINARIES_PATH/em100 -x $EM100BMC -s
+$BINARIES_PATH/em100 -x $EM100BIOS -s
 touch /tmp/cleanUpDONE
 rm -rf firmwares/*

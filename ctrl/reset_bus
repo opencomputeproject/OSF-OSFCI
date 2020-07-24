@@ -1,3 +1,26 @@
-echo -n "0000:00:14.0" | tee /sys/bus/pci/drivers/xhci_hcd/unbind
-sleep 3
-echo -n "0000:00:14.0" | tee /sys/bus/pci/drivers/xhci_hcd/bind
+#!/bin/bash
+IFS=$'\n'
+device_list=( $(lsusb -d $EM100_DEVID) )
+counter=0
+for i in ${device_list[@]}
+do
+	bus=`echo $i | awk '{print $2}' | bc`
+	fullname=usb$bus
+	current_bus[$counter]=`find /sys/devices/pci0000:00 -name $fullname`
+counter=$((counter + 1))
+done
+unset IFS
+if [ ${current_bus[0]} == ${current_bus[1]} ]
+then
+	bus=`echo ${current_bus[0]} | awk -F'/' '{print $5}'`
+	wakeupPath=`realpath ${current_bus[0]}/../driver/`
+	echo -n $bus | tee ${current_bus[0]}/../driver/unbind
+	sleep 5
+	echo -n $bus | tee $wakeupPath/bind
+	exit 0
+fi
+bus=`echo ${current_bus[1]} | awk -F'/' '{print $5}'`
+echo -n $bus | tee ${current_bus[1]}/../driver/unbind
+sleep 5
+echo -n $bus | tee ${current_bus[1]}/../driver/bind
+exit 0
