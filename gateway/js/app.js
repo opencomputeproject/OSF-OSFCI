@@ -76,6 +76,7 @@ function homebutton(){
                 });
         });
 	$('#btnpoweroff').on('click', function () {
+		BMCUP=0;		
                 $('#bmcbutton').css("display","none");
 		$('#bmcem100console').contents().find("head").remove();
                 $('#bmcem100console').contents().find("body").remove();
@@ -86,7 +87,6 @@ function homebutton(){
 		$('#bmcconsole').contents().find("head").remove();
                 $('#bmcconsole').contents().find("body").remove();
                 $('#bmcconsole').removeAttr("src");
-		BMCUP=0;		
                 $.ajax({
                         type: "GET",
                         contentType: 'application/json',
