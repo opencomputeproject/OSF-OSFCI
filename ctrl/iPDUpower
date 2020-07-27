@@ -6,8 +6,3 @@ then
 # We switch the Acroname to the host
 $BINARIES_PATH/switch
 fi
-if [ "$1" == "off" ]
-then
-echo "Running cleanup" >/tmp/cleanup
-$BINARIES_PATH/cleanUP
-fi
