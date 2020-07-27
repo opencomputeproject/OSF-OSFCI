@@ -196,6 +196,10 @@ func home(w http.ResponseWriter, r *http.Request) {
        		                                ciServers.servers[i].currentOwner = ""
 						// We have to reset the associated compile node and associated ctrl node
 						client := &http.Client{}
+                                                var req *http.Request
+                                                req, _ = http.NewRequest("GET","http://"+ciServers.servers[i].ip+ciServers.servers[i].tcpPort+"/poweroff", nil)
+                                                _, _  = client.Do(req)
+						client = &http.Client{}
 		                                var req *http.Request
 		                                req, _ = http.NewRequest("GET","http://"+ciServers.servers[i].compileIp+"/cleanUp", nil)
                			                 _, _  = client.Do(req)
