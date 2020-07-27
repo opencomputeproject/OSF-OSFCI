@@ -76,6 +76,7 @@ function homebutton(){
                 });
         });
 	$('#btnpoweroff').on('click', function () {
+                $('#bmcbutton').css("display","none");
 		$('#bmcem100console').contents().find("head").remove();
                 $('#bmcem100console').contents().find("body").remove();
 		$('#bmcem100console').removeAttr("src");
