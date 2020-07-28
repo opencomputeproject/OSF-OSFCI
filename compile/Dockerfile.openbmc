@@ -26,7 +26,6 @@ RUN ln -s /usr/bin/python2.7 /usr/bin/python2
 RUN useradd -ms /bin/bash openbmc
 USER openbmc
 WORKDIR /home/openbmc
-RUN useradd -ms /bin/bash linuxboot
 RUN cp /app/build_openbmc /home/openbmc/
 RUN chmod -Rf 777 /home/openbmc/build_openbmc
 
