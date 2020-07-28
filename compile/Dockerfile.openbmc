@@ -20,7 +20,7 @@ ENV LC_ALL en_US.UTF-8
 RUN apt install -y apt-utils
 RUN apt-get update && apt-get install --no-install-recommends -y ca-certificates && rm -rf /var/lib/apt/lists/*
 RUN cat /etc/apt/sources.list
-RUN DEBIAN_FRONTEND=noninteractive apt-get update && DEBIAN_FRONTEND=noninteractive  apt install -qq -y build-essential libssl-dev libcurl4-gnutls-dev libexpat1-dev gettext unzip wget snapd squashfuse fuse snap-confine sudo python2.7-dev chrpath cpio diffstat gawk texinfo python3.8 python3.8-venv python3.8-distutils python3.8-dev python3.8-gdbm python3.8-tk python3.8-lib2to3 idle-python3.8
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && DEBIAN_FRONTEND=noninteractive  apt install -qq -y build-essential libssl-dev libcurl4-gnutls-dev libexpat1-dev gettext unzip wget snapd squashfuse fuse snap-confine sudo python2.7-dev chrpath cpio diffstat gawk texinfo python3.8 python3.8-venv python3.8-distutils python3.8-dev python3.8-gdbm python3.8-tk python3.8-lib2to3 idle-python3.8 vim
 RUN apt-get -y install git
 RUN ln -s /usr/bin/python2.7 /usr/bin/python2
 RUN useradd -ms /bin/bash openbmc
