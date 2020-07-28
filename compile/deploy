@@ -47,6 +47,8 @@ rm $1/docker/Docker.temp
 fi
 docker image rm linuxboot
 docker build -t linuxboot -f $1/docker/Dockerfile.linuxboot $1/docker/
+docker image rm openbmc
+docker build -t openbmc -f $1/docker/Dockerfile.openbmc $1/docker/
 basePath=`realpath ..`
 export GOPATH=$GOPATH:$basePath
 go get golang.org/x/crypto/bcrypt
