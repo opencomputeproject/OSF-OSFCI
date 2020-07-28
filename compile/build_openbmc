@@ -1,0 +1,14 @@
+#!/bin/bash
+# This script is executed within a Docker container
+
+export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+if [ "$PROXY" != "" ]
+then
+git config --global https.proxy $PROXY
+fi
+git clone $GITHUBREPO
+cd openbmc
+git checkout -b $BRANCH origin/$BRANCH
+. ./setup $RECIPES
+bitbake obmc-phosphor-image
+cp tmp/deploy/images/dl360poc/obmc-phosphor-image-dl360poc-*.static.mtd /volume/obmc-dl360poc.static.mtd
