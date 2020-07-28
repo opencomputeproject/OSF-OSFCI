@@ -25,6 +25,7 @@ cp startLinuxbootBuildWrapper $1/bin
 chmod -Rf 777 $1/bin
 cp -Rf Docker* $1/docker
 cp build_linuxboot $1/docker
+cp build_openbmc $1/docker
 # We need to take care of potential PROXY and put them into 
 # the Docker files
 if [ "$http_proxy" != "" ]
