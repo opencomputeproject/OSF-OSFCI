@@ -390,6 +390,19 @@ func home(w http.ResponseWriter, r *http.Request) {
 	                        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 	                        proxy.ServeHTTP(w , r)
 			}
+                case "bmcbuildconsole":
+                        if ( cacheIndex != -1 ) {
+                                url, _ := url.Parse("http://"+ciServers.servers[cacheIndex].compileIp+":7682")
+                                proxy := httputil.NewSingleHostReverseProxy(url)
+                                r.URL.Host = "http://"+ciServers.servers[cacheIndex].compileIp+TTYDem100BMC
+                                filePath :=  strings.Split(tail,"/")
+                                r.URL.Path = "/"
+                                if ( len(filePath) > 2 ) {
+                                        r.URL.Path = r.URL.Path + filePath[2]
+                                }
+                                r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
+                                proxy.ServeHTTP(w , r)
+                        }
 		case "osloaderconsole":
                         if ( cacheIndex != -1 ) {
                                 url, _ := url.Parse("http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+TTYDOSLoader)
@@ -508,7 +521,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 				// We have to forward the request to the compile server
 				// which will start the compilation process and return
 				// the code to connect to the ttyd daemon
-				fmt.Printf("Forward biosfirmware upload\n");
+				fmt.Printf("Forward biosfirmware build\n");
        		                url, _ := url.Parse("http://"+ciServers.servers[cacheIndex].compileIp+compileTcpPort)
        		                proxy := httputil.NewSingleHostReverseProxy(url)
        		                r.URL.Host = "http://"+ciServers.servers[cacheIndex].compileIp+compileTcpPort
@@ -517,6 +530,28 @@ func home(w http.ResponseWriter, r *http.Request) {
        		                r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
        		                proxy.ServeHTTP(w , r)
 			}
+		case "buildbmcfirmware":
+                        if ( cacheIndex != -1 ) {
+                                _, tail = ShiftPath( r.URL.Path)
+                                keys := strings.Split(tail,"/")
+                                login := keys[2]
+                                command := keys[1]
+                                if ( !checkAccess(w, r, login, command)  ) {
+                                w.Write([]byte("Access denied"))
+                                         return
+                                }
+                                // We have to forward the request to the compile server
+                                // which will start the compilation process and return
+                                // the code to connect to the ttyd daemon
+                                fmt.Printf("Forward bmcfirmware build\n");
+                                url, _ := url.Parse("http://"+ciServers.servers[cacheIndex].compileIp+compileTcpPort)
+                                proxy := httputil.NewSingleHostReverseProxy(url)
+                                r.URL.Host = "http://"+ciServers.servers[cacheIndex].compileIp+compileTcpPort
+                                fmt.Printf("Tail %s\n",tail)
+                                r.URL.Path = tail
+                                r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
+                                proxy.ServeHTTP(w , r)
+                        }
 		case "loadbuiltsmbios":
 			if ( cacheIndex != -1 ) {
 				// we must tell to the controller node that he needs to download the BIOS
