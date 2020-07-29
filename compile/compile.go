@@ -13,9 +13,11 @@ import (
 
 var compileTcpPort = os.Getenv("COMPILE_TCPPORT")
 var startLinuxbootBuildBin = os.Getenv("LINUXBOOT_BUILD")
+var startOpenBMCBuildBin = os.Getenv("OPENBMC_BUILD")
 var binariesPath = os.Getenv("BINARIES_PATH")
 var firmwaresPath = os.Getenv("FIRMWARES_PATH")
-var ttydCommand *exec.Cmd = nil
+var ttydCommandlinuxboot *exec.Cmd = nil
+var ttydCommandopenbmc *exec.Cmd = nil
 var dockerCommand *exec.Cmd = nil
 
 // to check if a docker container is running
@@ -35,8 +37,11 @@ func home(w http.ResponseWriter, r *http.Request) {
 	head,tail := ShiftPath( r.URL.Path)
 	switch ( head ) {
 		case "cleanUp":
-			if ( ttydCommand != nil ) {
-                                unix.Kill(ttydCommand.Process.Pid, unix.SIGINT)
+			if ( ttydCommandlinuxboot != nil ) {
+                                unix.Kill(ttydCommandlinuxboot.Process.Pid, unix.SIGINT)
+                        }
+			if ( ttydCommandopenbmc != nil ) {
+                                unix.Kill(ttydCommandopenbmc.Process.Pid, unix.SIGINT)
                         }
                         if ( dockerCommand != nil ) {
                                 unix.Kill(-dockerCommand.Process.Pid, unix.SIGKILL)
@@ -45,8 +50,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 		case "getFirmware":
 			login := tail[1:]
 			// We must retreive the username BIOS and return it as the response body
-			if ( ttydCommand != nil ) {
-				unix.Kill(ttydCommand.Process.Pid, unix.SIGINT)
+			if ( ttydCommandlinuxboot != nil ) {
+				unix.Kill(ttydCommandlinuxboot.Process.Pid, unix.SIGINT)
                         }
                         if ( dockerCommand != nil ) {
 				unix.Kill(-dockerCommand.Process.Pid, unix.SIGKILL)
@@ -57,9 +62,42 @@ func home(w http.ResponseWriter, r *http.Request) {
 			firmware := make([]byte,64*1024*1024)
                         _,_=f.Read(firmware)
 			w.Write(firmware)
-		case "buildilofirmware":
+		case "buildbmcfirmware":
                         switch r.Method {
                                 case http.MethodPut:
+					username := tail[1:]
+                                        data := base.HTTPGetBody(r)
+                                        keywords := strings.Fields(string(data))
+                                        githubRepo := keywords[0]
+                                        githubBranch := keywords[1]
+                                        recipes := keywords[2]
+                                        proxy := os.Getenv("PROXY")
+                                        // We have to fork the build
+                                        // The script is startLinuxbootBuild
+                                        // It is getting 3 parameters
+                                        // 1 - Username
+                                        // 2 - Github repo address
+                                        // 3 - Branch
+                                        // 4 - Boards (which is a directory contained into the github repo)
+                                        // The github repo must have a format which is
+                                        // Second parameter shall be a string array
+
+                                        var args []string
+					args = append (args, username)
+                                        args = append (args, githubRepo)
+                                        args = append (args, githubBranch)
+                                        args = append (args, recipes)
+                                        args = append (args, proxy)
+                                        ttydCommandopenbmc = exec.Command(binariesPath + startOpenBMCBuildBin, args...)
+                                        ttydCommandopenbmc.SysProcAttr = &unix.SysProcAttr{
+                                                Setsid: true,
+                                        }
+                                        ttydCommandopenbmc.Start()
+                                        go func() {
+                                                ttydCommandopenbmc.Wait()
+                                                // This command is respinning itself
+                                        }()
+
 				}
 		case "buildbiosfirmware":
 			switch r.Method {
@@ -87,13 +125,13 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         argsTtyd = append (argsTtyd,"-s")
                                         argsTtyd = append (argsTtyd,"9")
                                         argsTtyd = append (argsTtyd,binariesPath+"/readBiosFifo")
-                                        ttydCommand = exec.Command(binariesPath + "/ttyd", argsTtyd...)
-					ttydCommand.SysProcAttr = &unix.SysProcAttr{
+                                        ttydCommandlinuxboot = exec.Command(binariesPath + "/ttyd", argsTtyd...)
+					ttydCommandlinuxboot.SysProcAttr = &unix.SysProcAttr{
                                                 Setsid: true,
                                         }
-                                        ttydCommand.Start()
+                                        ttydCommandlinuxboot.Start()
                                         go func() {
-						ttydCommand.Wait()
+						ttydCommandlinuxboot.Wait()
 						// This command is respinning itself
 					}()
 
