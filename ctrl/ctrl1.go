@@ -176,7 +176,37 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         } else {
                                                 conn.Close()
                                         }
-
+		case "loadfromcompilebmc":
+                        // We must get the username from the request
+                        _, tail := ShiftPath( r.URL.Path)
+                        login := tail[1:]
+                        // We have to retreive the BIOS from the compile server
+                        myfirmware := base.HTTPGetRequest("http://"+compileUri + compileTcpPort + "/getBMCFirmware/"+login)
+                        // f, err := os.Create("firmwares/openbmc_"+login+".rom", os.O_WRONLY|os.O_CREATE, 0666)
+                        f, err := os.Create(firmwaresPath+"/openbmc_"+login+".rom")
+                        defer f.Close()
+                        f.Write([]byte(myfirmware))
+                        fmt.Printf("BMC start received\n")
+                        args := []string { firmwaresPath+"/openbmc_"+login+".rom" }
+                        cmd := exec.Command(binariesPath+"/start_bmc", args...)
+                        cmd.Start()
+                        done := make(chan error, 1)
+                        go func() {
+                               done <- cmd.Wait()
+                        }()
+                        conn, err := net.DialTimeout("tcp", "localhost:7681", 220*time.Millisecond)
+                        max_loop := 5
+                        for ( err != nil && max_loop > 0 ) {
+                                             conn, err = net.DialTimeout("tcp", "localhost:7681", 220*time.Millisecond)
+                        }
+                        if ( err != nil ) {
+                                // Daemon has not started
+                                // Let's report an error
+                               w.Write([]byte("Error"))
+                                return
+                        } else {
+                              conn.Close()
+                        }	
 		case "startbmc":
 			fmt.Printf("BMC start received\n")
 			args := []string { firmwaresPath+"/ilo_dl360_OpenBMC.rom" }
