@@ -11,5 +11,6 @@ cd openbmc
 git checkout -b $BRANCH origin/$BRANCH
 export SSTATE_DIR=/datas/SSTATE
 . ./setup $RECIPES
+echo "SSTATE_DIR ?= \"/datas/SSTATE\"" >> conf/local.conf
 bitbake obmc-phosphor-image
 cp tmp/deploy/images/dl360poc/obmc-phosphor-image-dl360poc-*.static.mtd /volume/obmc-dl360poc.static.mtd
