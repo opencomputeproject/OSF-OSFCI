@@ -22,6 +22,8 @@ mkdir $1/images
 fi
 cp startLinuxbootBuild $1/bin
 cp startLinuxbootBuildWrapper $1/bin
+cp startOpenBMCBuild $1/bin
+cp startOpenBMCBuildWrapper $1/bin
 chmod -Rf 777 $1/bin
 cp -Rf Docker* $1/docker
 cp build_linuxboot $1/docker
