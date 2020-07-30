@@ -1,6 +1,2 @@
 #!/bin/bash
 $BINARIES_PATH/ttyd -p 7682 -s 9 screen $BINARIES_PATH/startOpenBMCBuild "$@"
-while true
-do
-sleep 1000
-done

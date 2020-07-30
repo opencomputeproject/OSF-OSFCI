@@ -62,6 +62,17 @@ func home(w http.ResponseWriter, r *http.Request) {
 			firmware := make([]byte,64*1024*1024)
                         _,_=f.Read(firmware)
 			w.Write(firmware)
+		case "getBMCFirmware":
+                      login := tail[1:]
+                        // We must retreive the username BIOS and return it as the response body
+                        if ( ttydCommandlinuxboot != nil ) {
+                                unix.Kill(ttydCommandopenbmc.Process.Pid, unix.SIGINT)
+                        }
+                        f, _ := os.Open(firmwaresPath+"/test_openbmc_"+login+".mtd")
+                        defer f.Close()
+                        firmware := make([]byte,32*1024*1024)
+                        _,_=f.Read(firmware)
+                        w.Write(firmware)
 		case "buildbmcfirmware":
                         switch r.Method {
                                 case http.MethodPut:
