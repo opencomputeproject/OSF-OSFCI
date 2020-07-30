@@ -88,7 +88,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         args = append (args, githubBranch)
                                         args = append (args, recipes)
                                         args = append (args, proxy)
-                                        ttydCommandopenbmc = exec.Command(binariesPath + startOpenBMCBuildBin, args...)
+                                        ttydCommandopenbmc = exec.Command(startOpenBMCBuildBin, args...)
                                         ttydCommandopenbmc.SysProcAttr = &unix.SysProcAttr{
                                                 Setsid: true,
                                         }
