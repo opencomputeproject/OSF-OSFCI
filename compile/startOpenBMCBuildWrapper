@@ -1,2 +1,14 @@
 #!/bin/bash
-$BINARIES_PATH/ttyd -p 7682 -s 9 screen $BINARIES_PATH/startOpenBMCBuild "$@"
+function exitWrapper()
+{
+	kill -SIGINT $ttydPID
+	screen -ls | grep pts | cut -d. -f1 | awk '{print $1}' | xargs kill
+	exit 0
+}
+trap exitWrapper SIGINT
+$BINARIES_PATH/ttyd -p 7682 -s 9 screen $BINARIES_PATH/startOpenBMCBuild "$@"  &
+ttydPID=$!
+while true
+do
+	sleep 1
+done

@@ -65,7 +65,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		case "getBMCFirmware":
                       login := tail[1:]
                         // We must retreive the username BIOS and return it as the response body
-                        if ( ttydCommandlinuxboot != nil ) {
+                        if ( ttydCommandopenbmc != nil ) {
                                 unix.Kill(ttydCommandopenbmc.Process.Pid, unix.SIGINT)
                         }
                         f, _ := os.Open(firmwaresPath+"/test_openbmc_"+login+".mtd")
