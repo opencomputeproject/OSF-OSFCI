@@ -76,6 +76,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 		case "buildbmcfirmware":
                         switch r.Method {
                                 case http.MethodPut:
+				        if ( ttydCommandopenbmc != nil ) {
+                        		        unix.Kill(ttydCommandopenbmc.Process.Pid, unix.SIGINT)
+                        		}
 					username := tail[1:]
                                         data := base.HTTPGetBody(r)
                                         keywords := strings.Fields(string(data))
@@ -113,6 +116,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 		case "buildbiosfirmware":
 			switch r.Method {
                                 case http.MethodPut:
+					if ( ttydCommandlinuxboot != nil ) {
+                        		        unix.Kill(ttydCommandlinuxboot.Process.Pid, unix.SIGINT)
+                        		}
 					username := tail[1:]
 					data := base.HTTPGetBody(r)
 					keywords := strings.Fields(string(data))
