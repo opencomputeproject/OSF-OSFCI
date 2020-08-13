@@ -81,7 +81,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                 case http.MethodPut:
 				        if ( ttydCommandopenbmc != nil ) {
                         		        unix.Kill(ttydCommandopenbmc.Process.Pid, unix.SIGINT)
-						done := <- OpenBMCBuildChannel
+						_ = <- OpenBMCBuildChannel
                         		}
 					username := tail[1:]
                                         data := base.HTTPGetBody(r)
