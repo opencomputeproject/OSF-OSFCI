@@ -1,6 +1,8 @@
 #!/bin/bash
+export USER=$1
 function exitWrapper()
 {
+	docker container kill openbmc_$USER
 	kill -SIGINT $ttydPID
 	screen -ls | grep pts | cut -d. -f1 | awk '{print $1}' | xargs kill
 	exit 0

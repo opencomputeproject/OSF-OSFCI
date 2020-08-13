@@ -21,6 +21,7 @@ var firmwaresPath = os.Getenv("FIRMWARES_PATH")
 var ttydCommandlinuxboot *exec.Cmd = nil
 var ttydCommandopenbmc *exec.Cmd = nil
 var dockerCommand *exec.Cmd = nil
+var OpenBMCBuildChannel chan string
 
 // to check if a docker container is running
 // docker inspect -f '{{.State.Running}}' linuxboot_vejmarie2
@@ -80,6 +81,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                 case http.MethodPut:
 				        if ( ttydCommandopenbmc != nil ) {
                         		        unix.Kill(ttydCommandopenbmc.Process.Pid, unix.SIGINT)
+						done := <- OpenBMCBuildChannel
                         		}
 					username := tail[1:]
                                         data := base.HTTPGetBody(r)
@@ -111,7 +113,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         ttydCommandopenbmc.Start()
                                         go func() {
                                                 ttydCommandopenbmc.Wait()
-                                                // This command is respinning itself
+						OpenBMCBuildChannel <- "done"
                                         }()
 					// We must hang off after being sure that the console daemon is properly starter
                                         conn, err := net.DialTimeout("tcp", "localhost:7682", 220*time.Millisecond)
@@ -210,7 +212,7 @@ func main() {
     print("| Development version -       |\n")
     print("=============================== \n")
 
-
+    OpenBMCBuildChannel = make(chan string)
     mux := http.NewServeMux()
 
     // Highest priority must be set to the signed request
