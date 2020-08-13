@@ -256,11 +256,41 @@ func home(w http.ResponseWriter, r *http.Request) {
 							if ( ciServers.servers[i].queue > 0 ) {
 								ciServers.servers[i].queue = ciServers.servers[i].queue - 1
 							}
-							w.Write([]byte(return_data))
 							// We probably need to turn it off just to clean it
+							client := &http.Client{}
+			                                var req *http.Request
+			                                req, _ = http.NewRequest("GET","http://"+ciServers.servers[i].ip+ciServers.servers[i].tcpPort+"/poweroff", nil)
+			                                _, _  = client.Do(req)
+							client = &http.Client{}
+                                                        req, _ = http.NewRequest("GET","http://"+ciServers.servers[i].compileIp+"/cleanUp", nil)
+                                                        _, _  = client.Do(req)
+							w.Write([]byte(return_data))
 							return
+						} else {
+							// We can check also if the user is just coming back ?
+							// their could be a case where the user reloaded it's session
+							// we can bring it back the server for his own usage
+							if ( ciServers.servers[i].currentOwner == cookie.Value ) {
+								// let's give it back to the user after a cleaning
+								client := &http.Client{}
+				                                var req *http.Request
+                           					req, _ = http.NewRequest("GET","http://"+ciServers.servers[i].ip+ciServers.servers[i].tcpPort+"/poweroff", nil)
+				                                _, _  = client.Do(req)
+								client = &http.Client{}
+       		                                                req, _ = http.NewRequest("GET","http://"+ciServers.servers[i].compileIp+"/cleanUp", nil)
+                                            	            	_, _  = client.Do(req)
+								myoutput.Servername = ciServers.servers[i].servername
+	                                                        myoutput.Waittime = "0"
+								myoutput.RemainingTime = fmt.Sprintf("%d", ciServers.servers[i].expiration.Unix() - time.Now().Unix())
+	                                                        return_data,_ := json.Marshal(myoutput)
+	                                                        if ( ciServers.servers[i].queue > 0 ) {
+	                                                                ciServers.servers[i].queue = ciServers.servers[i].queue - 1
+	                                                        }
+	                                                        w.Write([]byte(return_data))
+	                                                        // We probably need to turn it off just to clean it
+	                                                        return
+							}
 						}
-						// We can check also if the user is just coming back ?
 						// used to calculate potential wait time
 						if ( actualTime.After(ciServers.servers[i].expiration) ) {
 							actualTime = ciServers.servers[i].expiration
