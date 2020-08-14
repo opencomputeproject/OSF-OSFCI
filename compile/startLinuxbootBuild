@@ -19,6 +19,6 @@ cp /tmp/volume/$USERNAME/linuxboot.rom $FIRMWARES_PATH/test_$USERNAME.rom
 echo "Image successfully generated ..." 
 echo "shadow test_$USERNAME.rom" 
 $BINARIES_PATH/shadow $FIRMWARES_PATH/test_$USERNAME.rom
-echo "DONE !" > $PIPE_PATH/bios_fifo
+echo "DONE !" 
 exit 0
 fi
