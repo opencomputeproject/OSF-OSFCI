@@ -1,2 +1,18 @@
 #!/bin/bash
-( $BINARIES_PATH/startLinuxbootBuild "$@" ) >& $PIPE_PATH/bios_fifo
+export USER=$1
+function exitWrapper()
+{
+        docker container kill linuxboot_$USER
+        kill -SIGINT $ttydPID
+        screen -ls | grep pts | cut -d. -f1 | awk '{print $1}' | xargs kill
+        exit 0
+}
+trap exitWrapper SIGINT
+$BINARIES_PATH/ttyd -p 7681 -s 9 screen $BINARIES_PATH/startLinuxbootBuild "$@"  &
+ttydPID=$!
+while true
+do
+        sleep 1
+done
+
+# ( $BINARIES_PATH/startLinuxbootBuild "$@" ) >& $PIPE_PATH/bios_fifo

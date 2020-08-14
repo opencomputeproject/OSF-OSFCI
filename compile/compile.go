@@ -19,8 +19,8 @@ var startOpenBMCBuildBin = os.Getenv("OPENBMC_BUILD")
 var binariesPath = os.Getenv("BINARIES_PATH")
 var firmwaresPath = os.Getenv("FIRMWARES_PATH")
 var ttydCommandlinuxboot *exec.Cmd = nil
-var ttydCommandopenbmc *exec.Cmd = nil
-var dockerCommand *exec.Cmd = nil
+var OpenBMCCommand *exec.Cmd = nil
+var LinuxBOOTCommand *exec.Cmd = nil
 var OpenBMCBuildChannel chan string
 
 // to check if a docker container is running
@@ -43,12 +43,13 @@ func home(w http.ResponseWriter, r *http.Request) {
 			if ( ttydCommandlinuxboot != nil ) {
                                 unix.Kill(ttydCommandlinuxboot.Process.Pid, unix.SIGINT)
                         }
-			if ( ttydCommandopenbmc != nil ) {
-                                unix.Kill(ttydCommandopenbmc.Process.Pid, unix.SIGINT)
+			if ( OpenBMCCommand != nil ) {
+                                unix.Kill(OpenBMCCommand.Process.Pid, unix.SIGINT)
+                                _ = <- OpenBMCBuildChannel
                         }
-                        if ( dockerCommand != nil ) {
-                                unix.Kill(-dockerCommand.Process.Pid, unix.SIGKILL)
-                                unix.Kill(dockerCommand.Process.Pid, unix.SIGKILL)
+                        if ( LinuxBOOTCommand != nil ) {
+                                unix.Kill(-LinuxBOOTCommand.Process.Pid, unix.SIGKILL)
+                                unix.Kill(LinuxBOOTCommand.Process.Pid, unix.SIGKILL)
                         }
 		case "getFirmware":
 			login := tail[1:]
@@ -56,9 +57,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 			if ( ttydCommandlinuxboot != nil ) {
 				unix.Kill(ttydCommandlinuxboot.Process.Pid, unix.SIGINT)
                         }
-                        if ( dockerCommand != nil ) {
-				unix.Kill(-dockerCommand.Process.Pid, unix.SIGKILL)
-                                unix.Kill(dockerCommand.Process.Pid, unix.SIGKILL)
+                        if ( LinuxBOOTCommand != nil ) {
+				unix.Kill(-LinuxBOOTCommand.Process.Pid, unix.SIGKILL)
+                                unix.Kill(LinuxBOOTCommand.Process.Pid, unix.SIGKILL)
                         }
 			f, _ := os.Open(firmwaresPath+"/test_"+login+".rom")
                         defer f.Close()
@@ -68,8 +69,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 		case "getBMCFirmware":
                       login := tail[1:]
                         // We must retreive the username BIOS and return it as the response body
-                        if ( ttydCommandopenbmc != nil ) {
-                                unix.Kill(ttydCommandopenbmc.Process.Pid, unix.SIGINT)
+                        if ( OpenBMCCommand != nil ) {
+                                unix.Kill(OpenBMCCommand.Process.Pid, unix.SIGINT)
                         }
                         f, _ := os.Open(firmwaresPath+"/test_openbmc_"+login+".mtd")
                         defer f.Close()
@@ -79,8 +80,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 		case "buildbmcfirmware":
                         switch r.Method {
                                 case http.MethodPut:
-				        if ( ttydCommandopenbmc != nil ) {
-                        		        unix.Kill(ttydCommandopenbmc.Process.Pid, unix.SIGINT)
+				        if ( OpenBMCCommand != nil ) {
+                        		        unix.Kill(OpenBMCCommand.Process.Pid, unix.SIGINT)
 						_ = <- OpenBMCBuildChannel
                         		}
 					username := tail[1:]
@@ -106,13 +107,13 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         args = append (args, githubBranch)
                                         args = append (args, recipes)
                                         args = append (args, proxy)
-                                        ttydCommandopenbmc = exec.Command(startOpenBMCBuildBin, args...)
-                                        ttydCommandopenbmc.SysProcAttr = &unix.SysProcAttr{
+                                        OpenBMCCommand = exec.Command(startOpenBMCBuildBin, args...)
+                                        OpenBMCCommand.SysProcAttr = &unix.SysProcAttr{
                                                 Setsid: true,
                                         }
-                                        ttydCommandopenbmc.Start()
+                                        OpenBMCCommand.Start()
                                         go func() {
-                                                ttydCommandopenbmc.Wait()
+                                                OpenBMCCommand.Wait()
 						OpenBMCBuildChannel <- "done"
                                         }()
 					// We must hang off after being sure that the console daemon is properly starter
@@ -154,22 +155,6 @@ func home(w http.ResponseWriter, r *http.Request) {
 					// The github repo must have a format which is
 					// Second parameter shall be a string array
 
-                                        var argsTtyd []string
-                                        argsTtyd = append (argsTtyd,"-p")
-                                        argsTtyd = append (argsTtyd,"7681")
-                                        argsTtyd = append (argsTtyd,"-s")
-                                        argsTtyd = append (argsTtyd,"9")
-                                        argsTtyd = append (argsTtyd,binariesPath+"/readBiosFifo")
-                                        ttydCommandlinuxboot = exec.Command(binariesPath + "/ttyd", argsTtyd...)
-					ttydCommandlinuxboot.SysProcAttr = &unix.SysProcAttr{
-                                                Setsid: true,
-                                        }
-                                        ttydCommandlinuxboot.Start()
-                                        go func() {
-						ttydCommandlinuxboot.Wait()
-						// This command is respinning itself
-					}()
-
                                         var args []string
                                         args = append (args, username)
                                         args = append (args, githubRepo)
@@ -180,10 +165,10 @@ func home(w http.ResponseWriter, r *http.Request) {
                                                 print(args[i]+"\n")
                                         }
 
-                                        dockerCommand = exec.Command(startLinuxbootBuildBin, args...)
-                                        dockerCommand.Start()
+                                        LinuxBOOTCommand = exec.Command(startLinuxbootBuildBin, args...)
+                                        LinuxBOOTCommand.Start()
                                         go func() {
-						dockerCommand.Wait()
+						LinuxBOOTCommand.Wait()
 					}()
 					// We must hang off after being sure that the console daemon is properly starter
                                         conn, err := net.DialTimeout("tcp", "localhost:7681", 220*time.Millisecond)
