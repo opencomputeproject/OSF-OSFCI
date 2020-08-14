@@ -4,18 +4,18 @@ GITHUBREPO=$2
 BRANCH=$3
 BOARDS=$4
 PROXY=$5
-if [ ! -d /tmp/volume/$USERNAME ]
+if [ ! -d /tmp/volume/linuxboot_$USERNAME ]
 then
-mkdir /tmp/volume/$USERNAME
+mkdir /tmp/volume/linuxboot_$USERNAME
 else
-rm /tmp/volume/$USERNAME/*
+rm /tmp/volume/linuxboot_$USERNAME/*
 fi
-cp $FIRMWARES_PATH/default.rom /tmp/volume/$USERNAME/
-docker run --name linuxboot_$USERNAME -v /tmp/volume/$USERNAME:/volume -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e BOARDS=$BOARDS -e PROXY=$PROXY --rm=true  linuxboot 
-if [ -f /tmp/volume/$USERNAME/linuxboot.rom ]
+cp $FIRMWARES_PATH/default.rom /tmp/volume/linuxboot_$USERNAME/
+docker run --name linuxboot_$USERNAME -v /tmp/volume/linuxboot_$USERNAME:/volume -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e BOARDS=$BOARDS -e PROXY=$PROXY --rm=true  linuxboot 
+if [ -f /tmp/volume/linuxboot_$USERNAME/linuxboot.rom ]
 then
 \rm $FIRMWARES_PATH/test_$USERNAME.rom
-cp /tmp/volume/$USERNAME/linuxboot.rom $FIRMWARES_PATH/test_$USERNAME.rom
+cp /tmp/volume/linuxboot_$USERNAME/linuxboot.rom $FIRMWARES_PATH/test_$USERNAME.rom
 echo "Image successfully generated ..." 
 echo "shadow test_$USERNAME.rom" 
 $BINARIES_PATH/shadow $FIRMWARES_PATH/test_$USERNAME.rom

@@ -5,21 +5,21 @@ BRANCH=$3
 RECIPES=$4
 PROXY=$5
 echo $RECIPES
-if [ ! -d /tmp/volume/$USERNAME ]
+if [ ! -d /tmp/volume/openbmc_$USERNAME ]
 then
-mkdir /tmp/volume/$USERNAME
+mkdir /tmp/volume/openbmc_$USERNAME
 else
-rm /tmp/volume/$USERNAME/*
+rm /tmp/volume/openbmc_$USERNAME/*
 fi
-docker run --name openbmc_$USERNAME -v /datas:/datas -v /tmp/volume/$USERNAME:/volume -e RECIPES=$RECIPES -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e PROXY=$PROXY --rm=true  -t openbmc
-if [ -f /tmp/volume/$USERNAME/obmc-dl360poc.static.mtd ]
+docker run --name openbmc_$USERNAME -v /datas:/datas -v /tmp/volume/openbmc_$USERNAME:/volume -e RECIPES=$RECIPES -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e PROXY=$PROXY --rm=true  -t openbmc
+if [ -f /tmp/volume/openbmc_$USERNAME/obmc-dl360poc.static.mtd ]
 then
 \rm $FIRMWARES_PATH/test_openbmc_$USERNAME.mtd
-cp /tmp/volume/$USERNAME/obmc-dl360poc.static.mtd $FIRMWARES_PATH/test_openbmc_$USERNAME.mtd
+cp /tmp/volume/openbmc_$USERNAME/obmc-dl360poc.static.mtd $FIRMWARES_PATH/test_openbmc_$USERNAME.mtd
 echo "Image successfully generated ..."
 echo "DONE !"
-while true
 fi
+while true
 do
 sleep 60
 done

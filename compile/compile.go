@@ -43,10 +43,12 @@ func home(w http.ResponseWriter, r *http.Request) {
 			if ( OpenBMCCommand != nil ) {
                                 unix.Kill(OpenBMCCommand.Process.Pid, unix.SIGINT)
                                 _ = <- OpenBMCBuildChannel
+				OpenBMCCommand = nil
                         }
                         if ( LinuxBOOTCommand != nil ) {
                                 unix.Kill(LinuxBOOTCommand.Process.Pid, unix.SIGINT)
 				_ = <- LinuxBOOTBuildChannel
+				LinuxBOOTCommand = nil
                         }
 		case "getFirmware":
 			login := tail[1:]
@@ -54,6 +56,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                         if ( LinuxBOOTCommand != nil ) {
 				unix.Kill(LinuxBOOTCommand.Process.Pid, unix.SIGINT)
 				_ = <- LinuxBOOTBuildChannel
+				LinuxBOOTCommand = nil
                         }
 			f, _ := os.Open(firmwaresPath+"/test_"+login+".rom")
                         defer f.Close()
@@ -66,6 +69,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                         if ( OpenBMCCommand != nil ) {
                                 unix.Kill(OpenBMCCommand.Process.Pid, unix.SIGINT)
                                 _ = <- OpenBMCBuildChannel
+				OpenBMCCommand = nil
                         }
                         f, _ := os.Open(firmwaresPath+"/test_openbmc_"+login+".mtd")
                         defer f.Close()
@@ -78,6 +82,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 				        if ( OpenBMCCommand != nil ) {
                         		        unix.Kill(OpenBMCCommand.Process.Pid, unix.SIGINT)
 						_ = <- OpenBMCBuildChannel
+						OpenBMCCommand = nil
                         		}
 					username := tail[1:]
                                         data := base.HTTPGetBody(r)
@@ -137,6 +142,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 					if ( LinuxBOOTCommand != nil ) {
                                                 unix.Kill(LinuxBOOTCommand.Process.Pid, unix.SIGINT)
                                                 _ = <- LinuxBOOTBuildChannel
+						LinuxBOOTCommand = nil
                                         }
 					username := tail[1:]
 					data := base.HTTPGetBody(r)
