@@ -4,7 +4,15 @@ function exitWrapper()
 {
 	docker container kill openbmc_$USER
 	kill -SIGINT $ttydPID
-	screen -ls | grep pts | cut -d. -f1 | awk '{print $1}' | xargs kill
+        for i in $active_screen
+        do
+                launcher=`cat /proc/$i/cmdline | tr '\000' ' ' | awk '{print $2}'`
+                if [ "$launcher" == "$BINARIES_PATH/startOpenBMCBuild" ]
+                then
+                        kill -9 $i
+                fi
+        done
+#	screen -ls | grep pts | cut -d. -f1 | awk '{print $1}' | xargs kill
 	exit 0
 }
 trap exitWrapper SIGINT
