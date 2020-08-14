@@ -19,7 +19,7 @@ cp /tmp/volume/$USERNAME/obmc-dl360poc.static.mtd $FIRMWARES_PATH/test_openbmc_$
 echo "Image successfully generated ..."
 echo "DONE !"
 while true
+fi
 do
 sleep 60
 done
-fi

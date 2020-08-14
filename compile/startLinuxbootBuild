@@ -20,5 +20,8 @@ echo "Image successfully generated ..."
 echo "shadow test_$USERNAME.rom" 
 $BINARIES_PATH/shadow $FIRMWARES_PATH/test_$USERNAME.rom
 echo "DONE !" 
-exit 0
 fi
+while true
+do
+sleep 60
+done
