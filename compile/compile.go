@@ -18,10 +18,10 @@ var startLinuxbootBuildBin = os.Getenv("LINUXBOOT_BUILD")
 var startOpenBMCBuildBin = os.Getenv("OPENBMC_BUILD")
 var binariesPath = os.Getenv("BINARIES_PATH")
 var firmwaresPath = os.Getenv("FIRMWARES_PATH")
-var ttydCommandlinuxboot *exec.Cmd = nil
 var OpenBMCCommand *exec.Cmd = nil
 var LinuxBOOTCommand *exec.Cmd = nil
 var OpenBMCBuildChannel chan string
+var LinuxBOOTBuildChannel chan string
 
 // to check if a docker container is running
 // docker inspect -f '{{.State.Running}}' linuxboot_vejmarie2
@@ -40,26 +40,20 @@ func home(w http.ResponseWriter, r *http.Request) {
 	head,tail := ShiftPath( r.URL.Path)
 	switch ( head ) {
 		case "cleanUp":
-			if ( ttydCommandlinuxboot != nil ) {
-                                unix.Kill(ttydCommandlinuxboot.Process.Pid, unix.SIGINT)
-                        }
 			if ( OpenBMCCommand != nil ) {
                                 unix.Kill(OpenBMCCommand.Process.Pid, unix.SIGINT)
                                 _ = <- OpenBMCBuildChannel
                         }
                         if ( LinuxBOOTCommand != nil ) {
-                                unix.Kill(-LinuxBOOTCommand.Process.Pid, unix.SIGKILL)
-                                unix.Kill(LinuxBOOTCommand.Process.Pid, unix.SIGKILL)
+                                unix.Kill(LinuxBOOTCommand.Process.Pid, unix.SIGINT)
+				_ = <- LinuxBOOTBuildChannel
                         }
 		case "getFirmware":
 			login := tail[1:]
 			// We must retreive the username BIOS and return it as the response body
-			if ( ttydCommandlinuxboot != nil ) {
-				unix.Kill(ttydCommandlinuxboot.Process.Pid, unix.SIGINT)
-                        }
                         if ( LinuxBOOTCommand != nil ) {
-				unix.Kill(-LinuxBOOTCommand.Process.Pid, unix.SIGKILL)
-                                unix.Kill(LinuxBOOTCommand.Process.Pid, unix.SIGKILL)
+				unix.Kill(LinuxBOOTCommand.Process.Pid, unix.SIGINT)
+				_ = <- LinuxBOOTBuildChannel
                         }
 			f, _ := os.Open(firmwaresPath+"/test_"+login+".rom")
                         defer f.Close()
@@ -71,6 +65,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                         // We must retreive the username BIOS and return it as the response body
                         if ( OpenBMCCommand != nil ) {
                                 unix.Kill(OpenBMCCommand.Process.Pid, unix.SIGINT)
+                                _ = <- OpenBMCBuildChannel
                         }
                         f, _ := os.Open(firmwaresPath+"/test_openbmc_"+login+".mtd")
                         defer f.Close()
@@ -111,33 +106,38 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         OpenBMCCommand.SysProcAttr = &unix.SysProcAttr{
                                                 Setsid: true,
                                         }
-                                        OpenBMCCommand.Start()
-                                        go func() {
-                                                OpenBMCCommand.Wait()
-						OpenBMCBuildChannel <- "done"
-                                        }()
-					// We must hang off after being sure that the console daemon is properly starter
-                                        conn, err := net.DialTimeout("tcp", "localhost:7682", 220*time.Millisecond)
-                                        max_loop := 5
-                                        for ( err != nil && max_loop > 0 ) {
-                                                conn, err = net.DialTimeout("tcp", "localhost:7682", 220*time.Millisecond)
-                                        }
-                                        if ( err != nil ) {
-                                        // Daemon has not started
-                                        // Let's report an error
-                                                w.Write([]byte("Error"))
-                                                return
-                                        } else {
-                                                conn.Close()
-                                        }
+                                        err := OpenBMCCommand.Start()
+					if ( err == nil ) {
+	                                        go func() {
+	                                                OpenBMCCommand.Wait()
+							OpenBMCBuildChannel <- "done"
+	                                        }()
+						// We must hang off after being sure that the console daemon is properly starter
+	                                        conn, err := net.DialTimeout("tcp", "localhost:7682", 220*time.Millisecond)
+	                                        max_loop := 5
+	                                        for ( err != nil && max_loop > 0 ) {
+	                                                conn, err = net.DialTimeout("tcp", "localhost:7682", 220*time.Millisecond)
+	                                        }
+	                                        if ( err != nil ) {
+	                                        // Daemon has not started
+	                                        // Let's report an error
+	                                                w.Write([]byte("Error"))
+	                                                return
+	                                        } else {
+	                                                conn.Close()
+	                                        }
+					} else {
+						OpenBMCCommand = nil
+					}
 
 				}
 		case "buildbiosfirmware":
 			switch r.Method {
                                 case http.MethodPut:
-					if ( ttydCommandlinuxboot != nil ) {
-                        		        unix.Kill(ttydCommandlinuxboot.Process.Pid, unix.SIGINT)
-                        		}
+					if ( LinuxBOOTCommand != nil ) {
+                                                unix.Kill(LinuxBOOTCommand.Process.Pid, unix.SIGINT)
+                                                _ = <- LinuxBOOTBuildChannel
+                                        }
 					username := tail[1:]
 					data := base.HTTPGetBody(r)
 					keywords := strings.Fields(string(data))
@@ -166,26 +166,30 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         }
 
                                         LinuxBOOTCommand = exec.Command(startLinuxbootBuildBin, args...)
-                                        LinuxBOOTCommand.Start()
-                                        go func() {
-						LinuxBOOTCommand.Wait()
-					}()
-					// We must hang off after being sure that the console daemon is properly starter
-                                        conn, err := net.DialTimeout("tcp", "localhost:7681", 220*time.Millisecond)
-                                        max_loop := 5
-                                        for ( err != nil && max_loop > 0 ) {
-                                                conn, err = net.DialTimeout("tcp", "localhost:7681", 220*time.Millisecond)
-                                        }
-                                        if ( err != nil ) {
-                                        // Daemon has not started
-                                        // Let's report an error
-                                                w.Write([]byte("Error"))
-                                                return
-                                        } else {
-                                                conn.Close()
-                                        }
-
-                        }
+                                        err := LinuxBOOTCommand.Start()
+					if ( err == nil ) {	
+	                                        go func() {
+							LinuxBOOTCommand.Wait()
+							LinuxBOOTBuildChannel <- "done"
+						}()
+						// We must hang off after being sure that the console daemon is properly starter
+	                                        conn, err := net.DialTimeout("tcp", "localhost:7681", 220*time.Millisecond)
+	                                        max_loop := 5
+	                                        for ( err != nil && max_loop > 0 ) {
+	                                                conn, err = net.DialTimeout("tcp", "localhost:7681", 220*time.Millisecond)
+	                                        }
+	                                        if ( err != nil ) {
+		                                        // Daemon has not started
+	                                        	// Let's report an error
+	                                                w.Write([]byte("Error"))
+	                                                return
+	                                        } else {
+	                                                conn.Close()
+	                                        }
+					} else {
+						LinuxBOOTCommand = nil
+					}
+				}
 		default:
 	}
 }
@@ -198,6 +202,7 @@ func main() {
     print("=============================== \n")
 
     OpenBMCBuildChannel = make(chan string)
+    LinuxBOOTBuildChannel = make(chan string)
     mux := http.NewServeMux()
 
     // Highest priority must be set to the signed request
