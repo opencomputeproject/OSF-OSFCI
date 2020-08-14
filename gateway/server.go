@@ -326,7 +326,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 							ciServers.servers[i].currentOwner = ""
 							client := &http.Client{}
 	                                                var req *http.Request
-       		                                        req, _ = http.NewRequest("GET","http://"+ciServers.servers[i].compileIp+"/cleanUp", nil)
+       		                                        req, _ = http.NewRequest("GET","http://"+ciServers.servers[i].compileIp+compileTcpPort+"/cleanUp", nil)
                 	                                _, _  = client.Do(req)
 						}
 					}
