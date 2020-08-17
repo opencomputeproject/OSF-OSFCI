@@ -272,17 +272,11 @@ func home(w http.ResponseWriter, r *http.Request) {
                         args := []string { "off" }
                         cmd := exec.Command(binariesPath+"/iPDUpower", args...)
                         cmd.Start()
-                        done := make(chan error, 1)
-                        go func() {
-                            done <- cmd.Wait()
-                        }()
+                        cmd.Wait()
 			args = []string { "" }
                         cmd = exec.Command(binariesPath+"/cleanUP", args...)
                         cmd.Start()
-                        done = make(chan error, 1)
-                        go func() {
-                            done <- cmd.Wait()
-                        }()
+                        cmd.Wait()
 		default:
 	}
 }
