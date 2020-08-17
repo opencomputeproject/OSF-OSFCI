@@ -131,7 +131,7 @@ function start_ci() {
 			} else {
 				console.log(response);
 				// We must display a warning message
-				loadHTML("html/wait.html");
+				loadHTML("html/waitserver.html");
 				// We can run a countdown and we can restart the start_ci if 
 				// the countdown arrive to 0
 				// Set the date we're counting down to
@@ -290,6 +290,11 @@ function run_ci(servername, RemainingSecond) {
 
         });
 
+	clearDocument();
+        loadHTML("html/navbar.html");
+        loadJS("js/navbar.js");
+        navbarHover();
+        loginBtn();
         loadHTML("html/main.html");
 
         var dropZonebmc = document.getElementById('drop-zone-bmc');
@@ -536,6 +541,7 @@ function run_ci(servername, RemainingSecond) {
 	                         }
 	                         });
                         });
+		}
         });
 
 	$('#btnLoadbuiltsmbios').on('click', function(e) {
