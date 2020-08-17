@@ -250,8 +250,14 @@ function run_ci(servername, RemainingSecond) {
                 // we want end our session. It must clean up the cache
                 // and power off my machine
                 // we can clean up my page and Display a thank you message
+                $('#bmcem100console').contents().find("head").remove();
+                $('#bmcem100console').contents().find("body").remove();
                 $('#bmcem100console').removeAttr("src");
+                $('#smbiosem100console').contents().find("head").remove();
+                $('#smbiosem100console').contents().find("body").remove();
                 $('#smbiosem100console').removeAttr("src");
+                $('#bmcconsole').contents().find("head").remove();
+                $('#bmcconsole').contents().find("body").remove();
                 $('#bmcconsole').removeAttr("src");
                 $.ajax({
                         type: "GET",
