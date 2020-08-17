@@ -127,6 +127,7 @@ function start_ci() {
                   success: function(response){
 			var answer = JSON.parse(response);
 			if ( answer.Waittime == "0" ) {
+				$('#waitMessage').remove();
 				run_ci(answer.Servername, parseInt(answer.RemainingTime));
 			} else {
 				console.log(response);
@@ -266,6 +267,23 @@ function run_ci(servername, RemainingSecond) {
                 $('#bmcconsole').contents().find("head").remove();
                 $('#bmcconsole').contents().find("body").remove();
                 $('#bmcconsole').removeAttr("src");
+		$('#modalHeader').html("");
+		$('#modalBody').html(''
+		+'	<div class="container-fluid">'
+		+'	        <div class="row" style="margin-top:10px; margin-bottom:10px">'
+		+'                       <div class="container-fluid">'
+		+'                               <div class="row" style="margin-top:10px; margin-bottom:10px">'
+		+'                                       <div class="col-sm">'
+		+'                                       <div class="d-flex align-items-center">'
+		+'                                        <strong>Please wait while we are looking for and preparing first available server ...</strong>'
+		+'                                                 <div class="spinner-border ml-auto" role="status" aria-hidden="true"></div>'
+		+'                                         </div>'
+		+'                                       </div>'
+		+'                              </div>'
+		+'                       </div>'
+		+'	        </div>'
+		+'	</div>'
+		);
                 $.ajax({
                         type: "GET",
                         contentType: 'application/json',
@@ -290,11 +308,6 @@ function run_ci(servername, RemainingSecond) {
 
         });
 
-	clearDocument();
-        loadHTML("html/navbar.html");
-        loadJS("js/navbar.js");
-        navbarHover();
-        loginBtn();
         loadHTML("html/main.html");
 
         var dropZonebmc = document.getElementById('drop-zone-bmc');
