@@ -50,6 +50,9 @@ function homebutton(){
     			url: window.location.origin + '/ci/startbmc/',
 			success: function(response){
 				console.log("Bmc em100 started");
+				$('#bmcem100console').contents().find("head").remove();
+                                $('#bmcem100console').contents().find("body").remove();
+                                $('#bmcem100console').removeAttr("src");
 				$('#bmcem100console').attr("src", window.location+"/console");
     			}
         	});
@@ -348,6 +351,9 @@ function run_ci(servername, RemainingSecond) {
                                     // File(s) uploaded
                                     $('#bmcuploaded').show();
                                     $('#bmcfirmwarefeedback').html("<span class=\"badge alert-success pull-right\">Success</span>"+file.name);
+				    $('#bmcem100console').contents().find("head").remove();
+			            $('#bmcem100console').contents().find("body").remove();
+                		    $('#bmcem100console').removeAttr("src");
                                     $('#bmcem100console').attr("src", window.location+"/console");
                                   } else {
                                     alert('Something went wrong uploading the file.');
@@ -517,6 +523,7 @@ function run_ci(servername, RemainingSecond) {
 	                                // We can allocate that code to the BIOS iframe and we shall be receiving build input
 	                                $('#bmcem100console').contents().find("head").remove();
 	                                $('#bmcem100console').contents().find("body").remove();
+                                        $('#bmcem100console').removeAttr("src");
 	                                $('#bmcem100console').attr("src", window.location+"/bmcbuildconsole");
 	                         }
 	                         });
@@ -564,6 +571,7 @@ function run_ci(servername, RemainingSecond) {
                                 // We can allocate that code to the BIOS iframe and we shall be receiving build input
                                 $('#bmcem100console').contents().find("head").remove();
                                 $('#bmcem100console').contents().find("body").remove();
+                                $('#bmcem100console').removeAttr("src");
                                 $('#bmcem100console').attr("src", window.location+"/console");
                          }
                          });
