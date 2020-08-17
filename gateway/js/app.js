@@ -118,7 +118,8 @@ function start_ci() {
         loginBtn();
 
 	// We request a test node to the gateway
-
+	// This request could be a little bit long
+	loadHTML("html/wait.html");
         $.ajax({
                   type: "GET",
                   contentType: 'application/json',
