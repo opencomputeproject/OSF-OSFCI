@@ -433,34 +433,47 @@ function run_ci(servername, RemainingSecond) {
                 this.className = 'upload-drop-zone';
                 return false;
         }
+	$('#githubLinuxboot').on('click', function(e) {
+		$('#githubLinuxboot').removeClass("text-danger");
+		$('#githubLinuxboot').removeClass("is-invalid");
+	})
 
 	$('#btnbuildsmbios').on('click', function(e) {
 		// We must put the value to the compile server as to kick a build
 		// That request has to be signed and must be protected by the 
 		// user credential as to avoid server side overload
-		 Data = $('#githubLinuxboot').val()+' hpe/dl360gen10';
-		 Url_rel = '/ci/buildbiosfirmware/'+mylocalStorage['username'];
-		 BuildSignedAuth(Url_rel, 'PUT' , "text/plain", function(authString) {
-		 $.ajax({
-	         	 url: window.location.origin + Url_rel,
-		         type: 'PUT',
-			 headers: {
-		              "Authorization": "OSF " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
-		              "Content-Type" : "text/plain",
-		              "myDate" : authString['formattedDate']
-	                 },
-		         data: Data,
-		         contentType: 'text/plain',
-		         success: function(response) {
-				// The process to load the code is running
-				// the response contain the code from the ttyd which has kicked off the build
-				// We can allocate that code to the BIOS iframe and we shall be receiving build input
-	                        $('#smbiosem100console').contents().find("head").remove();
-       		                $('#smbiosem100console').contents().find("body").remove();
-                                $('#smbiosem100console').attr("src", window.location+"/smbiosbuildconsole");
-	        	 }
-	        	 });
-	             	});
+		// Let's sort out the user input
+		 input = $('#githubLinuxboot').val();
+		 if ( input.trim().replace(/\s\s+/g, ' ').split(/\W/).length < 2 )
+		 {
+			$('#githubLinuxboot').addClass("text-danger is-invalid");
+		 }
+		 else
+		 {
+			 Data = input+' hpe/dl360gen10';
+			 Url_rel = '/ci/buildbiosfirmware/'+mylocalStorage['username'];
+			 BuildSignedAuth(Url_rel, 'PUT' , "text/plain", function(authString) {
+			 $.ajax({
+		         	 url: window.location.origin + Url_rel,
+			         type: 'PUT',
+				 headers: {
+			              "Authorization": "OSF " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
+			              "Content-Type" : "text/plain",
+			              "myDate" : authString['formattedDate']
+		                 },
+			         data: Data,
+			         contentType: 'text/plain',
+			         success: function(response) {
+					// The process to load the code is running
+					// the response contain the code from the ttyd which has kicked off the build
+					// We can allocate that code to the BIOS iframe and we shall be receiving build input
+		                        $('#smbiosem100console').contents().find("head").remove();
+       			                $('#smbiosem100console').contents().find("body").remove();
+       	                         $('#smbiosem100console').attr("src", window.location+"/smbiosbuildconsole");
+		        	 }
+		        	 });
+		          });
+		   }
 	});
 
 	$('#btnbuildopenbmc').on('click', function(e) {
