@@ -63,6 +63,9 @@ function homebutton(){
                         contentType: 'application/json',
                         url: window.location.origin + '/ci/startsmbios/',
                         success: function(response){
+				$('#smbiosem100console').contents().find("head").remove();
+                                $('#smbiosem100console').contents().find("body").remove();
+                                $('#smbiosem100console').removeAttr("src");
                                 $('#smbiosem100console').attr("src", window.location+"/smbiosconsole");
                         }
                 });
@@ -409,6 +412,9 @@ function run_ci(servername, RemainingSecond) {
                                     // File(s) uploaded
                                     $('#biosuploaded').show();
                                     $('#biosfirmwarefeedback').html("<span class=\"badge alert-success pull-right\">Success</span>"+file.name);
+				    $('#smbiosem100console').contents().find("head").remove();
+                                    $('#smbiosem100console').contents().find("body").remove();
+                                    $('#smbiosem100console').removeAttr("src");
                                     $('#smbiosem100console').attr("src", window.location+"/smbiosconsole");
                                   } else {
                                     alert('Something went wrong uploading the file.');
@@ -481,7 +487,8 @@ function run_ci(servername, RemainingSecond) {
 					// We can allocate that code to the BIOS iframe and we shall be receiving build input
 		                        $('#smbiosem100console').contents().find("head").remove();
        			                $('#smbiosem100console').contents().find("body").remove();
-       	                         $('#smbiosem100console').attr("src", window.location+"/smbiosbuildconsole");
+                                        $('#smbiosem100console').removeAttr("src");
+       	                         	$('#smbiosem100console').attr("src", window.location+"/smbiosbuildconsole");
 		        	 }
 		        	 });
 		          });
@@ -548,6 +555,7 @@ function run_ci(servername, RemainingSecond) {
                                 // We can allocate that code to the BIOS iframe and we shall be receiving build input
                                 $('#smbiosem100console').contents().find("head").remove();
                                 $('#smbiosem100console').contents().find("body").remove();
+                                $('#smbiosem100console').removeAttr("src");
                                 $('#smbiosem100console').attr("src", window.location+"/smbiosconsole");
                          }
                          });
