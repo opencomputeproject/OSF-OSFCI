@@ -476,32 +476,44 @@ function run_ci(servername, RemainingSecond) {
 		   }
 	});
 
+	$('#githubopenbmc').on('click', function(e) {
+                $('#githubopenbmc').removeClass("text-danger");
+                $('#githubopenbmc').removeClass("is-invalid");
+        })
+
 	$('#btnbuildopenbmc').on('click', function(e) {
                 // We must put the value to the compile server as to kick a build
                 // That request has to be signed and must be protected by the
                 // user credential as to avoid server side overload
-                 Data = $('#githubopenbmc').val()+' dl360poc';
-                 Url_rel = '/ci/buildbmcfirmware/'+mylocalStorage['username'];
-                 BuildSignedAuth(Url_rel, 'PUT' , "text/plain", function(authString) {
-                 $.ajax({
-                         url: window.location.origin + Url_rel,
-                         type: 'PUT',
-                         headers: {
-                              "Authorization": "OSF " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
-                              "Content-Type" : "text/plain",
-                              "myDate" : authString['formattedDate']
-                         },
-                         data: Data,
-                         contentType: 'text/plain',
-                         success: function(response) {
-                                // The process to load the code is running
-                                // the response contain the code from the ttyd which has kicked off the build
-                                // We can allocate that code to the BIOS iframe and we shall be receiving build input
-                                $('#bmcem100console').contents().find("head").remove();
-                                $('#bmcem100console').contents().find("body").remove();
-                                $('#bmcem100console').attr("src", window.location+"/bmcbuildconsole");
-                         }
-                         });
+	         input = $('#githubopenbmc').val();
+                 if ( input.trim().replace(/\s\s+/g, ' ').split(/\W/).length < 2 )
+                 {
+                        $('#githubopenbmc').addClass("text-danger is-invalid");
+                 }
+                 else
+                 {
+	                 Data = input+' dl360poc';
+       	         	 Url_rel = '/ci/buildbmcfirmware/'+mylocalStorage['username'];
+	                 BuildSignedAuth(Url_rel, 'PUT' , "text/plain", function(authString) {
+       		         $.ajax({
+                	         url: window.location.origin + Url_rel,
+                         	type: 'PUT',
+                         	headers: {
+	                              "Authorization": "OSF " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
+	                              "Content-Type" : "text/plain",
+	                              "myDate" : authString['formattedDate']
+	                         },
+	                         data: Data,
+	                         contentType: 'text/plain',
+	                         success: function(response) {
+	                                // The process to load the code is running
+	                                // the response contain the code from the ttyd which has kicked off the build
+	                                // We can allocate that code to the BIOS iframe and we shall be receiving build input
+	                                $('#bmcem100console').contents().find("head").remove();
+	                                $('#bmcem100console').contents().find("body").remove();
+	                                $('#bmcem100console').attr("src", window.location+"/bmcbuildconsole");
+	                         }
+	                         });
                         });
         });
 
