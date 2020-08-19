@@ -268,7 +268,7 @@ function run_ci(servername, RemainingSecond) {
                 $('#bmcconsole').contents().find("body").remove();
                 $('#bmcconsole').removeAttr("src");
 		$("#ConfirmSessionEnd").css("display","none");
-		$("#btnCancel").css("display","none");
+		$("#ConfirmSessionCancel").css("display","none");
 		$('#modalHeader').html("");
 		$('#modalBody').html(''
 		+'	<div class="container-fluid">'
