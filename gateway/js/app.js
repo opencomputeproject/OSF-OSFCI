@@ -275,7 +275,7 @@ function run_ci(servername, RemainingSecond) {
 		+'                               <div class="row" style="margin-top:10px; margin-bottom:10px">'
 		+'                                       <div class="col-sm">'
 		+'                                       <div class="d-flex align-items-center">'
-		+'                                        <strong>Please wait while we are looking for and preparing first available server ...</strong>'
+		+'                                        <strong>Please wait while we are cleaning your server ...</strong>'
 		+'                                                 <div class="spinner-border ml-auto" role="status" aria-hidden="true"></div>'
 		+'                                         </div>'
 		+'                                       </div>'
