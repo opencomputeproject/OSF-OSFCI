@@ -36,6 +36,7 @@ RUN go build fiano/cmds/utk/utk.go
 RUN cp utk /usr/bin
 RUN ln -s /usr/bin/python2.7 /usr/bin/python2
 RUN useradd -ms /bin/bash linuxboot
+RUN usermod -aG sudo linuxboot
 USER linuxboot
 WORKDIR /home/linuxboot
 RUN cp /app/build_linuxboot /home/linuxboot/
