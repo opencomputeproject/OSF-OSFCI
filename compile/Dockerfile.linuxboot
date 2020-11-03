@@ -37,6 +37,7 @@ RUN cp utk /usr/bin
 RUN ln -s /usr/bin/python2.7 /usr/bin/python2
 RUN useradd -ms /bin/bash linuxboot
 RUN usermod -aG sudo linuxboot
+RUN echo "linuxboot ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
 USER linuxboot
 WORKDIR /home/linuxboot
 RUN cp /app/build_linuxboot /home/linuxboot/
