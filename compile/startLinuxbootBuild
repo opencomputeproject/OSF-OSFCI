@@ -10,8 +10,13 @@ mkdir /tmp/volume/linuxboot_$USERNAME
 else
 rm /tmp/volume/linuxboot_$USERNAME/*
 fi
+if [ -f $BINARIES_PATH/../keys/id_rsa.pub ]
+then
+        cp $BINARIES_PATH/../keys/id_rsa.pub /tmp/volume/linuxboot_$USERNAME/authorized_keys
+        export KEYPATH=/volume/authorized_keys
+fi
 cp $FIRMWARES_PATH/default.rom /tmp/volume/linuxboot_$USERNAME/
-docker run --name linuxboot_$USERNAME -v /tmp/volume/linuxboot_$USERNAME:/volume -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e BOARDS=$BOARDS -e PROXY=$PROXY --rm=true  linuxboot 
+docker run --name linuxboot_$USERNAME -v /tmp/volume/linuxboot_$USERNAME:/volume -e KEYPATH=$KEYPATH -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e BOARDS=$BOARDS -e PROXY=$PROXY --rm=true  linuxboot 
 if [ -f /tmp/volume/linuxboot_$USERNAME/linuxboot.rom ]
 then
 \rm $FIRMWARES_PATH/test_$USERNAME.rom
