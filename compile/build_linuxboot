@@ -20,5 +20,5 @@ if [ -f "/volume/id_rsa.pub" ]
 then
 export KEYPATH=/volume/id_rsa.pub
 fi
-make -DKEYPATH=$KEYPATH -DKEYPASS="" image.bin
+make image.bin
 cp image.bin /volume/linuxboot.rom
