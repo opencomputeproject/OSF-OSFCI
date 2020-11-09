@@ -10,6 +10,7 @@ mkdir /tmp/volume/linuxboot_$USERNAME
 else
 rm /tmp/volume/linuxboot_$USERNAME/*
 fi
+export KEYPATH=""
 if [ -f $BINARIES_PATH/../keys/id_rsa.pub ]
 then
         cp $BINARIES_PATH/../keys/id_rsa.pub /tmp/volume/linuxboot_$USERNAME/authorized_keys
