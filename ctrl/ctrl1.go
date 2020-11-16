@@ -151,7 +151,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 			_, tail := ShiftPath( r.URL.Path)
                         login := tail[1:]
 			// We have to retreive the BIOS from the compile server
-			myfirmware := base.HTTPGetRequest("http://"+storageUri + storageTcpPort + "/user/"+login"/getFirmware")
+			myfirmware := base.HTTPGetRequest("http://"+storageUri + storageTcpPort + "/user/"+login+"/getFirmware")
                         // f, err := os.Create("firmwares/linuxboot_"+login+".rom", os.O_WRONLY|os.O_CREATE, 0666)
                         f, err := os.Create(firmwaresPath+"/linuxboot_"+login+".rom")
 			defer f.Close()
@@ -178,12 +178,12 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         } else {
                                                 conn.Close()
                                         }
-		case "loadfromcompilebmc":
+		case "loadfromstoragebmc":
                         // We must get the username from the request
                         _, tail := ShiftPath( r.URL.Path)
                         login := tail[1:]
                         // We have to retreive the BIOS from the compile server
-                        myfirmware := base.HTTPGetRequest("http://"+compileUri + compileTcpPort + "/getBMCFirmware/"+login)
+                        myfirmware := base.HTTPGetRequest("http://"+storageUri + storageTcpPort + "/user/"+login+"/getBMCFirmware")
                         // f, err := os.Create("firmwares/openbmc_"+login+".rom", os.O_WRONLY|os.O_CREATE, 0666)
                         f, err := os.Create(firmwaresPath+"/openbmc_"+login+".rom")
                         defer f.Close()
