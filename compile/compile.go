@@ -168,9 +168,9 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         args = append (args, githubRepo)
                                         args = append (args, githubBranch)
                                         args = append (args, board)
-                                        args = append (args, proxy)
                                         args = append (args, storageUri)
                                         args = append (args, storageTcpPort)
+                                        args = append (args, proxy)
 
                                         for i := 0 ; i < len(args) ; i++ {
                                                 print(args[i]+"\n")
