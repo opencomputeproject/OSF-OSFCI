@@ -71,6 +71,23 @@ func createImage(username string, content string) (int) {
 	return 1
 }
 
+func storeFirmware(username string, content string, firmware string) (int) {
+        _, err := os.Stat(storageRoot + "/" + string(username[0]))
+
+        file.Lock()
+        defer file.Unlock()
+        if (  os.IsNotExist(err) ) {
+                // we must create the directory which will contain the file
+                _ = os.Mkdir(storageRoot + "/" + string(username[0]), os.ModePerm)
+        }
+        // We have to remove the "base64, stuff"
+        coI := strings.Index(content, ",")
+        rawImage := string(content)[coI+1:]
+        decodedBody, _ := base64.StdEncoding.DecodeString(rawImage)
+        _ = ioutil.WriteFile(storageRoot + "/" + string(username[0]) + "/" + firmware + "_" + username + ".rom", []byte(decodedBody), os.ModePerm)
+        return 1
+}
+
 func getImage(username string) (string) {
 	_, err := os.Stat(storageRoot + "/" + string(username[0]))
         file.Lock()
@@ -172,7 +189,14 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
                 case http.MethodPut:
 			// Update an existing record.
 			if (r.Header.Get("Content-Type") != "image/jpg" ) {
-				createEntry(username,string(base.HTTPGetBody(r)))	
+				if ( r.Header.Get("Content-Type") == "application/octet-stream" ) {
+					// We got a firmware
+					if ( command == "linuxboot" ) {
+						storeFirmware(username,string(base.HTTPGetBody(r)), "linuxboot")
+					}
+				} else {
+					createEntry(username,string(base.HTTPGetBody(r)))	
+				}
 			} else {
 				createImage(username,string(base.HTTPGetBody(r)))
 			}
