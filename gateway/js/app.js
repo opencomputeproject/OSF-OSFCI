@@ -251,6 +251,11 @@ function run_ci(servername, RemainingSecond) {
                     }
                 }, 1000);
 	
+
+	$("#ConfirmDownload").on("click", function(){
+		$("#modalDownload").modal('hide');
+	});
+
         // We must also attach the end session confirmation button !
 
         $("#ConfirmSessionEnd").on("click", function() {
