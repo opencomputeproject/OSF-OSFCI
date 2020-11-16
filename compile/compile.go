@@ -108,6 +108,8 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         args = append (args, githubRepo)
                                         args = append (args, githubBranch)
                                         args = append (args, recipes)
+					args = append (args, storageUri)
+                                        args = append (args, storageTcpPort)
                                         args = append (args, proxy)
                                         OpenBMCCommand = exec.Command(startOpenBMCBuildBin, args...)
                                         OpenBMCCommand.SysProcAttr = &unix.SysProcAttr{

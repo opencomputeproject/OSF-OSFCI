@@ -10,7 +10,7 @@ if [ ! -d /tmp/volume/linuxboot_$USERNAME ]
 then
 mkdir /tmp/volume/linuxboot_$USERNAME
 else
-rm /tmp/volume/linuxboot_$USERNAME/*
+rm -rf /tmp/volume/linuxboot_$USERNAME/*
 fi
 export KEYPATH=""
 if [ -f $BINARIES_PATH/../keys/id_rsa.pub ]

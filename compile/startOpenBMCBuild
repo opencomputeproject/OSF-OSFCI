@@ -3,13 +3,14 @@ USERNAME=$1
 GITHUBREPO=$2
 BRANCH=$3
 RECIPES=$4
-PROXY=$5
-echo $RECIPES
+STORAGE_URI=$5
+STORAGE_TCPPORT=$6
+PROXY=$7
 if [ ! -d /tmp/volume/openbmc_$USERNAME ]
 then
 mkdir /tmp/volume/openbmc_$USERNAME
 else
-rm /tmp/volume/openbmc_$USERNAME/*
+rm -rf /tmp/volume/openbmc_$USERNAME/*
 fi
 docker run --name openbmc_$USERNAME -v /datas:/datas -v /tmp/volume/openbmc_$USERNAME:/volume -e RECIPES=$RECIPES -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e PROXY=$PROXY --rm=true  -t openbmc
 if [ -f /tmp/volume/openbmc_$USERNAME/obmc-dl360poc.static.mtd ]
@@ -18,6 +19,7 @@ then
 cp /tmp/volume/openbmc_$USERNAME/obmc-dl360poc.static.mtd $FIRMWARES_PATH/test_openbmc_$USERNAME.mtd
 echo "Image successfully generated ..."
 echo "DONE !"
+curl -H "Content-Type:application/octet-stream" -T $FIRMWARES_PATH/test_openbmc_$USERNAME.mtd http://$STORAGE_URI$STORAGE_TCPPORT/user/$USERNAME/openbmc/test_$USERNAME.rom
 fi
 while true
 do
