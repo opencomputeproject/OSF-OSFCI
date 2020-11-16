@@ -18,6 +18,8 @@ var startLinuxbootBuildBin = os.Getenv("LINUXBOOT_BUILD")
 var startOpenBMCBuildBin = os.Getenv("OPENBMC_BUILD")
 var binariesPath = os.Getenv("BINARIES_PATH")
 var firmwaresPath = os.Getenv("FIRMWARES_PATH")
+var storageUri = os.Getenv("STORAGE_URI")
+var storageTcpPort= os.Getenv("STORAGE_TCPPORT")
 var OpenBMCCommand *exec.Cmd = nil
 var LinuxBOOTCommand *exec.Cmd = nil
 var OpenBMCBuildChannel chan string
@@ -167,6 +169,9 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         args = append (args, githubBranch)
                                         args = append (args, board)
                                         args = append (args, proxy)
+                                        args = append (args, storageUri)
+                                        args = append (args, storageTcpPort)
+
                                         for i := 0 ; i < len(args) ; i++ {
                                                 print(args[i]+"\n")
                                         }
