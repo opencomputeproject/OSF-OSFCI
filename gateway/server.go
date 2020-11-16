@@ -585,13 +585,13 @@ func home(w http.ResponseWriter, r *http.Request) {
 		case "loadbuiltsmbios":
 			if ( cacheIndex != -1 ) {
 				// we must tell to the controller node that he needs to download the BIOS
-				// from our user from the compile node and to start the em100
+				// from our user from the storage node and to start the em100
 				_, tail = ShiftPath( r.URL.Path)
        		                keys := strings.Split(tail,"/")
        		                login := keys[2]
        		                client := &http.Client{}
        		                var req *http.Request
-       		                req, _ = http.NewRequest("GET","http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+"/loadfromcompilesmbios/"+login, nil)
+       		                req, _ = http.NewRequest("GET","http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+"/loadfromstoragesmbios/"+login, nil)
        		                _, _  = client.Do(req)
 			}
 		case "loadbuiltopenbmc":
