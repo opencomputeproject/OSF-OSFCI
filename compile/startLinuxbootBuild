@@ -26,6 +26,7 @@ echo "Image successfully generated ..."
 echo "shadow test_$USERNAME.rom" 
 $BINARIES_PATH/shadow $FIRMWARES_PATH/test_$USERNAME.rom
 echo "DONE !" 
+curl -H "Content-Type:application/octet-stream" -T $FIRMWARES_PATH/test_$USERNAME.rom http://$STORAGE_URI$STORAGE_TCPPORT/user/$USERNAME/linuxboot/test_$USERNAME.rom
 fi
 while true
 do
