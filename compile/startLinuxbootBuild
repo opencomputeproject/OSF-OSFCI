@@ -3,9 +3,9 @@ USERNAME=$1
 GITHUBREPO=$2
 BRANCH=$3
 BOARDS=$4
-PROXY=$5
-STORAGE_URI=$6
-STORAGE_TCPPORT=$7
+STORAGE_URI=$5
+STORAGE_TCPPORT=$6
+PROXY=$7
 if [ ! -d /tmp/volume/linuxboot_$USERNAME ]
 then
 mkdir /tmp/volume/linuxboot_$USERNAME
