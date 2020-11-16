@@ -71,7 +71,7 @@ func createImage(username string, content string) (int) {
 	return 1
 }
 
-func storeFirmware(username string, content string, firmware string) (int) {
+func storeFirmware(username string, r *http.Request, firmware string) (int) {
         _, err := os.Stat(storageRoot + "/" + string(username[0]))
 
         file.Lock()
@@ -81,10 +81,7 @@ func storeFirmware(username string, content string, firmware string) (int) {
                 _ = os.Mkdir(storageRoot + "/" + string(username[0]), os.ModePerm)
         }
         // We have to remove the "base64, stuff"
-        coI := strings.Index(content, ",")
-        rawImage := string(content)[coI+1:]
-        decodedBody, _ := base64.StdEncoding.DecodeString(rawImage)
-        _ = ioutil.WriteFile(storageRoot + "/" + string(username[0]) + "/" + firmware + "_" + username + ".rom", []byte(decodedBody), os.ModePerm)
+        _ = ioutil.WriteFile(storageRoot + "/" + string(username[0]) + "/" + firmware + "_" + username + ".rom", base.HTTPGetBody(r), os.ModePerm)
         return 1
 }
 
@@ -192,7 +189,7 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 				if ( r.Header.Get("Content-Type") == "application/octet-stream" ) {
 					// We got a firmware
 					if ( command == "linuxboot" ) {
-						storeFirmware(username,string(base.HTTPGetBody(r)), "linuxboot")
+						storeFirmware(username,r, "linuxboot")
 					}
 				} else {
 					createEntry(username,string(base.HTTPGetBody(r)))	
