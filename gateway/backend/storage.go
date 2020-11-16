@@ -80,9 +80,18 @@ func storeFirmware(username string, r *http.Request, firmware string) (int) {
                 // we must create the directory which will contain the file
                 _ = os.Mkdir(storageRoot + "/" + string(username[0]), os.ModePerm)
         }
-        // We have to remove the "base64, stuff"
         _ = ioutil.WriteFile(storageRoot + "/" + string(username[0]) + "/" + firmware + "_" + username + ".rom", base.HTTPGetBody(r), os.ModePerm)
         return 1
+}
+
+func getSystemBIOS(username string, w http.ResponseWriter) {
+	content,_ := ioutil.ReadFile(storageRoot + "/" + string(username[0]) + "/" + "linuxboot_" + username + ".rom")
+	w.Write(content)
+}
+
+func getOpenBMC(username string, w http.ResponseWriter) {
+	content,_ := ioutil.ReadFile(storageRoot + "/" + string(username[0]) + "/" + "openbmc_" + username + ".rom")
+	w.Write(content)
 }
 
 func getImage(username string) (string) {
@@ -175,6 +184,10 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 			switch command {
 			case "avatar":
 				w.Write([]byte(getImage(username)))
+			case "getFirmware":
+				getSystemBIOS(username, w)
+			case "getBMCFirmware":
+				getOpenBMC(username, w)
 			default:
 				filecontent, return_value=getEntry(username)
 				if ( return_value != 0) {
