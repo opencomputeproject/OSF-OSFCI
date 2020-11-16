@@ -20,6 +20,8 @@ var firmwaresPath = os.Getenv("FIRMWARES_PATH")
 var distrosPath = os.Getenv("DISTROS_PATH")
 var compileUri = os.Getenv("COMPILE_URI")
 var compileTcpPort = os.Getenv("COMPILE_TCPPORT")
+var storageUri = os.Getenv("STORAGE_URI")
+var storageTcpPort = os.Getenv("STORAGE_TCPPORT")
 
 func ShiftPath(p string) (head, tail string) {
     p = path.Clean("/" + p)
@@ -144,12 +146,12 @@ func home(w http.ResponseWriter, r *http.Request) {
 		                        }
 
                         }
-		case "loadfromcompilesmbios":
+		case "loadfromstoragesmbios":
 			// We must get the username from the request
 			_, tail := ShiftPath( r.URL.Path)
                         login := tail[1:]
 			// We have to retreive the BIOS from the compile server
-			myfirmware := base.HTTPGetRequest("http://"+compileUri + compileTcpPort + "/getFirmware/"+login)
+			myfirmware := base.HTTPGetRequest("http://"+storageUri + storageTcpPort + "/user/"+login"/getFirmware")
                         // f, err := os.Create("firmwares/linuxboot_"+login+".rom", os.O_WRONLY|os.O_CREATE, 0666)
                         f, err := os.Create(firmwaresPath+"/linuxboot_"+login+".rom")
 			defer f.Close()
