@@ -603,7 +603,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                 login := keys[2]
                                 client := &http.Client{}
                                 var req *http.Request
-                                req, _ = http.NewRequest("GET","http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+"/loadfromcompilebmc/"+login, nil)
+                                req, _ = http.NewRequest("GET","http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+"/loadfromstoragebmc/"+login, nil)
                                 _, _  = client.Do(req)
                         }
 		case "":
