@@ -190,6 +190,10 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 					// We got a firmware
 					if ( command == "linuxboot" ) {
 						storeFirmware(username,r, "linuxboot")
+					} else {	
+						if ( command == "openbmc" ) {
+							storeFirmware(username,r, "openbmc")
+						}
 					}
 				} else {
 					createEntry(username,string(base.HTTPGetBody(r)))	
