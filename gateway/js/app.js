@@ -251,6 +251,19 @@ function run_ci(servername, RemainingSecond) {
                     }
                 }, 1000);
 	
+	$("#DownloadOpenBMC").on("click", function(){
+		$("#modalDowndloadBody").html("Looking for your openbmc image");
+		$.ajax({
+                                type: "GET",
+                                contentType: 'application/octet-stream',
+                                url: window.location.origin + '/user/'+mylocalStorage['username']+'/getopenbmc',
+                                success: function(response){
+				}
+		});
+	});
+	$("#DownloadLinuxboot").on("click", function(){
+		$("#modalDowndloadBody").html("Looking for your linuxboot image");
+	});
 
 	$("#ConfirmDownload").on("click", function(){
 		$("#modalDownload").modal('hide');

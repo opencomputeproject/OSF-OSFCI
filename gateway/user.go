@@ -7,6 +7,7 @@ import (
     "strings"
     "encoding/json"
     "encoding/base64"
+    "io/ioutil"
     "io"
     "crypto/rand"
     "fmt"
@@ -353,6 +354,24 @@ func getSessionID(username string) (string) {
 
 }
 
+func getOpenBMC(username string, w http.ResponseWriter) {
+	client := &http.Client{}
+	var req *http.Request
+	req, _ = http.NewRequest("GET","http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/getBMCFirmware", nil)
+	response, _  := client.Do(req)
+        buf, _ := ioutil.ReadAll(response.Body)
+	w.Write(buf)
+}
+
+func getLinuxBoot(username string, w http.ResponseWriter) {
+        client := &http.Client{}
+        var req *http.Request
+        req, _ = http.NewRequest("GET","http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/getFirmware", nil)
+        response, _  := client.Do(req)
+        buf, _ := ioutil.ReadAll(response.Body)
+	w.Write(buf)
+}
+
 func userCallback(w http.ResponseWriter, r *http.Request) {
         var username,command  string
 
@@ -415,6 +434,10 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 
 			case "getAvatar":
 				getAvatar(username, &w)
+			case "getOpenBMC":
+				getOpenBMC(username, w)
+			case "getLinuxBoot":
+				getLinuxBoot(username, w)
 			default:
 				var result *base.User
 				// Serve the resource.
