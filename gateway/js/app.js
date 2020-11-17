@@ -313,26 +313,60 @@ function run_ci(servername, RemainingSecond) {
         loadHTML("html/main.html");
 
 	$("#DownloadOpenBMC").on("click", function(){
-                $("#modalDowndloadBody").html("Looking for your openbmc image");
-                Url_rel = '/user/'+mylocalStorage['username']+'/getopenbmc';
+                $("#modalDownloadBody").html("Downloading your openbmc image ...");
+                Url_rel = '/user/'+mylocalStorage['username']+'/getOpenBMC';
                 BuildSignedAuth(Url_rel, 'GET' , "application/octet-stream", function(authString) {
                 $.ajax({
                          url: window.location.origin + Url_rel,
                          type: 'GET',
                          headers: {
                                   "Authorization": "OSF " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
-                                  "Content-Type" : "text/plain",
+                                  "Content-Type" : "application/octet-stream",
                                   "myDate" : authString['formattedDate']
                                  },
                          contentType: 'application/octet-stream',
+			 xhrFields:{
+                           responseType: 'blob'
+                         },
                          success: function(response) {
-					console.log("SUCCESS");
+				$("#modalDownload").modal('hide');
+				var fileName = "openbmc.rom" 
+			 	var link=document.createElement('a');
+				var url = window.URL || window.webkitURL;
+				link.href=url.createObjectURL(response);
+				link.download=fileName;
+				link.click();
                                }
                        });
                });
         });
         $("#DownloadLinuxboot").on("click", function(){
-                $("#modalDowndloadBody").html("Looking for your linuxboot image");
+		$("#modalDowndloadBody").html("Downloading your linuxboot image ...");
+                Url_rel = '/user/'+mylocalStorage['username']+'/getLinuxBoot';
+                BuildSignedAuth(Url_rel, 'GET' , "application/octet-stream", function(authString) {
+                $.ajax({
+                         url: window.location.origin + Url_rel,
+                         type: 'GET',
+                         headers: {
+                                  "Authorization": "OSF " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
+                                  "Content-Type" : "application/octet-stream",
+                                  "myDate" : authString['formattedDate']
+                                 },
+                         contentType: 'application/octet-stream',
+			 xhrFields:{
+                           responseType: 'blob'
+                         },
+                         success: function(response) {
+				$("#modalDownload").modal('hide');
+				var fileName = "linuxboot.rom"
+                                var link=document.createElement('a');
+				var url = window.URL || window.webkitURL;
+                                link.href=url.createObjectURL(response);
+                                link.download=fileName;
+                                link.click();
+                               }
+                       });
+               });
         });
 
         $("#ConfirmDownload").on("click", function(){
