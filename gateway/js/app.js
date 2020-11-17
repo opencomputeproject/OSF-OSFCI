@@ -314,13 +314,22 @@ function run_ci(servername, RemainingSecond) {
 
 	$("#DownloadOpenBMC").on("click", function(){
                 $("#modalDowndloadBody").html("Looking for your openbmc image");
+                Url_rel = '/user/'+mylocalStorage['username']+'/getopenbmc';
+                BuildSignedAuth(Url_rel, 'GET' , "application/octet-stream", function(authString) {
                 $.ajax({
-                                type: "GET",
-                                contentType: 'application/octet-stream',
-                                url: window.location.origin + '/user/'+mylocalStorage['username']+'/getopenbmc',
-                                success: function(response){
-                                }
-                });
+                         url: window.location.origin + Url_rel,
+                         type: 'GET',
+                         headers: {
+                                  "Authorization": "OSF " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
+                                  "Content-Type" : "text/plain",
+                                  "myDate" : authString['formattedDate']
+                                 },
+                         contentType: 'application/octet-stream',
+                         success: function(response) {
+					console.log("SUCCESS");
+                               }
+                       });
+               });
         });
         $("#DownloadLinuxboot").on("click", function(){
                 $("#modalDowndloadBody").html("Looking for your linuxboot image");
