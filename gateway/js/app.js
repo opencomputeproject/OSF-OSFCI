@@ -314,6 +314,9 @@ function run_ci(servername, RemainingSecond) {
 
 	$("#DownloadOpenBMC").on("click", function(){
                 $("#modalDownloadBody").html("Downloading your openbmc image ...");
+                $('#progress-downloadbmc').css("display", "");
+                $('#progress-downloadbmc').css("width","0%");
+                $('#progress-downloadlinuxboot').css("display", "none");
                 Url_rel = '/user/'+mylocalStorage['username']+'/getOpenBMC';
                 BuildSignedAuth(Url_rel, 'GET' , "application/octet-stream", function(authString) {
                 $.ajax({
@@ -329,12 +332,8 @@ function run_ci(servername, RemainingSecond) {
                            responseType: 'blob',
 			   onprogress: function(progress)
                                 {
-                                    var percentage = Math.floor((progress.total / progress.totalSize) * 100);
-                                    console.log('progress: ', percentage, progress.loaded);
-                                    if (percentage === 100)
-                                    {
-                                        console.log('DONE!');
-                                    }
+                                    var percentage = Math.floor((progress.loaded / progress.total) * 100);
+                                    $('#progress-downloadbmc').css("width",percentage+"%");
                                 }
                          },
                          success: function(response) {
@@ -351,6 +350,9 @@ function run_ci(servername, RemainingSecond) {
         });
         $("#DownloadLinuxboot").on("click", function(){
 		$("#modalDownloadBody").html("Downloading your linuxboot image ...");
+                $('#progress-downloadbmc').css("display", "none");
+                $('#progress-downloadlinuxboot').css("width","0%");
+                $('#progress-downloadlinuxboot').css("display", "");
                 Url_rel = '/user/'+mylocalStorage['username']+'/getLinuxBoot';
                 BuildSignedAuth(Url_rel, 'GET' , "application/octet-stream", function(authString) {
                 $.ajax({
@@ -363,7 +365,12 @@ function run_ci(servername, RemainingSecond) {
                                  },
                          contentType: 'application/octet-stream',
 			 xhrFields:{
-                           responseType: 'blob'
+                           responseType: 'blob',
+			   onprogress: function(progress)
+                                {
+                                    var percentage = Math.floor((progress.loaded / progress.total) * 100);
+                                    $('#progress-downloadlinuxboot').css("width",percentage+"%");
+                                }
                          },
                          success: function(response) {
 				$("#modalDownload").modal('hide');
