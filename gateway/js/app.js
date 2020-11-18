@@ -341,7 +341,7 @@ function run_ci(servername, RemainingSecond) {
                });
         });
         $("#DownloadLinuxboot").on("click", function(){
-		$("#modalDowndloadBody").html("Downloading your linuxboot image ...");
+		$("#modalDownloadBody").html("Downloading your linuxboot image ...");
                 Url_rel = '/user/'+mylocalStorage['username']+'/getLinuxBoot';
                 BuildSignedAuth(Url_rel, 'GET' , "application/octet-stream", function(authString) {
                 $.ajax({
