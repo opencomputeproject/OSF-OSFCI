@@ -326,7 +326,16 @@ function run_ci(servername, RemainingSecond) {
                                  },
                          contentType: 'application/octet-stream',
 			 xhrFields:{
-                           responseType: 'blob'
+                           responseType: 'blob',
+			   onprogress: function(progress)
+                                {
+                                    var percentage = Math.floor((progress.total / progress.totalSize) * 100);
+                                    console.log('progress: ', percentage, progress.loaded);
+                                    if (percentage === 100)
+                                    {
+                                        console.log('DONE!');
+                                    }
+                                }
                          },
                          success: function(response) {
 				$("#modalDownload").modal('hide');
@@ -341,7 +350,7 @@ function run_ci(servername, RemainingSecond) {
                });
         });
         $("#DownloadLinuxboot").on("click", function(){
-		$("#modalDowndloadBody").html("Downloading your linuxboot image ...");
+		$("#modalDownloadBody").html("Downloading your linuxboot image ...");
                 Url_rel = '/user/'+mylocalStorage['username']+'/getLinuxBoot';
                 BuildSignedAuth(Url_rel, 'GET' , "application/octet-stream", function(authString) {
                 $.ajax({
