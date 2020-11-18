@@ -360,6 +360,7 @@ func getOpenBMC(username string, w http.ResponseWriter) {
 	req, _ = http.NewRequest("GET","http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/getBMCFirmware", nil)
 	response, _  := client.Do(req)
         buf, _ := ioutil.ReadAll(response.Body)
+        w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
 	w.Write(buf)
 }
 
@@ -369,6 +370,7 @@ func getLinuxBoot(username string, w http.ResponseWriter) {
         req, _ = http.NewRequest("GET","http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/getFirmware", nil)
         response, _  := client.Do(req)
         buf, _ := ioutil.ReadAll(response.Body)
+        w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
 	w.Write(buf)
 }
 
