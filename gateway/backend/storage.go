@@ -1,4 +1,4 @@
-package main
+
 
 import (
     "base"
@@ -87,12 +87,13 @@ func storeFirmware(username string, r *http.Request, firmware string) (int) {
 
 func getSystemBIOS(username string, w http.ResponseWriter) {
 	content,_ := ioutil.ReadFile(storageRoot + "/" + string(username[0]) + "/" + "linuxboot_" + username + ".rom")
-	w.Header().Set("Content-Length", strconv.Itoa(len(content)))
+	w.Header().Add("Content-Length", strconv.Itoa(len(content)))
 	w.Write(content)
 }
 
 func getOpenBMC(username string, w http.ResponseWriter) {
 	content,_ := ioutil.ReadFile(storageRoot + "/" + string(username[0]) + "/" + "openbmc_" + username + ".rom")
+	w.Header().Add("Content-Length", strconv.Itoa(len(content)))
 	w.Write(content)
 }
 
