@@ -1,8 +1,11 @@
 #!/bin/bash
-export USER=$1
+SUM=`md5sum <<EOF
+$1
+EOF`
+SUM=`echo $SUM | awk '{ print $1 }'`
 function exitWrapper()
 {
-	docker container kill openbmc_$USER
+	docker container kill openbmc_$SUM
 	kill -SIGINT $ttydPID
         for i in $active_screen
         do
