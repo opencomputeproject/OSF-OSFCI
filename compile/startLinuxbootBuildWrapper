@@ -1,8 +1,11 @@
 #!/bin/bash
-export USER=$1
+SUM=`md5sum <<EOF
+$1
+EOF`
+SUM=`echo $SUM | awk '{ print $1 }'`
 function exitWrapper()
 {
-        docker container kill linuxboot_$USER
+        docker container kill linuxboot_$SUM
         kill -SIGINT $ttydPID
 	active_screen=`screen -ls | grep pts | cut -d. -f1 | awk '{print $1}'`
 	for i in $active_screen

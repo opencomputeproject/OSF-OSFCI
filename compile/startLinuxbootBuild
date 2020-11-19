@@ -6,6 +6,10 @@ BOARDS=$4
 STORAGE_URI=$5
 STORAGE_TCPPORT=$6
 PROXY=$7
+SUM=`md5sum <<EOF
+$USERNAME
+EOF`
+SUM=`echo $SUM | awk '{ print $1 }'`
 if [ ! -d /tmp/volume/linuxboot_$USERNAME ]
 then
 mkdir /tmp/volume/linuxboot_$USERNAME
@@ -19,7 +23,7 @@ then
         export KEYPATH=/volume/authorized_keys
 fi
 cp $FIRMWARES_PATH/default.rom /tmp/volume/linuxboot_$USERNAME/
-docker run --name linuxboot_$USERNAME -v /tmp/volume/linuxboot_$USERNAME:/volume -e KEYPATH=$KEYPATH -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e BOARDS=$BOARDS -e PROXY=$PROXY --rm=true  linuxboot 
+docker run --name linuxboot_$SUM -v /tmp/volume/linuxboot_$USERNAME:/volume -e KEYPATH=$KEYPATH -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e BOARDS=$BOARDS -e PROXY=$PROXY --rm=true  linuxboot 
 if [ -f /tmp/volume/linuxboot_$USERNAME/linuxboot.rom ]
 then
 \rm $FIRMWARES_PATH/test_$USERNAME.rom

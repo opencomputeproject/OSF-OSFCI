@@ -6,13 +6,17 @@ RECIPES=$4
 STORAGE_URI=$5
 STORAGE_TCPPORT=$6
 PROXY=$7
+SUM=`md5sum <<EOF
+$USERNAME
+EOF`
+SUM=`echo $SUM | awk '{ print $1 }'`
 if [ ! -d /tmp/volume/openbmc_$USERNAME ]
 then
 mkdir /tmp/volume/openbmc_$USERNAME
 else
 rm -rf /tmp/volume/openbmc_$USERNAME/*
 fi
-docker run --name openbmc_$USERNAME -v /datas:/datas -v /tmp/volume/openbmc_$USERNAME:/volume -e RECIPES=$RECIPES -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e PROXY=$PROXY --rm=true  -t openbmc
+docker run --name openbmc_$SUM -v /datas:/datas -v /tmp/volume/openbmc_$USERNAME:/volume -e RECIPES=$RECIPES -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e PROXY=$PROXY --rm=true  -t openbmc
 if [ -f /tmp/volume/openbmc_$USERNAME/obmc-dl360poc.static.mtd ]
 then
 \rm $FIRMWARES_PATH/test_openbmc_$USERNAME.mtd
