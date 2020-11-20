@@ -441,11 +441,6 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 			case "getLinuxBoot":
 				getLinuxBoot(username, w)
 			default:
-				var result *base.User
-				// Serve the resource.
-				result=userGetInternalInfo(username)
-				b, _ := json.Marshal(*result)
-				fmt.Fprint(w, string(b))
 			}
                 case http.MethodPut:
 			// Update an existing record.
@@ -455,6 +450,8 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 			case "updateAccount":
 				updateAccount(username, w, r)
 			default:
+				http.Error(w, "401 Unknown user command", 401)
+				return
 			}
 		case http.MethodPost:
 			// Ok I am getting there the various parameters to log a user
@@ -507,6 +504,7 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 			// Remove the record.
 			deleteUser(username, w, r)
                 default:
+			http.Error(w, "401 Unknown request\n", 401)
         }
 }
 func main() {
