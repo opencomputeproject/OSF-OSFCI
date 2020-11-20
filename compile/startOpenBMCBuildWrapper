@@ -19,7 +19,7 @@ function exitWrapper()
 	exit 0
 }
 trap exitWrapper SIGINT
-$BINARIES_PATH/ttyd -p 7682 -s 9 screen $BINARIES_PATH/startOpenBMCBuild "$@"  &
+$BINARIES_PATH/ttyd -p 7682 -s 9 screen -L -Logfile /tmp/openbmc_$1 $BINARIES_PATH/startOpenBMCBuild "$@"  &
 ttydPID=$!
 while true
 do

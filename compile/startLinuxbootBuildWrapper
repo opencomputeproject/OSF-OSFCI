@@ -20,7 +20,7 @@ function exitWrapper()
         exit 0
 }
 trap exitWrapper SIGINT
-$BINARIES_PATH/ttyd -p 7681 -s 9 screen $BINARIES_PATH/startLinuxbootBuild "$@"  &
+$BINARIES_PATH/ttyd -p 7681 -s 9 screen -L -Logfile /tmp/linuxboot_$1 $BINARIES_PATH/startLinuxbootBuild "$@"  &
 ttydPID=$!
 while true
 do
