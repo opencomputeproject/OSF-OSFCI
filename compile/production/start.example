@@ -1,0 +1,14 @@
+#!/bin/bash
+# Example of compile start script
+
+export PIPE_PATH=/usr/local/production/tmp
+export BINARIES_PATH=/usr/local/production/bin
+export FIRMWARES_PATH=/usr/local/production/images
+export COMPILE_TCPPORT=:9101
+export LINUXBOOT_BUILD=/usr/local/production/bin/startLinuxbootBuildWrapper
+export OPENBMC_BUILD=/usr/local/production/bin/startOpenBMCBuildWrapper
+export STORAGE_URI=10.1.1.1
+export STORAGE_TCPPORT=:9200
+mkdir /tmp/volume
+chmod -Rf 777 /tmp/volume
+(nohup setsid $BINARIES_PATH/compile) >& out.compile &

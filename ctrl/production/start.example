@@ -1,0 +1,33 @@
+#!/bin/bash
+export PIPE_PATH=/usr/local/production/pipes
+export BINARIES_PATH=/usr/local/production/bin
+export FIRMWARES_PATH=/usr/local/production/firmwares
+export OLD_LIBRARIES=/usr/local/old/gnutls/lib
+export ORIGINAL_BMC=/usr/share/local/images/obmc-phosphor-image-dl360poc-20200410131609.static.mtd
+export ORIGINAL_BIOS=/usr/share/local/images/SBIOS_OpenBMC.rom
+export COMPILE_URI=10.1.0.2
+export COMPILE_TCPPORT=:9101
+export EM100BMC=DP144197
+export EM100BIOS=DP144198
+export ACRONAME=18E0918F
+export USB_STORAGE=/dev/disk/by-id/usb-SanDisk_Extreme_4C530000160330205203-0:0
+export DISTROS_PATH=/usr/local/production/distros
+export STORAGE_TCPPORT=:9200
+export STORAGE_URI=10.1.1.1
+export BMC_SERIAL=/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0
+export EM100_DEVID=04b4:1235
+ln -s /usr/local/production/bin/iPDU_HPE /usr/local/production/bin/iPDU
+if [ ! -p $PIPE_PATH/usb_fifo ]
+then
+        mkfifo $PIPE_PATH/usb_fifo
+fi
+if [ ! -d $DISTROS_PATH ]
+then
+        mkdir $DISTROS_PATH
+fi
+istmpfs=`df -k $DISTROS_PATH | awk '{ print $1}' | tail -1`
+if [ "$istmpfs"  != "tmpfs" ]
+then
+        sudo mount -t tmpfs -o size=4096m tmpfs $DISTROS_PATH
+fi
+$BINARIES_PATH/ctrl1
