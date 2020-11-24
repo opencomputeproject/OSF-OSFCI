@@ -27,6 +27,7 @@ then
 $BINARIES_PATH/ttyd -p 7682 -s 9 screen -L -Logfile /tmp/openbmc_$1 $BINARIES_PATH/startOpenBMCBuild "$@"  &
 ttydPID=$!
 else
+screen -d -m -L -Logfile /tmp/linuxboot_$1 $BINARIES_PATH/startOpenBMCBuild "$@"  &
 ttydPID="-2"
 fi
 while true

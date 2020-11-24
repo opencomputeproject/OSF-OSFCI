@@ -124,20 +124,23 @@ func home(w http.ResponseWriter, r *http.Request) {
 	                                                OpenBMCCommand.Wait()
 							OpenBMCBuildChannel <- "done"
 	                                        }()
-						// We must hang off after being sure that the console daemon is properly starter
-	                                        conn, err := net.DialTimeout("tcp", "localhost:7682", 220*time.Millisecond)
-	                                        max_loop := 5
-	                                        for ( err != nil && max_loop > 0 ) {
-	                                                conn, err = net.DialTimeout("tcp", "localhost:7682", 220*time.Millisecond)
-	                                        }
-	                                        if ( err != nil ) {
-	                                        // Daemon has not started
-	                                        // Let's report an error
-	                                                w.Write([]byte("Error"))
-	                                                return
-	                                        } else {
-	                                                conn.Close()
-	                                        }
+						if ( interactive == "1" ) {
+							// We must hang off after being sure that the console daemon is properly starter
+		                                        conn, err := net.DialTimeout("tcp", "localhost:7682", 220*time.Millisecond)
+		                                        max_loop := 5
+		                                        for ( err != nil && max_loop > 0 ) {
+		                                                conn, err = net.DialTimeout("tcp", "localhost:7682", 220*time.Millisecond)
+								max_loop = max_loop - 1
+		                                        }
+		                                        if ( err != nil ) {
+		                                        // Daemon has not started
+		                                        // Let's report an error
+		                                                w.Write([]byte("Error"))
+		                                                return
+		                                        } else {
+		                                                conn.Close()
+		                                        }
+						}
 					} else {
 						OpenBMCCommand = nil
 					}
@@ -191,20 +194,23 @@ func home(w http.ResponseWriter, r *http.Request) {
 							LinuxBOOTCommand.Wait()
 							LinuxBOOTBuildChannel <- "done"
 						}()
-						// We must hang off after being sure that the console daemon is properly starter
-	                                        conn, err := net.DialTimeout("tcp", "localhost:7681", 220*time.Millisecond)
-	                                        max_loop := 5
-	                                        for ( err != nil && max_loop > 0 ) {
-	                                                conn, err = net.DialTimeout("tcp", "localhost:7681", 220*time.Millisecond)
-	                                        }
-	                                        if ( err != nil ) {
-		                                        // Daemon has not started
-	                                        	// Let's report an error
-	                                                w.Write([]byte("Error"))
-	                                                return
-	                                        } else {
-	                                                conn.Close()
-	                                        }
+						if ( interactive == "1" ) {
+							// We must hang off after being sure that the console daemon is properly starter
+		                                        conn, err := net.DialTimeout("tcp", "localhost:7681", 220*time.Millisecond)
+		                                        max_loop := 5
+		                                        for ( err != nil && max_loop > 0 ) {
+		                                                conn, err = net.DialTimeout("tcp", "localhost:7681", 220*time.Millisecond)
+								max_loop = max_loop - 1
+		                                        }
+		                                        if ( err != nil ) {
+			                                        // Daemon has not started
+		                                        	// Let's report an error
+		                                                w.Write([]byte("Error"))
+		                                                return
+		                                        } else {
+		                                                conn.Close()
+		                                        }
+						}
 					} else {
 						LinuxBOOTCommand = nil
 					}
