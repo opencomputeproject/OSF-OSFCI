@@ -92,6 +92,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         githubRepo := keywords[0]
                                         githubBranch := keywords[1]
                                         recipes := keywords[2]
+					interactive := keywords[3]
                                         proxy := os.Getenv("PROXY")
                                         // We have to fork the build
                                         // The script is startLinuxbootBuild
@@ -110,6 +111,8 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         args = append (args, recipes)
 					args = append (args, storageUri)
                                         args = append (args, storageTcpPort)
+					args = append (args, interactive)
+
                                         args = append (args, proxy)
                                         OpenBMCCommand = exec.Command(startOpenBMCBuildBin, args...)
                                         OpenBMCCommand.SysProcAttr = &unix.SysProcAttr{
@@ -154,6 +157,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 					githubRepo := keywords[0]
 					githubBranch := keywords[1]
 					board := keywords[2]
+					interactive := keywords[3]
 					proxy := os.Getenv("PROXY")
 					// We have to fork the build
 					// The script is startLinuxbootBuild
@@ -172,6 +176,8 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         args = append (args, board)
                                         args = append (args, storageUri)
                                         args = append (args, storageTcpPort)
+					args = append (args, interactive)
+
                                         args = append (args, proxy)
 
                                         for i := 0 ; i < len(args) ; i++ {
