@@ -568,7 +568,7 @@ function run_ci(servername, RemainingSecond) {
 		 }
 		 else
 		 {
-			 Data = input+' hpe/dl360gen10';
+			 Data = input+' hpe/dl360gen10 1';
 			 Url_rel = '/ci/buildbiosfirmware/'+mylocalStorage['username'];
 			 BuildSignedAuth(Url_rel, 'PUT' , "text/plain", function(authString) {
 			 $.ajax({
@@ -611,7 +611,7 @@ function run_ci(servername, RemainingSecond) {
                  }
                  else
                  {
-	                 Data = input+' dl360poc';
+	                 Data = input+' dl360poc 1';
        	         	 Url_rel = '/ci/buildbmcfirmware/'+mylocalStorage['username'];
 	                 BuildSignedAuth(Url_rel, 'PUT' , "text/plain", function(authString) {
        		         $.ajax({

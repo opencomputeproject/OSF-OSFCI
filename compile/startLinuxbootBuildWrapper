@@ -1,4 +1,5 @@
 #!/bin/bash
+ttydPID="-2"
 SUM=`md5sum <<EOF
 $1
 EOF`
@@ -6,8 +7,12 @@ SUM=`echo $SUM | awk '{ print $1 }'`
 function exitWrapper()
 {
         docker container kill linuxboot_$SUM
-        kill -SIGINT $ttydPID
+	if [ "$ttydPID" != "-2" ]
+	then
+	        kill -SIGINT $ttydPID
+	fi
 	active_screen=`screen -ls | grep pts | cut -d. -f1 | awk '{print $1}'`
+
 	for i in $active_screen
 	do
 		launcher=`cat /proc/$i/cmdline | tr '\000' ' ' | awk '{print $2}'`
@@ -20,7 +25,13 @@ function exitWrapper()
         exit 0
 }
 trap exitWrapper SIGINT
+# The interactive parameter is #7
+if [ "$7" == "1" ] 
+then
 $BINARIES_PATH/ttyd -p 7681 -s 9 screen -L -Logfile /tmp/linuxboot_$1 $BINARIES_PATH/startLinuxbootBuild "$@"  &
+else
+ttydPID="-2"
+fi
 ttydPID=$!
 while true
 do

@@ -1,0 +1,84 @@
+# (c) Hewlett Packard Enterprise LP - 2020
+#!/bin/bash
+
+function check_requirements() {
+	for i in jq openssl base64 curl
+	do
+		command=`which $i`
+		if [ "$command" == "" ]
+		then
+			echo "Error: Please install $i or verify it is accessible through your default execution path variable"
+			exit 1
+		fi
+	done
+}
+
+function help() {
+   echo "build_firmware is a command line tool allowing you to build your OpenBMC or Linuxboot firmware from an OSFCI instance"
+   echo ""
+   echo "Mandatory options are:"
+   echo "-u or --user <username> : Account name from OSFCI server"
+   echo "-f or --firmware <openbmc|linuxboot> : to select which firmware to download"
+   exit 0
+}
+
+check_requirements
+
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -u|--user)
+    username="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -f|--firmware)
+    firmware="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    *)    # unknown option
+    shift # past argument
+    help
+    exit 1
+    ;;
+esac
+done
+
+if [ "$username" == "" ] 
+then
+echo "Error missing user parameter : -u|--user"
+echo ""
+help
+fi
+if [ "$firmware" == "" ]
+then
+echo "Error missing firmware parameter : -f|--firmware"
+echo ""
+help
+fi
+
+echo "Please type in your account password:"
+read -s upassword
+
+user_s3_api=`curl -X "POST" -c $username.jar  -d"password=$upassword" -H "Content-Type: application/x-www-form-urlencoded"  "https://osfci.tech/user/$username/getToken"`
+accessKey=`echo $user_s3_api | jq -r '.accessKey'`
+secretKey=`echo $user_s3_api | jq -r '.secretKey'`
+dateFormatted=`TZ=GMT date -R`
+relativePath="/ci/getServer"
+contentType="application/json"
+stringToSign="GET\n\n${contentType}\n${dateFormatted}\n${relativePath}"
+signature=`echo -en ${stringToSign} | openssl sha1 -hmac ${secretKey} -binary | base64`
+curl -b $username.jar -X GET \
+-H "Host: osfci.tech" \
+-H "mydate: ${dateFormatted}" \
+-H "Content-Type: ${contentType}" \
+-H "Authorization: OSF ${accessKey}:${signature}" \
+"https://osfci.tech/ci/getServer"
+
+# Got a server
+
+
+rm $username.jar

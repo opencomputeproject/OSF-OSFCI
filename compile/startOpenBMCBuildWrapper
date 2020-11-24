@@ -1,4 +1,5 @@
 #!/bin/bash
+ttydPID="-2"
 SUM=`md5sum <<EOF
 $1
 EOF`
@@ -6,7 +7,10 @@ SUM=`echo $SUM | awk '{ print $1 }'`
 function exitWrapper()
 {
 	docker container kill openbmc_$SUM
-	kill -SIGINT $ttydPID
+	if [ "$ttydPID" != "-2" ]
+	then
+		kill -SIGINT $ttydPID
+	fi
         for i in $active_screen
         do
                 launcher=`cat /proc/$i/cmdline | tr '\000' ' ' | awk '{print $2}'`
@@ -15,12 +19,16 @@ function exitWrapper()
                         kill -9 $i
                 fi
         done
-#	screen -ls | grep pts | cut -d. -f1 | awk '{print $1}' | xargs kill
 	exit 0
 }
 trap exitWrapper SIGINT
+if [ "$7" == "1" ]
+then
 $BINARIES_PATH/ttyd -p 7682 -s 9 screen -L -Logfile /tmp/openbmc_$1 $BINARIES_PATH/startOpenBMCBuild "$@"  &
 ttydPID=$!
+else
+ttydPID="-2"
+fi
 while true
 do
 	sleep 1
