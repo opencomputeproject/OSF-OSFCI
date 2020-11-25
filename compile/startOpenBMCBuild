@@ -26,7 +26,10 @@ echo "Image successfully generated ..."
 echo "DONE !"
 curl -H "Content-Type:application/octet-stream" -T $FIRMWARES_PATH/test_openbmc_$USERNAME.mtd http://$STORAGE_URI$STORAGE_TCPPORT/user/$USERNAME/openbmc/test_$USERNAME.rom
 fi
-while true
-do
-sleep 60
-done
+if [ "$INTERACTIVE" == "1" ]
+then
+	while true
+	do
+		sleep 60
+	done
+fi

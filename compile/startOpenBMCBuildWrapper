@@ -30,7 +30,10 @@ else
 screen -d -m -L -Logfile /tmp/linuxboot_$1 $BINARIES_PATH/startOpenBMCBuild "$@"  &
 ttydPID="-2"
 fi
-while true
-do
-	sleep 1
-done
+if [ "$7" == "1" ]
+then
+	while true
+	do
+		sleep 1
+	done
+fi

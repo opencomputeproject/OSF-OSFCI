@@ -34,9 +34,12 @@ else
 screen -d -m -L -Logfile /tmp/linuxboot_$1 $BINARIES_PATH/startLinuxbootBuild "$@"  &
 ttydPID="-2"
 fi
-while true
-do
-        sleep 1
-done
+if [ "$7" == "1" ]
+then
+	while true
+	do
+	        sleep 1
+	done
+fi
 
 # ( $BINARIES_PATH/startLinuxbootBuild "$@" ) >& $PIPE_PATH/bios_fifo
