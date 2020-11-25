@@ -4,5 +4,7 @@ echo "Loading $filename"
 echo $DISTROS_PATH
 \rm -rf $DISTROS_PATH/*
 wget -O $1 http://$STORAGE_URI$STORAGE_TCPPORT/distros/$filename
+# Reconnect USB_STORAGE in the case a previous soft reset happened
+eject -t $USB_STORAGE
 dd if=$1 bs=4M | pv | dd of=$USB_STORAGE bs=4M oflag=sync
 while true; do sleep 10000; done
