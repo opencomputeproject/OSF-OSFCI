@@ -239,9 +239,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 						RemainingTime string
        		                         }
        		                         var myoutput returnValue	
-					ciServers.mux.Lock()
 					actualTime := time.Now().Add(time.Second*3600*365*10)
 					index := 0
+					ciServers.mux.Lock()
 					for i, _ := range ciServers.servers { 
 						if ( time.Now().After(ciServers.servers[i].expiration) ) {
 							// the server is available we can allocate it
@@ -286,6 +286,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	                                                        if ( ciServers.servers[i].queue > 0 ) {
 	                                                                ciServers.servers[i].queue = ciServers.servers[i].queue - 1
 	                                                        }
+								ciServers.mux.Unlock()
 	                                                        w.Write([]byte(return_data))
 	                                                        // We probably need to turn it off just to clean it
 	                                                        return
