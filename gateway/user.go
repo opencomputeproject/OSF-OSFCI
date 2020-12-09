@@ -417,7 +417,7 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 						print("REDIRECTION");
                                                 http.Redirect(
                                                         w, r,
-                                                        "https://"+r.Host+"/?resetPassword=1&username="+username+"&validation="+path[4],
+                                                        "https://"+r.Host+"/ci/?resetPassword=1&username="+username+"&validation="+path[4],
                                                         http.StatusMovedPermanently,
                                                 )
                                 }

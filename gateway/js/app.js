@@ -811,25 +811,45 @@ function main(){
 	}
 	else
 	{
-		clearDocument();
-		loadHTML("html/navbar.html");
-		loadJS("js/navbar.js");
-		navbarHover();
-		loginBtn();
-		loadHTML("html/home.html");
-		$('#background').css('background-image', 'url(images/landing.png)').fadeIn(3000);
-                $(document).ready(function () {
-                    $('#background').animate({ opacity: 1 }, { duration: 2000 });
-                    $('#background').fadeIn(3000);
-                });
-		if (( "string" !== typeof(mylocalStorage['secretKey']) ) & ( "string" !== typeof(mylocalStorage['accessKey']) ))
+		if ( getUrlParameter('resetPassword') == "1" )
+                {
+                        loadHTML("html/navbar.html");
+                        loadJS("js/navbar.js");
+                        navbarHover();
+                        loginBtn();
+                        $(document.body).append("<center><h1>Welcome Back !</h1><center>");
+                        loadHTML("html/resetPassword.html");
+                        $('#username').val(getUrlParameter('username'));
+                        $('#username').prop('disabled', true);
+                        $('#validation').val(getUrlParameter('validation'));
+                        $('#validation').prop('disabled', true);
+                        loadJS("js/forms.js");
+                        formSubmission('#resetPassword','resetPassword','Password successfully reset','Reset link expired');
+                        loadHTML("html/footer.html");
+
+                }
+		else
 		{
-			$('#signup').css("display", "");
+			clearDocument();
+			loadHTML("html/navbar.html");
+			loadJS("js/navbar.js");
+			navbarHover();
+			loginBtn();
+			loadHTML("html/home.html");
+			$('#background').css('background-image', 'url(images/landing.png)').fadeIn(3000);
+	      	        $(document).ready(function () {
+	       	             $('#background').animate({ opacity: 1 }, { duration: 2000 });
+	       	             $('#background').fadeIn(3000);
+	       	         });
+			if (( "string" !== typeof(mylocalStorage['secretKey']) ) & ( "string" !== typeof(mylocalStorage['accessKey']) ))
+			{
+				$('#signup').css("display", "");
+			}
+			loadJS("js/forms.js");
+			loadJS("js/base.js");
+			loadHTML("html/footer.html");
+			formSubmission('#signup','createUser','User created - Please check your email','User exist');
 		}
-		loadJS("js/forms.js");
-		loadJS("js/base.js");
-		loadHTML("html/footer.html");
-		formSubmission('#signup','createUser','User created - Please check your email','User exist');
 	}
 }
 
