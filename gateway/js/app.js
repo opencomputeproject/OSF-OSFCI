@@ -813,12 +813,15 @@ function main(){
 	{
 		if ( getUrlParameter('resetPassword') == "1" )
                 {
+			clearDocument();
                         loadHTML("html/navbar.html");
                         loadJS("js/navbar.js");
                         navbarHover();
                         loginBtn();
                         $(document.body).append("<center><h1>Welcome Back !</h1><center>");
                         loadHTML("html/resetPassword.html");
+			$('#dropdown').css("display","none");
+			loadJS("js/login.js");
                         $('#username').val(getUrlParameter('username'));
                         $('#username').prop('disabled', true);
                         $('#validation').val(getUrlParameter('validation'));

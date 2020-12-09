@@ -4,7 +4,10 @@ function managePasswordForgotten() {
 		// to a form where the end user can update the password
 		clearDocument();
 		loadHTML("html/navbar.html");
+                loadJS("js/navbar.js");
 		navbarHover();
+                loginBtn();
+		$('#dropdown').css("display","none");
 		$(document.body).append("<center><h1>Please fill in the following form !</h1><center>");
 		loadHTML("html/passwordForgotten.html");
 		loadJS("js/forms.js");
