@@ -22,6 +22,7 @@ var compileUri = os.Getenv("COMPILE_URI")
 var compileTcpPort = os.Getenv("COMPILE_TCPPORT")
 var storageUri = os.Getenv("STORAGE_URI")
 var storageTcpPort = os.Getenv("STORAGE_TCPPORT")
+var isEmulatorsPool = os.Getenv("IS_EMULATORS_POOL")
 
 func ShiftPath(p string) (head, tail string) {
     p = path.Clean("/" + p)
@@ -56,6 +57,8 @@ func home(w http.ResponseWriter, r *http.Request) {
                         go func() {
 				done <- cmd.Wait()
 			}()
+		case "isEmulatorsPool":
+			w.Write([]byte('{ "isPool":"'+isEmulatorsPool+'" }'))
 		case "bmcfirmware":
                         switch r.Method {
                                 case http.MethodPost:

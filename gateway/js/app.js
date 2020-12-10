@@ -175,6 +175,23 @@ function run_ci(servername, RemainingSecond) {
 
 	$("#EndSession").css("display","");
 
+
+	// We must determine if the controller node which has been allocated
+	// is able to handle flash emulators as a pool or through a one by one 
+	// approach. If this is a pool we can't offer the opportunity to load
+	// more than once the uploaded bios or bmc images. If this is not a pool
+	// we can reset each of the emulator and restart them
+
+	$.ajax({
+		type: "GET",
+		contentType: 'application/json',
+		url: window.location.origin + '/ci/isEmulatorsPool',
+		success: function(response){
+				console.log('Emulator Pool:'+response);
+			}
+		});
+
+
 	// The home button and most of the navbar button must be disabled
 
 	var x = setInterval(function() {

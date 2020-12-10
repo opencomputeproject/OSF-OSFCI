@@ -395,6 +395,15 @@ func home(w http.ResponseWriter, r *http.Request) {
 			        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 				proxy.ServeHTTP(w , r)
 			}
+		case "isEmulatorsPool":
+			if ( cacheIndex != -1 ) {
+				url, _ := url.Parse("http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort)
+	                        proxy := httputil.NewSingleHostReverseProxy(url)
+                                r.URL.Path = "/isEmulatorPath"
+                                r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
+                                proxy.ServeHTTP(w , r)
+			}
+				
 		case "smbiosconsole":
 			if ( cacheIndex != -1 ) {
 	                        url, _ := url.Parse("http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+TTYDem100Bios)
