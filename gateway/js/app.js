@@ -2,6 +2,7 @@
 var mylocalStorage = {};
 window.mylocalStorage = mylocalStorage;
 var BMCUP=0;
+var isPool=1;
 
 function clearDocument(){
 	$(document.body).empty();
@@ -188,6 +189,11 @@ function run_ci(servername, RemainingSecond) {
 		url: window.location.origin + '/ci/isEmulatorsPool',
 		success: function(response){
 				console.log('Emulator Pool:'+response);
+				var obj = jQuery.parseJSON(response);
+				if ( obj.isPool === "no" ) {
+					console.log("not a pool");
+					isPool=0;
+				}
 			}
 		});
 
@@ -488,15 +494,39 @@ function run_ci(servername, RemainingSecond) {
 
         dropZonebmc.ondrop = function(e) {
                 e.preventDefault();
-                if ( firmwarebmcuploaded == 0 ) {
-                        this.className = 'upload-drop-zone';
+		if ( isPool == 1 ) {
+	                if ( firmwarebmcuploaded == 0 ) {
+	                        this.className = 'upload-drop-zone';
+	                        firmwarebmcuploaded =1;
+	                        startUploadbmc(e.dataTransfer.files)
+	                }
+	                else
+	                {
+	                        alert('Only one firmware per session');
+	                }
+		}
+		else
+		{
+			// We need to clean up the console
+			$('#bmcem100console').contents().find("head").remove();
+                        $('#bmcem100console').contents().find("body").remove();
+                        $('#bmcem100console').removeAttr("src");
+			// The connection to the console has been lost
+			// We must inform the controller node that we want to get rid of the previous setup
+			// and reset the relevant em100 emulator
+			// before accepting the new file
+			$.ajax({
+		                type: "GET",
+		                contentType: 'application/json',
+		                url: window.location.origin + '/ci/resetEmulator/bmc',
+		                success: function(response){
+					console.log('BMC emulator has been reset');
+                                }
+                	});
+			this.className = 'upload-drop-zone';
                         firmwarebmcuploaded =1;
                         startUploadbmc(e.dataTransfer.files)
-                }
-                else
-                {
-                        alert('Only one firmware per session');
-                }
+		}
         }
 
         dropZonebmc.ondragover = function() {

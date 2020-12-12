@@ -59,6 +59,17 @@ func home(w http.ResponseWriter, r *http.Request) {
 			}()
 		case "isEmulatorsPool":
 			w.Write([]byte('{ "isPool":"'+isEmulatorsPool+'" }'))
+		case "resetEmulator":
+			_,tail := ShiftPath( r.URL.Path)
+			path :=  strings.Split(tail,"/")
+                        emulator := path[2]
+			if ( emlator == "bmc" ) {
+                        } else {
+                                if ( emulator == "rom" ) {
+                                } else {
+                                        w.Write([]byte(emulator))
+                                }
+                        }
 		case "bmcfirmware":
                         switch r.Method {
                                 case http.MethodPost:
