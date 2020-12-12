@@ -1,0 +1,38 @@
+#!/bin/bash
+# (c) 2020 Hewlett-Packard LP.
+
+if [ "$1" == "bmc" ]
+then
+export DEVICE=`echo $EM100BMC | sed 's/DP/EM/g'`
+fi
+export DEVICEID=`cat $BINARIES_PATH/.emulators/config_em100.txt | grep $DEVICE | awk '{ print $4}' | sed 's/://' | bc`
+# We need to find the HUB ID and the PORT ID from the USB config tree
+IFS=$'\n'
+usbtree=`cat $BINARIES_PATH/.emulators/config_usb_tree.txt`
+currenthub=""
+for i in ${usbtree[@]}
+do
+        ishub=`echo $i | grep "Class=Hub"`
+        if [ "$ishub" != "" ]
+        then
+                currentport=`echo $ishub | awk '{ print $3 }' | sed 's/://'`
+                currentdev=`echo $ishub | awk '{ print $5 }' | sed 's/,//'`
+                currenthub="$currentdev-$currentport"
+        fi
+        ismyport=`echo $i | grep "Dev $DEVICEID"`
+        if [ "$ismyport" != "" ]
+        then
+                export PORTID=`echo $i | grep "Dev $DEVICEID" | awk '{ print $3 }' | sed 's/://'`
+                export HUB="$currenthub"
+                break
+        fi
+done
+unset IFS
+$BINARIES_PATH/uhubctl -l $HUB -p $PORTID -a off
+sleep 2
+lsusb
+$BINARIES_PATH/uhubctl -l $HUB -p $PORTID -a on
+sleep 3
+( $BINARIES_PATH/em100 -l ) >& $BINARIES_PATH/.emulators/config_em100.txt
+( lsusb -t ) >& $BINARIES_PATH/.emulators/config_usb_tree.txt
+exit 0
