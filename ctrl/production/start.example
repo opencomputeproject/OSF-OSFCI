@@ -16,7 +16,13 @@ export STORAGE_TCPPORT=:9200
 export STORAGE_URI=10.1.1.1
 export BMC_SERIAL=/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0
 export EM100_DEVID=04b4:1235
-ln -s /usr/local/production/bin/iPDU_HPE /usr/local/production/bin/iPDU
+if [ ! -d $BINARIES_PATH/.emulators ]
+then
+	mkdir $BINARIES_PATH/.emulators
+fi
+( $BINARIES_PATH/em100 -l ) >& $BINARIES_PATH/.emulators/config_em100.txt
+( lsusb -t ) >& $BINARIES_PATH/.emulators/config_usb_tree.txt
+ln -s $BINARIES_PATH/iPDU_HPE $BINARIES_PATH/iPDU
 if [ ! -p $PIPE_PATH/usb_fifo ]
 then
         mkfifo $PIPE_PATH/usb_fifo
