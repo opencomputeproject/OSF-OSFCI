@@ -12,6 +12,7 @@ import (
 	"os"
 	"io"
 	"base"
+        "time"
 	"golang.org/x/sys/unix"
 )
 
@@ -63,7 +64,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 			_,tail := ShiftPath( r.URL.Path)
 			path :=  strings.Split(tail,"/")
                         emulator := path[2]
-			if ( emlator == "bmc" ) {
+			if ( emulator == "bmc" ) {
                         } else {
                                 if ( emulator == "rom" ) {
                                 } else {
@@ -171,27 +172,48 @@ func home(w http.ResponseWriter, r *http.Request) {
 			defer f.Close()
 			f.Write([]byte(myfirmware))
 
-					fmt.Printf("System BIOS start received\n")
-                                        args := []string { firmwaresPath+"/linuxboot_"+login+".rom" }
-                                        cmd := exec.Command(binariesPath+"/start_smbios", args...)
-                                        cmd.Start()
-                                        done := make(chan error, 1)
-                                        go func() {
-                                            done <- cmd.Wait()
-                                        }()
-                                        conn, err := net.DialTimeout("tcp", "localhost:7683", 220*time.Millisecond)
-                                        max_loop := 5
-                                        for ( err != nil && max_loop > 0 ) {
-                                                conn, err = net.DialTimeout("tcp", "localhost:7683", 220*time.Millisecond)
-                                        }
-                                        if ( err != nil ) {
-                                                // Daemon has not started
-                                                // Let's report an error
-                                                w.Write([]byte("Error"))
-                                                return
-                                        } else {
-                                                conn.Close()
-                                        }
+			fmt.Printf("System BIOS start received\n")
+                        var args []string
+                        args = append(args,"-p")
+                        args = append(args,"7683")
+                        args = append(args,"-R")
+                        args = append(args,"unbuffer")
+                        args = append(args,binariesPath + "/em100")
+                        args = append(args,"-c")
+                        args = append(args,"MX25L51245G")
+                        args = append(args,"-x")
+                        args = append(args,em100Bios)
+                        args = append(args,"-T")
+                        args = append(args,"-d")
+                        args = append(args, firmwaresPath+"/linuxboot_"+login+".rom")
+                        args = append(args,"-r")
+                        args = append(args,"-v")
+                        args = append(args,"-O")
+                        args = append(args,"0xFE0000000")
+                        args = append(args,"-p")
+                        args = append(args,"low")
+                        cmd := exec.Command(binariesPath+"/ttyd", args...)
+                        cmd.Start()
+                        done := make(chan error, 1)
+                        go func() {
+       				done <- cmd.Wait()
+                        }()
+			// We need to wait that the process spawn before checking if it is up and running
+			// total wait time can be up to 3s
+			time.Sleep(2)
+                        conn, err := net.DialTimeout("tcp", "localhost:7683", 220*time.Millisecond)
+                        max_loop := 5
+                        for ( err != nil && max_loop > 0 ) {
+				conn, err = net.DialTimeout("tcp", "localhost:7683", 220*time.Millisecond)
+			}
+			if ( err != nil ) {
+				// Daemon has not started
+				// Let's report an error
+					w.Write([]byte("Error"))
+                                        return
+                         } else {
+				conn.Close()
+                         }
 		case "loadfromstoragebmc":
                         // We must get the username from the request
                         _, tail := ShiftPath( r.URL.Path)
