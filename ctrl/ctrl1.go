@@ -12,7 +12,6 @@ import (
 	"os"
 	"io"
 	"base"
-        "time"
 	"golang.org/x/sys/unix"
 )
 
@@ -24,6 +23,7 @@ var compileTcpPort = os.Getenv("COMPILE_TCPPORT")
 var storageUri = os.Getenv("STORAGE_URI")
 var storageTcpPort = os.Getenv("STORAGE_TCPPORT")
 var isEmulatorsPool = os.Getenv("IS_EMULATORS_POOL")
+var em100Bios = os.Getenv("EM100BIOS")
 
 func ShiftPath(p string) (head, tail string) {
     p = path.Clean("/" + p)
@@ -59,7 +59,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 				done <- cmd.Wait()
 			}()
 		case "isEmulatorsPool":
-			w.Write([]byte('{ "isPool":"'+isEmulatorsPool+'" }'))
+			w.Write([]byte("{ \"isPool\":\"'+isEmulatorsPool+'\" }"))
 		case "resetEmulator":
 			_,tail := ShiftPath( r.URL.Path)
 			path :=  strings.Split(tail,"/")
