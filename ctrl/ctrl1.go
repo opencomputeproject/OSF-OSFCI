@@ -105,7 +105,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         args = append(args,"unbuffer")
                                         args = append(args,binariesPath + "/em100")
                                         args = append(args,"-c")
-                                 `      args = append(args,"MX25L25635E")
+                                        args = append(args,"MX25L25635E")
                                         args = append(args,"-x")
                                         args = append(args,em100Bmc)
                                         args = append(args,"-T")
@@ -133,7 +133,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 					go func() {
 						cmdConsole.Wait()
-					}
+					}()
 
 		                        done := make(chan error, 1)
 		                        go func() {
@@ -184,7 +184,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		                        args = append(args,"unbuffer")
 		                        args = append(args,binariesPath + "/em100")
 		                        args = append(args,"-c")
-               		         `	args = append(args,"MX25L51245G")
+               		         	args = append(args,"MX25L51245G")
                        		 	args = append(args,"-x")
 		                        args = append(args,em100Bios)
 		                        args = append(args,"-T")
@@ -318,7 +318,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
                         go func() {
 				cmdConsole.Wait()
-                        }
+                        }()
 
                         done := make(chan error, 1)
                         go func() {
@@ -374,7 +374,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
                         go func() {
                                 cmdConsole.Wait()
-                        }
+                        }()
 
 			done := make(chan error, 1)
                         go func() {
