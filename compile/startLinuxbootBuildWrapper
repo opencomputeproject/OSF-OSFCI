@@ -15,7 +15,7 @@ function exitWrapper()
 
 	for i in $active_screen
 	do
-		launcher=`cat /proc/$i/cmdline | tr '\000' ' ' | awk '{print $2}'`
+		launcher=`cat /proc/$i/cmdline | tr '\000' ' ' | awk '{print $5}'`
 		if [ "$launcher" == "$BINARIES_PATH/startLinuxbootBuild" ]
 		then
 			kill -9 $i
