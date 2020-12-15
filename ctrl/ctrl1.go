@@ -24,6 +24,7 @@ var storageUri = os.Getenv("STORAGE_URI")
 var storageTcpPort = os.Getenv("STORAGE_TCPPORT")
 var isEmulatorsPool = os.Getenv("IS_EMULATORS_POOL")
 var em100Bios = os.Getenv("EM100BIOS")
+var em100Bmc = os.Getenv("EM100BMC")
 
 func ShiftPath(p string) (head, tail string) {
     p = path.Clean("/" + p)
@@ -95,8 +96,31 @@ func home(w http.ResponseWriter, r *http.Request) {
 					// we must forward the request to the relevant test server
 		                        fmt.Printf("Ilo start received\n")
 		                        args := []string { firmwaresPath+"/_"+username+"_"+handler.Filename }
-		                        cmd := exec.Command(binariesPath+"/start_bmc", args...)
+
+					var args []string
+                                        args = append(args,"-p")
+                                        args = append(args,"7681")
+                                        args = append(args,"-R")
+                                        args = append(args,"unbuffer")
+                                        args = append(args,binariesPath + "/em100")
+                                        args = append(args,"-c")
+                                 `      args = append(args,"MX25L25635E")
+                                        args = append(args,"-x")
+                                        args = append(args,em100Bmc)
+                                        args = append(args,"-T")
+                                        args = append(args,"-d")
+                                        args = append(args, firmwaresPath+"/_"+username+"_"+handler.Filename)
+                                        args = append(args,"-r")
+                                        args = append(args,"-v")
+                                        args = append(args,"-O")
+                                        args = append(args,"0xFE0000000")
+                                        args = append(args,"-p")
+                                        args = append(args,"low")
+                                        cmd := exec.Command(binariesPath+"/ttyd", args...)
 		                        cmd.Start()
+
+					// BMC console needs to be started also
+
 		                        done := make(chan error, 1)
 		                        go func() {
 		                            done <- cmd.Wait()
@@ -244,9 +268,31 @@ func home(w http.ResponseWriter, r *http.Request) {
                         defer f.Close()
                         f.Write([]byte(myfirmware))
                         fmt.Printf("BMC start received\n")
-                        args := []string { firmwaresPath+"/openbmc_"+login+".rom" }
-                        cmd := exec.Command(binariesPath+"/start_bmc", args...)
+
+			var args []string
+                        args = append(args,"-p")
+                        args = append(args,"7681")
+                        args = append(args,"-R")
+                        args = append(args,"unbuffer")
+                        args = append(args,binariesPath + "/em100")
+                        args = append(args,"-c")
+                        args = append(args,"MX25L25635E")
+                        args = append(args,"-x")
+                        args = append(args,em100Bmc)
+                        args = append(args,"-T")
+                        args = append(args,"-d")
+                        args = append(args, firmwaresPath+"/openbmc_"+login+".rom")
+                        args = append(args,"-r")
+                        args = append(args,"-v")
+                        args = append(args,"-O")
+                        args = append(args,"0xFE0000000")
+                        args = append(args,"-p")
+                        args = append(args,"low")
+                        cmd := exec.Command(binariesPath+"/ttyd", args...)
                         cmd.Start()
+
+			// We need to start the console also
+
                         done := make(chan error, 1)
                         go func() {
                                done <- cmd.Wait()
@@ -266,9 +312,30 @@ func home(w http.ResponseWriter, r *http.Request) {
                         }	
 		case "startbmc":
 			fmt.Printf("BMC start received\n")
-			args := []string { firmwaresPath+"/ilo_dl360_OpenBMC.rom" }
-                        cmd := exec.Command(binariesPath+"/start_bmc", args...)
+			var args []string
+                        args = append(args,"-p")
+                        args = append(args,"7681")
+                        args = append(args,"-R")
+                        args = append(args,"unbuffer")
+                        args = append(args,binariesPath + "/em100")
+                        args = append(args,"-c")
+                        args = append(args,"MX25L25635E")
+                        args = append(args,"-x")
+                        args = append(args,em100Bmc)
+                        args = append(args,"-T")
+                        args = append(args,"-d")
+                        args = append(args, firmwaresPath+"/ilo_dl360_OpenBMC.rom")
+                        args = append(args,"-r")
+                        args = append(args,"-v")
+                        args = append(args,"-O")
+                        args = append(args,"0xFE0000000")
+                        args = append(args,"-p")
+                        args = append(args,"low")
+                        cmd := exec.Command(binariesPath+"/ttyd", args...)
                         cmd.Start()
+
+			// we need to start also the console
+
 			done := make(chan error, 1)
                         go func() {
                             done <- cmd.Wait()
