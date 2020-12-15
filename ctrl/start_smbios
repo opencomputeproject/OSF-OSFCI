@@ -1,5 +1,0 @@
-#!/bin/bash
-cp $ORIGINAL_BIOS $FIRMWARES_PATH
-$HOME/build/ttyd/ttyd -p 7683 -R $BINARIES_PATH/read_pipe_smbios &
-( unbuffer $BINARIES_PATH/em100 -c MX25L51245G -x $EM100BIOS -d $1 -r -v  -O 0xFE0000000 -p low ) >& $PIPE_PATH/smbiosem100
-sleep 2
