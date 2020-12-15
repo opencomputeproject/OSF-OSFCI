@@ -139,8 +139,27 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         io.Copy(f, file)
 					// we must forward the request to the relevant test server
 		                        fmt.Printf("System BIOS start received\n")
-		                        args := []string { firmwaresPath+"/_"+username+"_"+handler.Filename }
-		                        cmd := exec.Command(binariesPath+"/start_smbios", args...)
+		                        var args []string
+                        		args = append(args,"-p")
+		                        args = append(args,"7683")
+		                        args = append(args,"-R")
+		                        args = append(args,"unbuffer")
+		                        args = append(args,binariesPath + "/em100")
+		                        args = append(args,"-c")
+               		         `	args = append(args,"MX25L51245G")
+                       		 	args = append(args,"-x")
+		                        args = append(args,em100Bios)
+		                        args = append(args,"-T")
+		                        args = append(args,"-d")
+		                        args = append(args, firmwaresPath+"/_"+username+"_"+handler.Filename)
+		                        args = append(args,"-r")
+		                        args = append(args,"-v")
+		                        args = append(args,"-O")
+		                        args = append(args,"0xFE0000000")
+		                        args = append(args,"-p")
+		                        args = append(args,"low")
+		                        cmd := exec.Command(binariesPath+"/ttyd", args...)
+
 		                        cmd.Start()
 		                        done := make(chan error, 1)
 		                        go func() {
@@ -271,8 +290,26 @@ func home(w http.ResponseWriter, r *http.Request) {
 		case "startsmbios":
 			// we must forward the request to the relevant test server
                         fmt.Printf("System BIOS start received\n")
-                        args := []string { firmwaresPath+"/SBIOS_OpenBMC.rom" }
-                        cmd := exec.Command(binariesPath+"/start_smbios", args...)
+                        var args []string
+                        args = append(args,"-p")
+                        args = append(args,"7683")
+                        args = append(args,"-R")
+                        args = append(args,"unbuffer")
+                        args = append(args,binariesPath + "/em100")
+                        args = append(args,"-c")
+                        args = append(args,"MX25L51245G")
+                        args = append(args,"-x")
+                        args = append(args,em100Bios)
+                        args = append(args,"-T")
+                        args = append(args,"-d")
+                        args = append(args, firmwaresPath+"/SBIOS_OpenBMC.rom")
+                        args = append(args,"-r")
+                        args = append(args,"-v")
+                        args = append(args,"-O")
+                        args = append(args,"0xFE0000000")
+                        args = append(args,"-p")
+                        args = append(args,"low")
+                        cmd := exec.Command(binariesPath+"/ttyd", args...)
                         cmd.Start()
                         done := make(chan error, 1)
                         go func() {
