@@ -1,7 +1,0 @@
-#!/bin/bash
-cp $ORIGINAL_BMC $FIRMWARES_PATH
-export LD_LIBRARY_PATH=$OLD_LIBRARIES
-$BINARIES_PATH/ttyd -p 7681 -R $BINARIES_PATH/read_pipe &
-$BINARIES_PATH/ttyd -p 7682 screen $BMC_SERIAL 115200  &
-( unbuffer $BINARIES_PATH/em100 -c MX25L25635E -x $EM100BMC -d $1 -r -v  -O 0xFE0000000 -p low ) >& $PIPE_PATH/bmcem100
-sleep 2
