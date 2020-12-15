@@ -25,6 +25,7 @@ var storageTcpPort = os.Getenv("STORAGE_TCPPORT")
 var isEmulatorsPool = os.Getenv("IS_EMULATORS_POOL")
 var em100Bios = os.Getenv("EM100BIOS")
 var em100Bmc = os.Getenv("EM100BMC")
+var bmcSerial = os.Getenv("BMC_SERIAL")
 
 func ShiftPath(p string) (head, tail string) {
     p = path.Clean("/" + p)
@@ -120,6 +121,19 @@ func home(w http.ResponseWriter, r *http.Request) {
 		                        cmd.Start()
 
 					// BMC console needs to be started also
+
+					var argsConsole []string
+					argsConsole = append(argsConsole, "-p")
+					argsConsole = append(argsConsole, "7682")
+					argsConsole = append(argsConsole, "screen")
+					argsConsole = append(argsConsole, bmcSerial)
+					argsConsole = append(argsConsole, "115200")
+					cmdConsole := exec.Command(binariesPath+"/ttyd", argsConsole...)
+					cmdConsole.Start()
+
+					go func() {
+						cmdConsole.Wait()
+					}
 
 		                        done := make(chan error, 1)
 		                        go func() {
@@ -293,6 +307,19 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 			// We need to start the console also
 
+			var argsConsole []string
+                        argsConsole = append(argsConsole, "-p")
+                        argsConsole = append(argsConsole, "7682")
+                        argsConsole = append(argsConsole, "screen")
+                        argsConsole = append(argsConsole, bmcSerial)
+                        argsConsole = append(argsConsole, "115200")
+                        cmdConsole := exec.Command(binariesPath+"/ttyd", argsConsole...)
+                        cmdConsole.Start()
+
+                        go func() {
+				cmdConsole.Wait()
+                        }
+
                         done := make(chan error, 1)
                         go func() {
                                done <- cmd.Wait()
@@ -335,6 +362,19 @@ func home(w http.ResponseWriter, r *http.Request) {
                         cmd.Start()
 
 			// we need to start also the console
+
+			var argsConsole []string
+                        argsConsole = append(argsConsole, "-p")
+                        argsConsole = append(argsConsole, "7682")
+                        argsConsole = append(argsConsole, "screen")
+                        argsConsole = append(argsConsole, bmcSerial)
+                        argsConsole = append(argsConsole, "115200")
+                        cmdConsole := exec.Command(binariesPath+"/ttyd", argsConsole...)
+                        cmdConsole.Start()
+
+                        go func() {
+                                cmdConsole.Wait()
+                        }
 
 			done := make(chan error, 1)
                         go func() {
