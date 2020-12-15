@@ -96,7 +96,6 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         io.Copy(f, file)
 					// we must forward the request to the relevant test server
 		                        fmt.Printf("Ilo start received\n")
-		                        args := []string { firmwaresPath+"/_"+username+"_"+handler.Filename }
 
 					var args []string
                                         args = append(args,"-p")
