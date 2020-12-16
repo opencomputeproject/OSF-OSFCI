@@ -27,6 +27,9 @@ var em100Bios = os.Getenv("EM100BIOS")
 var em100Bmc = os.Getenv("EM100BMC")
 var bmcSerial = os.Getenv("BMC_SERIAL")
 
+var OpenBMCEm100Command *exec.Cmd = nil
+var RomEm100Command *exec.Cmd = nil
+
 func ShiftPath(p string) (head, tail string) {
     p = path.Clean("/" + p)
     i := strings.Index(p[1:], "/") + 1
@@ -67,6 +70,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 			path :=  strings.Split(tail,"/")
                         emulator := path[2]
 			if ( emulator == "bmc" ) {
+				// We need to switch off the em100 associated to the BMC
+				// This could be done by sending a kill signal to the associates ttyCommand if it does exist
+				// and then reset the associated em100 through binariesPath/reset_em100 script
+				
                         } else {
                                 if ( emulator == "rom" ) {
                                 } else {
@@ -116,8 +123,8 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         args = append(args,"0xFE0000000")
                                         args = append(args,"-p")
                                         args = append(args,"low")
-                                        cmd := exec.Command(binariesPath+"/ttyd", args...)
-		                        cmd.Start()
+                                        OpenBMCEm100Command = exec.Command(binariesPath+"/ttyd", args...)
+		                        OpenBMCEm100Command.Start()
 
 					// BMC console needs to be started also
 
@@ -136,7 +143,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 		                        done := make(chan error, 1)
 		                        go func() {
-		                            done <- cmd.Wait()
+		                            done <- OpenBMCEm100Command.Wait()
 		                        }()
 		                        // We must hang off after being sure that the console daemon is properly starter
 		                        conn, err := net.DialTimeout("tcp", "localhost:7681", 220*time.Millisecond)
@@ -195,12 +202,12 @@ func home(w http.ResponseWriter, r *http.Request) {
 		                        args = append(args,"0xFE0000000")
 		                        args = append(args,"-p")
 		                        args = append(args,"low")
-		                        cmd := exec.Command(binariesPath+"/ttyd", args...)
+		                        RomEm100Command := exec.Command(binariesPath+"/ttyd", args...)
 
-		                        cmd.Start()
+		                        RomEm100Command.Start()
 		                        done := make(chan error, 1)
 		                        go func() {
-		                            done <- cmd.Wait()
+		                            done <- RomEm100Command.Wait()
 		                        }()
 		                        conn, err := net.DialTimeout("tcp", "localhost:7683", 220*time.Millisecond)
 		                        max_loop := 5
@@ -248,11 +255,11 @@ func home(w http.ResponseWriter, r *http.Request) {
                         args = append(args,"0xFE0000000")
                         args = append(args,"-p")
                         args = append(args,"low")
-                        cmd := exec.Command(binariesPath+"/ttyd", args...)
-                        cmd.Start()
+                        RomEm100Command := exec.Command(binariesPath+"/ttyd", args...)
+                        RomEm100Command.Start()
                         done := make(chan error, 1)
                         go func() {
-       				done <- cmd.Wait()
+       				done <- RomEm100Command.Wait()
                         }()
 			// We need to wait that the process spawn before checking if it is up and running
 			// total wait time can be up to 3s
@@ -301,8 +308,8 @@ func home(w http.ResponseWriter, r *http.Request) {
                         args = append(args,"0xFE0000000")
                         args = append(args,"-p")
                         args = append(args,"low")
-                        cmd := exec.Command(binariesPath+"/ttyd", args...)
-                        cmd.Start()
+                        OpenBMCEm100Command = exec.Command(binariesPath+"/ttyd", args...)
+                        OpenBMCEm100Command.Start()
 
 			// We need to start the console also
 
@@ -321,7 +328,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
                         done := make(chan error, 1)
                         go func() {
-                               done <- cmd.Wait()
+                               done <- OpenBMCEm100Command.Wait()
                         }()
                         conn, err := net.DialTimeout("tcp", "localhost:7681", 220*time.Millisecond)
                         max_loop := 5
@@ -357,8 +364,8 @@ func home(w http.ResponseWriter, r *http.Request) {
                         args = append(args,"0xFE0000000")
                         args = append(args,"-p")
                         args = append(args,"low")
-                        cmd := exec.Command(binariesPath+"/ttyd", args...)
-                        cmd.Start()
+                        OpenBMCEm100Command = exec.Command(binariesPath+"/ttyd", args...)
+                        OpenBMCEm100Command.Start()
 
 			// we need to start also the console
 
@@ -377,7 +384,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 			done := make(chan error, 1)
                         go func() {
-                            done <- cmd.Wait()
+                            done <- OpenBMCEm100Command.Wait()
                         }()
 			// We must hang off after being sure that the console daemon is properly starter
 			conn, err := net.DialTimeout("tcp", "localhost:7681", 220*time.Millisecond)
@@ -415,11 +422,11 @@ func home(w http.ResponseWriter, r *http.Request) {
                         args = append(args,"0xFE0000000")
                         args = append(args,"-p")
                         args = append(args,"low")
-                        cmd := exec.Command(binariesPath+"/ttyd", args...)
-                        cmd.Start()
+                        RomEm100Command = exec.Command(binariesPath+"/ttyd", args...)
+                        RomEm100Command.Start()
                         done := make(chan error, 1)
                         go func() {
-                            done <- cmd.Wait()
+                            done <- RomEm100Command.Wait()
                         }()
 			conn, err := net.DialTimeout("tcp", "localhost:7683", 220*time.Millisecond)
                         max_loop := 5
