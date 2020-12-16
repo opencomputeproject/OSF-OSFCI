@@ -75,9 +75,35 @@ func home(w http.ResponseWriter, r *http.Request) {
 				// We need to switch off the em100 associated to the BMC
 				// This could be done by sending a kill signal to the associates ttyCommand if it does exist
 				// and then reset the associated em100 through binariesPath/reset_em100 script
+				if ( OpenBMCEm100Command != nil ) {
+					unix.Kill(OpenBMCEm100Command.Process.Pid, unix.SIGTERM)
+					OpenBMCEm100Command = nil
+					var args []string
+                                        argsConsole = append(argsConsole, "bmc")
+                                        resetEm100Cmd := exec.Command(binariesPath+"/reset_em100", argsConsole...)
+                                        resetEm100Cmd.Start()
+                                        go func() {
+                                                resetEm100Cmd.Wait()
+                                        }()
+				}
+				if ( bmcSerialConsoleCmd != nil ) {
+					unix.Kill(bmcSerialConsoleCmd.Process.Pid, unix.SIGTERM)
+                                        bmcSerialConsoleCmd = nil
+				}
 				
                         } else {
                                 if ( emulator == "rom" ) {
+					if ( RomEm100Command != nil ) {
+						unix.Kill(RomEm100Command.Process.Pid, unix.SIGTERM)
+	                                        RomEm100Command = nil
+						var args []string
+	                                        argsConsole = append(argsConsole, "rom")
+	                                        resetEm100Cmd := exec.Command(binariesPath+"/reset_em100", argsConsole...)
+	                                        resetEm100Cmd.Start()
+	                                        go func() {
+	                                                resetEm100Cmd.Wait()
+	                                        }()
+					}
                                 } else {
                                         w.Write([]byte(emulator))
                                 }
@@ -109,6 +135,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 					var args []string
                                         args = append(args,"-p")
                                         args = append(args,"7681")
+					args = append(args, "-s")
+                                        args = append(args, "9")
                                         args = append(args,"-R")
                                         args = append(args,"unbuffer")
                                         args = append(args,binariesPath + "/em100")
@@ -133,6 +161,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 					var argsConsole []string
 					argsConsole = append(argsConsole, "-p")
 					argsConsole = append(argsConsole, "7682")
+					argsConsole = append(argsConsole, "-s")
+					argsConsole = append(argsConsole, "9")
 					argsConsole = append(argsConsole, "screen")
 					argsConsole = append(argsConsole, bmcSerial)
 					argsConsole = append(argsConsole, "115200")
@@ -188,6 +218,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 		                        var args []string
                         		args = append(args,"-p")
 		                        args = append(args,"7683")
+					args = append(args, "-s")
+                                        args = append(args, "9")
 		                        args = append(args,"-R")
 		                        args = append(args,"unbuffer")
 		                        args = append(args,binariesPath + "/em100")
@@ -241,6 +273,8 @@ func home(w http.ResponseWriter, r *http.Request) {
                         var args []string
                         args = append(args,"-p")
                         args = append(args,"7683")
+			args = append(args, "-s")
+                        args = append(args, "9")
                         args = append(args,"-R")
                         args = append(args,"unbuffer")
                         args = append(args,binariesPath + "/em100")
@@ -294,6 +328,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 			var args []string
                         args = append(args,"-p")
                         args = append(args,"7681")
+			args = append(args, "-s")
+                        args = append(args, "9")
                         args = append(args,"-R")
                         args = append(args,"unbuffer")
                         args = append(args,binariesPath + "/em100")
@@ -318,6 +354,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 			var argsConsole []string
                         argsConsole = append(argsConsole, "-p")
                         argsConsole = append(argsConsole, "7682")
+			argsConsole = append(argsConsole, "-s")
+                        argsConsole = append(argsConsole, "9")
                         argsConsole = append(argsConsole, "screen")
                         argsConsole = append(argsConsole, bmcSerial)
                         argsConsole = append(argsConsole, "115200")
@@ -350,6 +388,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 			var args []string
                         args = append(args,"-p")
                         args = append(args,"7681")
+			args = append(args, "-s")
+                        args = append(args, "9")
                         args = append(args,"-R")
                         args = append(args,"unbuffer")
                         args = append(args,binariesPath + "/em100")
@@ -374,6 +414,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 			var argsConsole []string
                         argsConsole = append(argsConsole, "-p")
                         argsConsole = append(argsConsole, "7682")
+			argsConsole = append(argsConsole, "-s")
+                        argsConsole = append(argsConsole, "9")
                         argsConsole = append(argsConsole, "screen")
                         argsConsole = append(argsConsole, bmcSerial)
                         argsConsole = append(argsConsole, "115200")
@@ -408,6 +450,8 @@ func home(w http.ResponseWriter, r *http.Request) {
                         var args []string
                         args = append(args,"-p")
                         args = append(args,"7683")
+			args = append(args, "-s")
+                        args = append(args, "9")
                         args = append(args,"-R")
                         args = append(args,"unbuffer")
                         args = append(args,binariesPath + "/em100")

@@ -1,9 +1,17 @@
 #!/bin/bash
 # (c) 2020 Hewlett-Packard LP.
-
+export DEVICE=
 if [ "$1" == "bmc" ]
 then
 export DEVICE=`echo $EM100BMC | sed 's/DP/EM/g'`
+fi
+if [ "$1" == "rom" ]
+then
+export DEVICE=`echo $EM100BIOS | sed 's/DP/EM/g'`
+fi
+if [ "$DEVICE" == "" ]
+then
+exit 0
 fi
 export DEVICEID=`cat $BINARIES_PATH/.emulators/config_em100.txt | grep $DEVICE | awk '{ print $4}' | sed 's/://' | bc`
 # We need to find the HUB ID and the PORT ID from the USB config tree
