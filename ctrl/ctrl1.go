@@ -10,7 +10,6 @@ import (
 	"net"
 	"time"
 	"os"
-        "os/exec"
 	"io"
 	"base"
 	"golang.org/x/sys/unix"
@@ -78,7 +77,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 				if ( OpenBMCEm100Command != nil ) {
 					unix.Kill(OpenBMCEm100Command.Process.Pid, unix.SIGTERM)
 					OpenBMCEm100Command = nil
-					var args []string
+					var argsConsole []string
                                         argsConsole = append(argsConsole, "bmc")
                                         resetEm100Cmd := exec.Command(binariesPath+"/reset_em100", argsConsole...)
                                         resetEm100Cmd.Start()
@@ -96,7 +95,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 					if ( RomEm100Command != nil ) {
 						unix.Kill(RomEm100Command.Process.Pid, unix.SIGTERM)
 	                                        RomEm100Command = nil
-						var args []string
+						var argsConsole []string
 	                                        argsConsole = append(argsConsole, "rom")
 	                                        resetEm100Cmd := exec.Command(binariesPath+"/reset_em100", argsConsole...)
 	                                        resetEm100Cmd.Start()
