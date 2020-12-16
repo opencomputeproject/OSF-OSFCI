@@ -10,6 +10,7 @@ import (
 	"net"
 	"time"
 	"os"
+        "os/exec"
 	"io"
 	"base"
 	"golang.org/x/sys/unix"
@@ -28,6 +29,7 @@ var em100Bmc = os.Getenv("EM100BMC")
 var bmcSerial = os.Getenv("BMC_SERIAL")
 
 var OpenBMCEm100Command *exec.Cmd = nil
+var bmcSerialConsoleCmd *exec.Cmd = nil
 var RomEm100Command *exec.Cmd = nil
 
 func ShiftPath(p string) (head, tail string) {
@@ -134,11 +136,11 @@ func home(w http.ResponseWriter, r *http.Request) {
 					argsConsole = append(argsConsole, "screen")
 					argsConsole = append(argsConsole, bmcSerial)
 					argsConsole = append(argsConsole, "115200")
-					cmdConsole := exec.Command(binariesPath+"/ttyd", argsConsole...)
-					cmdConsole.Start()
+					bmcSerialConsoleCmd = exec.Command(binariesPath+"/ttyd", argsConsole...)
+					bmcSerialConsoleCmd.Start()
 
 					go func() {
-						cmdConsole.Wait()
+						bmcSerialConsoleCmd.Wait()
 					}()
 
 		                        done := make(chan error, 1)
@@ -319,11 +321,11 @@ func home(w http.ResponseWriter, r *http.Request) {
                         argsConsole = append(argsConsole, "screen")
                         argsConsole = append(argsConsole, bmcSerial)
                         argsConsole = append(argsConsole, "115200")
-                        cmdConsole := exec.Command(binariesPath+"/ttyd", argsConsole...)
-                        cmdConsole.Start()
+                        bmcSerialConsoleCmd = exec.Command(binariesPath+"/ttyd", argsConsole...)
+                        bmcSerialConsoleCmd.Start()
 
                         go func() {
-				cmdConsole.Wait()
+				bmcSerialConsoleCmd.Wait()
                         }()
 
                         done := make(chan error, 1)
@@ -375,11 +377,11 @@ func home(w http.ResponseWriter, r *http.Request) {
                         argsConsole = append(argsConsole, "screen")
                         argsConsole = append(argsConsole, bmcSerial)
                         argsConsole = append(argsConsole, "115200")
-                        cmdConsole := exec.Command(binariesPath+"/ttyd", argsConsole...)
-                        cmdConsole.Start()
+                        bmcSerialConsoleCmd = exec.Command(binariesPath+"/ttyd", argsConsole...)
+                        bmcSerialConsoleCmd.Start()
 
                         go func() {
-                                cmdConsole.Wait()
+                                bmcSerialConsoleCmd.Wait()
                         }()
 
 			done := make(chan error, 1)
