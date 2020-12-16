@@ -578,15 +578,39 @@ function run_ci(servername, RemainingSecond) {
                 e.preventDefault();
                 this.className = 'upload-drop-zone';
                 // Only if a file was not uploaded
-                if ( firmwarebiosuploaded == 0 ) {
-                        this.className = 'upload-drop-zone';
+		if ( isPool == 1 ) {
+	                if ( firmwarebiosuploaded == 0 ) {
+	                        this.className = 'upload-drop-zone';
+	                        firmwarebiosuploaded=1;
+	                        startUploadbios(e.dataTransfer.files)
+	                }
+	                else
+	                {
+	                        alert('Only one firmware per session');
+	                }
+		}
+		else
+		{
+			// We need to clean up the console
+			$('#smbiosem100console').contents().find("head").remove();
+	                $('#smbiosem100console').contents().find("body").remove();
+	                $('#smbiosem100console').removeAttr("src");
+                        // The connection to the console has been lost
+                        // We must inform the controller node that we want to get rid of the previous setup
+                        // and reset the relevant em100 emulator
+                        // before accepting the new file
+                        $.ajax({
+                                type: "GET",
+                                contentType: 'application/json',
+                                url: window.location.origin + '/ci/resetEmulator/rom',
+                                success: function(response){
+                                        console.log('ROM emulator has been reset');
+                                }
+                        });
+			this.className = 'upload-drop-zone';
                         firmwarebiosuploaded=1;
                         startUploadbios(e.dataTransfer.files)
-                }
-                else
-                {
-                        alert('Only one firmware per session');
-                }
+		}
         }
 
         dropZonebios.ondragover = function() {
