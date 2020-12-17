@@ -42,6 +42,21 @@ func home(w http.ResponseWriter, r *http.Request) {
 	head,tail := ShiftPath( r.URL.Path)
 	switch ( head ) {
 		case "cleanUp":
+			device := tail[1:]
+			if ( len(device) > 1 ) {
+				fmt.Printf("Device: %d\n", device)
+				if ( device == "bmc" ) {
+					unix.Kill(OpenBMCCommand.Process.Pid, unix.SIGINT)
+	                                _ = <- OpenBMCBuildChannel
+	                                OpenBMCCommand = nil
+				} else {
+				if ( device == "rom" ) {
+					unix.Kill(LinuxBOOTCommand.Process.Pid, unix.SIGINT)
+	                                _ = <- LinuxBOOTBuildChannel
+	                                LinuxBOOTCommand = nil
+				}
+			}
+			
 			if ( OpenBMCCommand != nil ) {
                                 unix.Kill(OpenBMCCommand.Process.Pid, unix.SIGINT)
                                 _ = <- OpenBMCBuildChannel
