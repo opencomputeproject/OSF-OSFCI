@@ -26,9 +26,18 @@ if [ "$em100_counter" != "0" ]
 then
         $BINARIES_PATH/uhubctl ${current_em100[0]} -a off
         $BINARIES_PATH/uhubctl ${current_em100[1]} -a off
-        sleep 5
+        sleep 2
         $BINARIES_PATH/uhubctl ${current_em100[0]} -a on
         $BINARIES_PATH/uhubctl ${current_em100[1]} -a on
+	sleep 4
+        ( $BINARIES_PATH/em100 -l ) >& $BINARIES_PATH/.emulators/config_em100.txt
+        ( cat $BINARIES_PATH/.emulators/config_em100.txt | sed 's/EM/DP/g'  ) >& $BINARIES_PATH/.emulators/config_em100.txt.n
+        mv $BINARIES_PATH/.emulators/config_em100.txt.n $BINARIES_PATH/.emulators/config_em100.txt
+        ( lsusb -t ) >& $BINARIES_PATH/.emulators/config_usb_tree.txt
+        chown $1 $BINARIES_PATH/.emulators/config_em100.txt
+        chgrp $1 $BINARIES_PATH/.emulators/config_em100.txt
+        chown $1 $BINARIES_PATH/.emulators/config_usb_tree.txt
+        chgrp $1 $BINARIES_PATH/.emulators/config_usb_tree.txt
 exit 0
 fi
 IFS=$'\n'

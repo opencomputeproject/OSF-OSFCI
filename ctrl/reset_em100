@@ -1,46 +1,59 @@
 #!/bin/bash
 # (c) 2020 Hewlett-Packard LP.
-export DEVICE=
+echo "reset" >> $BINARIES_PATH/.emulators/out
+DEVICE=
 if [ "$1" == "bmc" ]
 then
-export DEVICE=`echo $EM100BMC | sed 's/DP/EM/g'`
+DEVICE=`echo $EM100BMC`
 fi
 if [ "$1" == "rom" ]
 then
-export DEVICE=`echo $EM100BIOS | sed 's/DP/EM/g'`
+DEVICE=$EM100BIOS
 fi
+echo "$DEVICE" >> $BINARIES_PATH/.emulators/out
 if [ "$DEVICE" == "" ]
 then
 exit 0
 fi
-export DEVICEID=`cat $BINARIES_PATH/.emulators/config_em100.txt | grep $DEVICE | awk '{ print $4}' | sed 's/://' | bc`
+echo $DEVICE
+DEVICEID=`cat $BINARIES_PATH/.emulators/config_em100.txt | grep $DEVICE | awk '{ print $4}' | sed 's/://' | bc`
+echo $DEVICEID
 # We need to find the HUB ID and the PORT ID from the USB config tree
 IFS=$'\n'
 usbtree=`cat $BINARIES_PATH/.emulators/config_usb_tree.txt`
 currenthub=""
 for i in ${usbtree[@]}
 do
+        isroothub=`echo $i | grep "Class=root_hub"`
+        if [ "$isroothub" != "" ]
+        then
+                BUS=`echo $isroothub | awk '{ print $3}' | awk -F"." '{ print $1 }' | bc`
+        fi
         ishub=`echo $i | grep "Class=Hub"`
         if [ "$ishub" != "" ]
         then
                 currentport=`echo $ishub | awk '{ print $3 }' | sed 's/://'`
                 currentdev=`echo $ishub | awk '{ print $5 }' | sed 's/,//'`
-                currenthub="$currentdev-$currentport"
+                currenthub="$BUS-$currentport"
+                echo "CURRENT HUB $currenthub" >> out
         fi
         ismyport=`echo $i | grep "Dev $DEVICEID"`
         if [ "$ismyport" != "" ]
         then
-                export PORTID=`echo $i | grep "Dev $DEVICEID" | awk '{ print $3 }' | sed 's/://'`
-                export HUB="$currenthub"
+                PORTID=`echo $i | grep "Dev $DEVICEID" | awk '{ print $3 }' | sed 's/://'`
+                HUB="$currenthub"
                 break
         fi
 done
 unset IFS
+echo "RESETTING hub $HUB port $PORTID"  >> $BINARIES_PATH/.emulators/out
 $BINARIES_PATH/uhubctl -l $HUB -p $PORTID -a off
-sleep 2
-lsusb
+sleep 5
 $BINARIES_PATH/uhubctl -l $HUB -p $PORTID -a on
-sleep 3
+sleep 5
+echo "done" >> $BINARIES_PATH/.emulators/out
 ( $BINARIES_PATH/em100 -l ) >& $BINARIES_PATH/.emulators/config_em100.txt
+( cat $BINARIES_PATH/.emulators/config_em100.txt | sed 's/EM/DP/g'  ) >& $BINARIES_PATH/.emulators/config_em100.txt.n
+mv $BINARIES_PATH/.emulators/config_em100.txt.n $BINARIES_PATH/.emulators/config_em100.txt
 ( lsusb -t ) >& $BINARIES_PATH/.emulators/config_usb_tree.txt
 exit 0
