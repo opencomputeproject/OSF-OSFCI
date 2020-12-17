@@ -65,11 +65,11 @@ func home(w http.ResponseWriter, r *http.Request) {
 				done <- cmd.Wait()
 			}()
 		case "isEmulatorsPool":
-			w.Write([]byte("{ \"isPool\":\"'+isEmulatorsPool+'\" }"))
+			w.Write([]byte("{ \"isPool\":\""+isEmulatorsPool+"\" }"))
 		case "resetEmulator":
 			_,tail := ShiftPath( r.URL.Path)
 			path :=  strings.Split(tail,"/")
-                        emulator := path[2]
+                        emulator := path[1]
 			if ( emulator == "bmc" ) {
 				// We need to switch off the em100 associated to the BMC
 				// This could be done by sending a kill signal to the associates ttyCommand if it does exist

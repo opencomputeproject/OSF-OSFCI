@@ -32,7 +32,8 @@ do
 done
 fi
 #We have to reset the PCI bus
-sudo -E $BINARIES_PATH/reset_bus
+myid=`whoami`
+sudo -E $BINARIES_PATH/reset_bus $1
 $BINARIES_PATH/em100 -x $EM100BMC -s
 $BINARIES_PATH/em100 -x $EM100BIOS -s
 touch /tmp/cleanUpDONE
