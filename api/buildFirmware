@@ -58,18 +58,8 @@ case $key in
     shift # past argument
     shift # past value
     ;;
-    -r|--reuse)
-    reuse="1"
-    shift # past argument
-    shift # past value
-    ;;
     -k|--keep)
     keep="1"
-    shift # past argument
-    shift # past value
-    ;;
-    -w|--wait)
-    waitServer="1"
     shift # past argument
     shift # past value
     ;;

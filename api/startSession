@@ -1,0 +1,118 @@
+# (c) Hewlett Packard Enterprise LP - 2020
+#!/bin/bash
+
+function check_requirements() {
+        for i in jq openssl base64 curl
+        do
+                command=`which $i`
+                if [ "$command" == "" ]
+                then
+                        echo "Error: Please install $i or verify it is accessible through your default execution path variable"
+                        exit 1
+                fi
+        done
+}
+
+function help() {
+   echo "startSession is a command line tool allowing you to retrieve a new session an OSFCI"
+   echo ""
+   echo "Mandatory options are:"
+   echo "-u or --user <username> : Account name from OSFCI server"
+   echo "-w or --wait : wait up to a server becomes available"
+   exit 0
+}
+
+check_requirements
+
+keep="0"
+waitServer="0"
+
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -u|--user)
+    username="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -w|--wait)
+    waitServer="1"
+    shift # past argument
+    shift # past value
+    ;;
+    *)    # unknown option
+    shift # past argument
+    help
+    exit 1
+    ;;
+esac
+done
+
+if [ "$username" == "" ]
+then
+echo "Error missing user parameter : -u|--user"
+echo ""
+help
+fi
+
+echo "Please type in your account password:"
+read -s upassword
+if [ ! -d $HOME/.osfci ]
+then
+        mkdir $HOME/.osfci
+fi
+chmod -Rf 700 $HOME/.osfci
+
+user_s3_api=`curl -X "POST" -c $HOME/.osfci/$username.new.jar  -d"password=$upassword" -H "Content-Type: application/x-www-form-urlencoded"  "https://osfci.tech/user/$username/getToken"`
+accessKey=`echo $user_s3_api | jq -r '.accessKey'`
+secretKey=`echo $user_s3_api | jq -r '.secretKey'`
+echo "$username $accessKey $secretKey" > $HOME/.osfci/auth
+chmod -Rf 700 $HOME/.osfci/auth
+if [ ! -f  $HOME/.osfci/$username.jar ]
+then
+        mv $HOME/.osfci/$username.new.jar $HOME/.osfci/$username.jar
+fi
+
+chmod -Rf 700 $HOME/.osfci/$username.jar
+
+haveServer="0"
+
+while [ "$haveServer" == 0 ]
+do
+
+# We must request a server
+
+dateFormatted=`TZ=GMT date -R`
+relativePath="/ci/getServer"
+contentType="application/json"
+stringToSign="GET\n\n${contentType}\n${dateFormatted}\n${relativePath}"
+signature=`echo -en ${stringToSign} | openssl sha1 -hmac ${secretKey} -binary | base64`
+curl -o $HOME/.osfci/credential.txt -b $HOME/.osfci/$username.jar -X GET \
+-H "Host: osfci.tech" \
+-H "mydate: ${dateFormatted}" \
+-H "Content-Type: ${contentType}" \
+-H "Authorization: OSF ${accessKey}:${signature}" \
+"https://osfci.tech/ci/getServer"
+
+chmod -Rf 700 $HOME/.osfci/credential.txt
+
+# Output format is {"Servername":"","Waittime":"1729","Queue":"0","RemainingTime":"0"}
+serverName=`cat $HOME/.osfci/credential.txt | sed 's/{//' | sed 's/}//' | awk -F"," '{ print $1 }' | awk -F":" '{ print $2 }' | sed 's/"//g'`
+waitTime=`cat $HOME/.osfci/credential.txt | sed 's/{//' | sed 's/}//' | awk -F"," '{ print $2 }' | awk -F":" '{ print $2 }' | sed 's/"//g'`
+
+if [ "$waitTime" != "0" ]
+then
+        if [ "$waitServer" == "1" ]
+        then
+                sleep $waitTime
+                sleep 5
+        else
+                echo "no server available. Please relaunch your request, or use the --wait option"
+                exit 0
+        fi
+else
+haveServer="1"
+fi
+done

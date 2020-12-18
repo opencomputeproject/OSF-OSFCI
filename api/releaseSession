@@ -14,10 +14,8 @@ function check_requirements() {
 }
 
 function help() {
-   echo "release_ci is a command line tool use to close a CI session:
+   echo "releaseSession is a command line tool use to close a CI session"
    echo ""
-   echo "Mandatory options are:"
-   echo "-s or --server <servername> : OSFCI server name returned by session opening"
    exit 0
 }
 
@@ -32,11 +30,6 @@ do
 key="$1"
 
 case $key in
-    -s|--server)
-    serverName="$2"
-    shift # past argument
-    shift # past value
-    ;;
     *)    # unknown option
     shift # past argument
     help
@@ -47,6 +40,8 @@ done
 
 # We have to release the session
 # We do not need to stop the power as this script doesn't turn it on
-curl -v -o $TMPDIR/test.txt -b $HOME/.osfci_cookies/$username.jar -X GET "https://osfci.tech/ci/stopServer/$serverName"
+username=`cat $HOME/.osfci/auth | awk '{ print $1}'`
+serverName=`cat $HOME/.osfci/credential.txt | sed 's/{//' | sed 's/}//' | awk -F"," '{ print $1 }' | awk -F":" '{ print $2 }' | sed 's/"//g'`
+curl  -o $TMPDIR/test.txt -b $HOME/.osfci/$username.jar -X GET "https://osfci.tech/ci/stopServer/$serverName"
 rm $TMPDIR/test.txt
-rm $HOME/.osfci_cookies/*
+rm $HOME/.osfci/*
