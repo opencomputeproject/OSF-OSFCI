@@ -10,6 +10,7 @@ import (
         "os"
 	"os/exec"
 	"base"
+	"fmt"
 	"golang.org/x/sys/unix"
 )
 
@@ -50,10 +51,11 @@ func home(w http.ResponseWriter, r *http.Request) {
 	                                _ = <- OpenBMCBuildChannel
 	                                OpenBMCCommand = nil
 				} else {
-				if ( device == "rom" ) {
-					unix.Kill(LinuxBOOTCommand.Process.Pid, unix.SIGINT)
-	                                _ = <- LinuxBOOTBuildChannel
-	                                LinuxBOOTCommand = nil
+					if ( device == "rom" ) {
+						unix.Kill(LinuxBOOTCommand.Process.Pid, unix.SIGINT)
+		                                _ = <- LinuxBOOTBuildChannel
+		                                LinuxBOOTCommand = nil
+					}
 				}
 			}
 			
@@ -67,6 +69,23 @@ func home(w http.ResponseWriter, r *http.Request) {
 				_ = <- LinuxBOOTBuildChannel
 				LinuxBOOTCommand = nil
                         }
+ 		case "isRunning":
+			command := tail[1:]
+			if ( command == "openbmc" ) {
+				if ( OpenBMCCommand == nil ) {
+					w.Write([]byte("{ \"status\" : \"1\" }"))
+				} else {
+					w.Write([]byte("{ \"status\" : \"0\" }"))
+				}
+			} else {
+				if ( command == "linuxboot" ) {
+					if ( LinuxBOOTCommand == nil ) {
+						w.Write([]byte("{ \"status\" : \"1\" }"))
+					} else {
+						w.Write([]byte("{ \"status\" : \"0\" }"))
+					}
+				}
+			}
 		case "getFirmware":
 			login := tail[1:]
 			// We must retreive the username BIOS and return it as the response body

@@ -395,6 +395,16 @@ func home(w http.ResponseWriter, r *http.Request) {
 			        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 				proxy.ServeHTTP(w , r)
 			}
+		case "isRunning":
+			if ( cacheIndex != -1 ) {
+				url, _ := url.Parse("http://"+ciServers.servers[cacheIndex].compileIp+compileTcpPort)
+                                proxy := httputil.NewSingleHostReverseProxy(url)
+                                r.URL.Host = "http://"+ciServers.servers[cacheIndex].compileIp+compileTcpPort
+                                fmt.Printf("Tail %s\n",tail)
+                                r.URL.Path = tail
+                                r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
+                                proxy.ServeHTTP(w , r)
+                        }
 		case "isEmulatorsPool":
 			if ( cacheIndex != -1 ) {
 				url, _ := url.Parse("http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort)
