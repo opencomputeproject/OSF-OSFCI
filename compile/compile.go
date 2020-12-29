@@ -11,6 +11,7 @@ import (
 	"os/exec"
 	"base"
 	"fmt"
+	"context"
 	"golang.org/x/sys/unix"
         "github.com/docker/docker/api/types"
         "github.com/docker/docker/client"
@@ -54,10 +55,10 @@ func containerList() ([]types.Container) {
 
 func isRunning(prefix string) (bool) {
         containers := containerList()
-        myUniqueId := md5.Sum([]byte(username))
+        myUniqueId := md5.Sum([]byte(username+"\n"))
         containerName := prefix + "_" + hex.EncodeToString(myUniqueId[:])
         for _, container := range containers {
-                if ( container.Names[0] == containerName ) {
+                if ( container.Names[0] == "/"+containerName ) {
                         return true
                 }
         }
