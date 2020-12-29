@@ -12,6 +12,10 @@ import (
 	"base"
 	"fmt"
 	"golang.org/x/sys/unix"
+        "github.com/docker/docker/api/types"
+        "github.com/docker/docker/client"
+        "crypto/md5"
+        "encoding/hex"
 )
 
 var compileTcpPort = os.Getenv("COMPILE_TCPPORT")
@@ -25,6 +29,8 @@ var OpenBMCCommand *exec.Cmd = nil
 var LinuxBOOTCommand *exec.Cmd = nil
 var OpenBMCBuildChannel chan string
 var LinuxBOOTBuildChannel chan string
+var dockerClient *client.Client
+var username string
 
 // to check if a docker container is running
 // docker inspect -f '{{.State.Running}}' linuxboot_vejmarie2
@@ -38,6 +44,25 @@ func ShiftPath(p string) (head, tail string) {
     return p[1:i], p[i:]
 }
 
+func containerList() ([]types.Container) {
+        containers, err := dockerClient.ContainerList(context.Background(), types.ContainerListOptions{})
+        if err != nil {
+                panic(err)
+        }
+        return containers
+}
+
+func isRunning(prefix string) (bool) {
+        containers := containerList()
+        myUniqueId := md5.Sum([]byte(username))
+        containerName := prefix + "_" + hex.EncodeToString(myUniqueId[:])
+        for _, container := range containers {
+                if ( container.Names[0] == containerName ) {
+                        return true
+                }
+        }
+        return false
+}
 
 func home(w http.ResponseWriter, r *http.Request) {
 	head,tail := ShiftPath( r.URL.Path)
@@ -72,14 +97,14 @@ func home(w http.ResponseWriter, r *http.Request) {
  		case "isRunning":
 			command := tail[1:]
 			if ( command == "openbmc" ) {
-				if ( OpenBMCCommand == nil ) {
+				if ( OpenBMCCommand != nil ) {
 					w.Write([]byte("{ \"status\" : \"1\" }"))
 				} else {
 					w.Write([]byte("{ \"status\" : \"0\" }"))
 				}
 			} else {
 				if ( command == "linuxboot" ) {
-					if ( LinuxBOOTCommand == nil ) {
+					if ( LinuxBOOTCommand != nil ) {
 						w.Write([]byte("{ \"status\" : \"1\" }"))
 					} else {
 						w.Write([]byte("{ \"status\" : \"0\" }"))
@@ -256,9 +281,12 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 func main() {
     print("=============================== \n")
-    print("| Starting frontend           |\n")
+    print("| Starting Compile backen     |\n")
     print("| Development version -       |\n")
     print("=============================== \n")
+
+    dockerClient,_ = client.NewEnvClient()
+
 
     OpenBMCBuildChannel = make(chan string)
     LinuxBOOTBuildChannel = make(chan string)
