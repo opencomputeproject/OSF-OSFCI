@@ -1,0 +1,60 @@
+# (c) Hewlett Packard Enterprise LP - 2020
+#!/bin/bash
+
+function check_requirements() {
+        for i in jq openssl base64 curl
+        do
+                command=`which $i`
+                if [ "$command" == "" ]
+                then
+                        echo "Error: Please install $i or verify it is accessible through your default execution path variable"
+                        exit 1
+                fi
+        done
+}
+
+function help() {
+   echo "getBuildStatus is a command line tool which provide build status of openbmc / linuxboot from an OSFCI instance"
+   echo ""
+   echo "Mandatory options are:"
+   echo "-f or --firmware <openbmc|linuxboot> : to select which firmware to download"
+   exit 0
+}
+
+check_requirements
+
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -f|--firmware)
+    firmware="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    *)    # unknown option
+    shift # past argument
+    help
+    exit 1
+    ;;
+esac
+done
+
+if [ "$firmware" == "" ]
+then
+echo "Error missing firmware parameter : -f|--firmware"
+echo ""
+help
+fi
+
+username=`cat $HOME/.osfci/auth | awk '{ print $1}'`
+accessKey=`cat $HOME/.osfci/auth | awk '{ print $2 }'`
+secretKey=`cat $HOME/.osfci/auth | awk '{ print $3 }'`
+serverName=`cat $HOME/.osfci/credential.txt | sed 's/{//' | sed 's/}//' | awk -F"," '{ print $1 }' | awk -F":" '{ print $2 }' | sed 's/"//g'`
+
+echo $username
+
+curl -v -b $HOME/.osfci/$username.jar -X GET "https://osfci.tech/ci/isRunning/$firmware"
+
+
