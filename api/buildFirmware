@@ -20,13 +20,13 @@ function help() {
    echo "-f or --firmware <openbmc|linuxboot> : to select which firmware to download"
    echo "-g or --git : http address of a git repository"
    echo "-b or --branch : branch to use"
+   echo "-w or --wait : wait for end of compilation"
    exit 0
 }
 
 check_requirements
 
 reuse="0"
-keep="0"
 waitServer="0"
 
 while [[ $# -gt 0 ]]
@@ -46,6 +46,11 @@ case $key in
     ;;
     -f|--firmware)
     firmware="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -w|--wait)
+    waitServer="1"
     shift # past argument
     shift # past value
     ;;
@@ -88,25 +93,24 @@ relativePath="/ci/$command/$username"
 contentType="text/plain"
 stringToSign="PUT\n\n${contentType}\n${dateFormatted}\n${relativePath}"
 signature=`echo -en ${stringToSign} | openssl sha1 -hmac ${secretKey} -binary | base64`
-curl -v -b $HOME/.osfci/$username.jar -d"$git $branch $machine 0" -X PUT \
+curl -s -b $HOME/.osfci/$username.jar -d"$git $branch $machine 0" -X PUT \
 -H "Host: osfci.tech" \
 -H "mydate: ${dateFormatted}" \
 -H "Content-Type: ${contentType}" \
 -H "Authorization: OSF ${accessKey}:${signature}" \
 "https://osfci.tech/ci/$command/$username"
-# rm $TMPDIR/test.txt
-echo "https://osfci.tech/ci/$command/$username"
-exit 0
 
-# This part is not yet developped
-
-if [ "$keep" == "0" ]
+if [ "$waitServer" == "1" ]
 then
-# we have to exit only when the build is finished
-# 
-# We have to release the session
-# We do not need to stop the power as this script doesn't turn it on
-	curl -v -o $TMPDIR/test.txt -b $HOME/.osfci_cookies/$username.jar -X GET "https://osfci.tech/ci/stopServer/$serverName"
-	rm $TMPDIR/test.txt
-	rm $HOME/.osfci_cookies/*
+waitStatus="1"
+while [ "$waitStatus" == "1" ]
+do
+	pollServer=`getBuildStatus -f $firmware`
+	serverStatus = `echo $pollserver | awk '{ print $4 }' | sed 's/\"//g'`
+	if [ "$serverStatus" != "1" ]
+	then
+		waitStatus=0
+	fi
+	sleep 5
+done
 fi
