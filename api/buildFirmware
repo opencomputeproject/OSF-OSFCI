@@ -105,10 +105,11 @@ then
 waitStatus="1"
 while [ "$waitStatus" == "1" ]
 do
-	pollServer=`getBuildStatus -f $firmware`
-	serverStatus = `echo $pollserver | awk '{ print $4 }' | sed 's/\"//g'`
+	pollServer=`./getBuildStatus -f $firmware`
+	serverStatus=`echo $pollServer | awk '{ print $4 }' | sed 's/\"//g'`
 	if [ "$serverStatus" != "1" ]
 	then
+		echo "exiting on serverstatus $serverStatus"
 		waitStatus=0
 	fi
 	sleep 5
