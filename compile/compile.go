@@ -11,6 +11,8 @@ import (
 	"os/exec"
 	"base"
 	"fmt"
+        "io"
+	"bufio"
 	"context"
 	"golang.org/x/sys/unix"
         "github.com/docker/docker/api/types"
@@ -28,6 +30,7 @@ var storageUri = os.Getenv("STORAGE_URI")
 var storageTcpPort= os.Getenv("STORAGE_TCPPORT")
 var OpenBMCCommand *exec.Cmd = nil
 var LinuxBOOTCommand *exec.Cmd = nil
+var LinuxBOOTOutput io.ReadCloser
 var OpenBMCBuildChannel chan string
 var LinuxBOOTBuildChannel chan string
 var dockerClient *client.Client
@@ -252,6 +255,10 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         }
 
                                         LinuxBOOTCommand = exec.Command(startLinuxbootBuildBin, args...)
+					if ( interactive != "1" ) {
+						LinuxBOOTOutput, _ = LinuxBOOTCommand.StdoutPipe()
+						LinuxBOOTCommand.Stderr = LinuxBOOTCommand.Stdout
+					}
                                         err := LinuxBOOTCommand.Start()
 					if ( err == nil ) {	
 	                                        go func() {
@@ -274,7 +281,14 @@ func home(w http.ResponseWriter, r *http.Request) {
 		                                        } else {
 		                                                conn.Close()
 		                                        }
+						} else {
+							scanner := bufio.NewScanner(LinuxBOOTOutput)
+							for scanner.Scan() {
+								line := scanner.Text()
+								fmt.Printf("Received: %s\n", line)
+							}
 						}
+
 					} else {
 						LinuxBOOTCommand = nil
 					}
