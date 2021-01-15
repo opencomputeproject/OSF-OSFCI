@@ -29,12 +29,17 @@ var firmwaresPath = os.Getenv("FIRMWARES_PATH")
 var storageUri = os.Getenv("STORAGE_URI")
 var storageTcpPort= os.Getenv("STORAGE_TCPPORT")
 var OpenBMCCommand *exec.Cmd = nil
+var OpenBMCOutput io.ReadCloser
+
 var LinuxBOOTCommand *exec.Cmd = nil
 var LinuxBOOTOutput io.ReadCloser
+
 var OpenBMCBuildChannel chan string
 var LinuxBOOTBuildChannel chan string
 var dockerClient *client.Client
 var username string
+var linuxbootDockerID string
+var openbmcDockerID string
 
 // to check if a docker container is running
 // docker inspect -f '{{.State.Running}}' linuxboot_vejmarie2
@@ -175,6 +180,10 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         OpenBMCCommand.SysProcAttr = &unix.SysProcAttr{
                                                 Setsid: true,
                                         }
+					if ( interactive != "1" ) {
+                                                OpenBMCOutput, _ = OpenBMCCommand.StdoutPipe()
+                                                OpenBMCCommand.Stderr = OpenBMCCommand.Stdout
+                                        }
                                         err := OpenBMCCommand.Start()
 					if ( err == nil ) {
 	                                        go func() {
@@ -197,7 +206,21 @@ func home(w http.ResponseWriter, r *http.Request) {
 		                                        } else {
 		                                                conn.Close()
 		                                        }
+						} else {
+							f, _ := os.Create("/tmp/openbmc_"+username+".log")
+                                                        scanner := bufio.NewScanner(OpenBMCOutput)
+                                                        scanner.Scan()
+                                                        openbmcDockerID = scanner.Text()
+                                                        fmt.Printf("New container: %s\n", openbmcDockerID)
+                                                        go func() {
+                                                                for scanner.Scan() {
+                                                                        line := scanner.Text()
+                                                                        f.WriteString(line+"\n")
+                                                                }
+                                                                f.Close()
+                                                        } ()
 						}
+					
 					} else {
 						OpenBMCCommand = nil
 					}
@@ -272,11 +295,18 @@ func home(w http.ResponseWriter, r *http.Request) {
 		                                                conn.Close()
 		                                        }
 						} else {
+							f, _ := os.Create("/tmp/linuxboot_"+username+".log")
 							scanner := bufio.NewScanner(LinuxBOOTOutput)
-							for scanner.Scan() {
-								line := scanner.Text()
-								fmt.Printf("Received: %s\n", line)
-							}
+							scanner.Scan()
+							linuxbootDockerID = scanner.Text()
+							fmt.Printf("New container: %s\n", linuxbootDockerID)
+							go func() {	
+								for scanner.Scan() {
+									line := scanner.Text()
+									f.WriteString(line+"\n")
+								}
+								f.Close()
+							} ()
 						}
 
 					} else {

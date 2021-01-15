@@ -111,6 +111,7 @@ do
 	then
 		echo "exiting on serverstatus $serverStatus"
 		waitStatus=0
+		exit 0
 	fi
 	sleep 5
 done
