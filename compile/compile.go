@@ -104,20 +104,10 @@ func home(w http.ResponseWriter, r *http.Request) {
                         }
  		case "isRunning":
 			command := tail[1:]
-			if ( command == "openbmc" ) {
-				if ( OpenBMCCommand != nil ) {
-					w.Write([]byte("{ \"status\" : \"1\" }"))
-				} else {
-					w.Write([]byte("{ \"status\" : \"0\" }"))
-				}
+			if ( isRunning(command) ) {
+				w.Write([]byte("{ \"status\" : \"1\" }"))
 			} else {
-				if ( command == "linuxboot" ) {
-					if ( LinuxBOOTCommand != nil ) {
-						w.Write([]byte("{ \"status\" : \"1\" }"))
-					} else {
-						w.Write([]byte("{ \"status\" : \"0\" }"))
-					}
-				}
+				w.Write([]byte("{ \"status\" : \"0\" }"))
 			}
 		case "getFirmware":
 			login := tail[1:]
@@ -153,7 +143,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 						_ = <- OpenBMCBuildChannel
 						OpenBMCCommand = nil
                         		}
-					username := tail[1:]
+					username = tail[1:]
                                         data := base.HTTPGetBody(r)
                                         keywords := strings.Fields(string(data))
                                         githubRepo := keywords[0]
@@ -221,7 +211,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                                 _ = <- LinuxBOOTBuildChannel
 						LinuxBOOTCommand = nil
                                         }
-					username := tail[1:]
+					username = tail[1:]
 					data := base.HTTPGetBody(r)
 					keywords := strings.Fields(string(data))
 					githubRepo := keywords[0]
