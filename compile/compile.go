@@ -54,7 +54,9 @@ func ShiftPath(p string) (head, tail string) {
 }
 
 func containerList() ([]types.Container) {
-        containers, err := dockerClient.ContainerList(context.Background(), types.ContainerListOptions{})
+        var options types.ContainerListOptions
+        options.All = true
+        containers, err := dockerClient.ContainerList(context.Background(), options)
         if err != nil {
                 panic(err)
         }
