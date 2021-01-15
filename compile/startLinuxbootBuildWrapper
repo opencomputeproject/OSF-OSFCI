@@ -31,8 +31,8 @@ then
 $BINARIES_PATH/ttyd -p 7681 -s 9 screen -L -Logfile /tmp/linuxboot_$1 $BINARIES_PATH/startLinuxbootBuild "$@"  &
 ttydPID=$!
 else
-screen -d -m -L -Logfile /tmp/linuxboot_$1 $BINARIES_PATH/startLinuxbootBuild "$@"  &
 ttydPID="-2"
+/tmp/linuxboot_$1 $BINARIES_PATH/startLinuxbootBuild "$@"
 fi
 if [ "$7" == "1" ]
 then
