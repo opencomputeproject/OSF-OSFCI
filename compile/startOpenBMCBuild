@@ -17,7 +17,9 @@ mkdir /tmp/volume/openbmc_$USERNAME
 else
 rm -rf /tmp/volume/openbmc_$USERNAME/*
 fi
-docker run --name openbmc_$SUM -v /datas:/datas -v /tmp/volume/openbmc_$USERNAME:/volume -e RECIPES=$RECIPES -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e PROXY=$PROXY --rm=true  -t openbmc
+docker run -d --name openbmc_$SUM -v /datas:/datas -v /tmp/volume/openbmc_$USERNAME:/volume -e RECIPES=$RECIPES -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e PROXY=$PROXY --rm=true  -t openbmc
+docker logs -f openbmc_$SUM
+docker wait openbmc_$SUM
 if [ -f /tmp/volume/openbmc_$USERNAME/obmc-dl360poc.static.mtd ]
 then
 \rm $FIRMWARES_PATH/test_openbmc_$USERNAME.mtd

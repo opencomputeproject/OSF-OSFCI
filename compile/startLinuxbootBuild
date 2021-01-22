@@ -24,7 +24,9 @@ then
         export KEYPATH=/volume/authorized_keys
 fi
 cp $FIRMWARES_PATH/default.rom /tmp/volume/linuxboot_$USERNAME/
-docker run --name linuxboot_$SUM -v /tmp/volume/linuxboot_$USERNAME:/volume -e KEYPATH=$KEYPATH -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e BOARDS=$BOARDS -e PROXY=$PROXY --rm=true  linuxboot 
+docker run -d --name linuxboot_$SUM -v /tmp/volume/linuxboot_$USERNAME:/volume -e KEYPATH=$KEYPATH -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e BOARDS=$BOARDS -e PROXY=$PROXY --rm=true  linuxboot 
+docker logs -f linuxboot_$SUM
+docker wait linuxboot_$SUM
 if [ -f /tmp/volume/linuxboot_$USERNAME/linuxboot.rom ]
 then
 \rm $FIRMWARES_PATH/test_$USERNAME.rom
