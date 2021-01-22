@@ -1,5 +1,5 @@
 # (c) Hewlett Packard Enterprise LP - 2020
-#!/bin/bash
+#!/bin/bash -x
 
 function check_requirements() {
 	for i in jq openssl base64 curl
@@ -93,6 +93,7 @@ relativePath="/ci/$command/$username"
 contentType="text/plain"
 stringToSign="PUT\n\n${contentType}\n${dateFormatted}\n${relativePath}"
 signature=`echo -en ${stringToSign} | openssl sha1 -hmac ${secretKey} -binary | base64`
+echo "launching container"
 curl -s -b $HOME/.osfci/$username.jar -d"$git $branch $machine 0" -X PUT \
 -H "Host: osfci.tech" \
 -H "mydate: ${dateFormatted}" \
