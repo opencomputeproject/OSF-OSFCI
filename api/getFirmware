@@ -17,7 +17,6 @@ function help() {
    echo "get_firmware is a command line tool allowing you to download your OpenBMC or Linuxboot firmware from an OSFCI instance"
    echo ""
    echo "Mandatory options are:"
-   echo "-u or --user <username> : Account name from OSFCI server"
    echo "-f or --firmware <openbmc|linuxboot> : to select which firmware to download"
    exit 0
 }
@@ -29,11 +28,6 @@ do
 key="$1"
 
 case $key in
-    -u|--user)
-    username="$2"
-    shift # past argument
-    shift # past value
-    ;;
     -f|--firmware)
     firmware="$2"
     shift # past argument
@@ -47,12 +41,8 @@ case $key in
 esac
 done
 
-if [ "$username" == "" ] 
-then
-echo "Error missing user parameter : -u|--user"
-echo ""
-help
-fi
+username=`cat $HOME/.osfci/auth | awk '{ print $1}'`
+
 if [ "$firmware" == "" ]
 then
 echo "Error missing firmware parameter : -f|--firmware"
@@ -60,12 +50,8 @@ echo ""
 help
 fi
 
-echo "Please type in your account password:"
-read -s upassword
-
-user_s3_api=`curl -s -X "POST" -d"password=$upassword" -H "Content-Type: application/x-www-form-urlencoded"  "https://osfci.tech/user/$username/getToken"`
-accessKey=`echo $user_s3_api | jq -r '.accessKey'`
-secretKey=`echo $user_s3_api | jq -r '.secretKey'`
+accessKey=`cat $HOME/.osfci/auth | awk '{ print $2 }'`
+secretKey=`cat $HOME/.osfci/auth | awk '{ print $3 }'`
 dateFormatted=`TZ=GMT date -R`
 if [ "$firmware" == "linuxboot" ] 
 then
