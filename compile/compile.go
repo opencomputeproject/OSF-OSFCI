@@ -210,17 +210,17 @@ func home(w http.ResponseWriter, r *http.Request) {
 		                                                conn.Close()
 		                                        }
 						} else {
-							f, _ := os.Create("/tmp/openbmc_"+username+".log")
                                                         scanner := bufio.NewScanner(OpenBMCOutput)
                                                         scanner.Scan()
                                                         openbmcDockerID = scanner.Text()
                                                         fmt.Printf("New container: %s\n", openbmcDockerID)
                                                         go func() {
+								var openbmcLog strings.Builder
                                                                 for scanner.Scan() {
                                                                         line := scanner.Text()
-                                                                        f.WriteString(line+"\n")
+									openbmcLog.WriteString(line+"\n")
                                                                 }
-                                                                f.Close()
+								base.HTTPPutRequest("http://"+storageUri+storageTcpPort+"/user/"+username+"/openbmc/",[]byte(openbmcLog.String()),"text/plain")
                                                         } ()
 							// we have to push the log to the storage area
 						}
