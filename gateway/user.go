@@ -365,6 +365,17 @@ func getOpenBMC(username string, w http.ResponseWriter) {
 	w.Write(buf)
 }
 
+func getOpenBMCBuildLog(username string, w http.ResponseWriter) {
+        client := &http.Client{}
+        var req *http.Request
+        req, _ = http.NewRequest("GET","http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/getBMCFirmwareBuildLog", nil)
+        response, _  := client.Do(req)
+        buf, _ := ioutil.ReadAll(response.Body)
+        w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
+        w.Write(buf)
+}
+
+
 func getLinuxBoot(username string, w http.ResponseWriter) {
         client := &http.Client{}
         var req *http.Request
@@ -373,6 +384,16 @@ func getLinuxBoot(username string, w http.ResponseWriter) {
         buf, _ := ioutil.ReadAll(response.Body)
         w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
 	w.Write(buf)
+}
+
+func getLinuxBootBuildLog(username string, w http.ResponseWriter) {
+        client := &http.Client{}
+        var req *http.Request
+        req, _ = http.NewRequest("GET","http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/getFirmwareBuildLog", nil)
+        response, _  := client.Do(req)
+        buf, _ := ioutil.ReadAll(response.Body)
+        w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
+        w.Write(buf)
 }
 
 func userCallback(w http.ResponseWriter, r *http.Request) {
@@ -441,6 +462,10 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 				getOpenBMC(username, w)
 			case "getLinuxBoot":
 				getLinuxBoot(username, w)
+                        case "getOpenBMCLog":
+                                getOpenBMCLog(username, w)
+                        case "getLinuxBootLog":
+                                getLinuxBootLog(username, w)
 			default:
 			}
                 case http.MethodPut:

@@ -104,10 +104,22 @@ func getSystemBIOS(username string, w http.ResponseWriter) {
 	w.Write(content)
 }
 
+func getSystemBIOSBuildLog(username string, w http.ResponseWriter) {
+        content,_ := ioutil.ReadFile(storageRoot + "/" + string(username[0]) + "/" + "linuxboot_" + username + ".log")
+        w.Header().Add("Content-Length", strconv.Itoa(len(content)))
+        w.Write(content)
+}
+
 func getOpenBMC(username string, w http.ResponseWriter) {
 	content,_ := ioutil.ReadFile(storageRoot + "/" + string(username[0]) + "/" + "openbmc_" + username + ".rom")
 	w.Header().Add("Content-Length", strconv.Itoa(len(content)))
 	w.Write(content)
+}
+
+func getOpenBMCBuildLog(username string, w http.ResponseWriter) {
+        content,_ := ioutil.ReadFile(storageRoot + "/" + string(username[0]) + "/" + "openbmc_" + username + ".log")
+        w.Header().Add("Content-Length", strconv.Itoa(len(content)))
+        w.Write(content)
 }
 
 func getImage(username string) (string) {
@@ -204,6 +216,10 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 				getSystemBIOS(username, w)
 			case "getBMCFirmware":
 				getOpenBMC(username, w)
+			case "getFirmwareBuildLog":
+                                getSystemBIOSBuildLog(username, w)
+                        case "getBMCFirmwareBuildLog":
+                                getOpenBMCBuildLog(username, w)
 			default:
 				filecontent, return_value=getEntry(username)
 				if ( return_value != 0) {
