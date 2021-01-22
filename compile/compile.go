@@ -299,7 +299,6 @@ func home(w http.ResponseWriter, r *http.Request) {
 		                                                conn.Close()
 		                                        }
 						} else {
-							f, _ := os.Create("/tmp/linuxboot_"+username+".log")
 							scanner := bufio.NewScanner(LinuxBOOTOutput)
 							scanner.Scan()
 							linuxbootDockerID = scanner.Text()
