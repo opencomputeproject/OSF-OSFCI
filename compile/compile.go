@@ -31,6 +31,7 @@ var storageTcpPort= os.Getenv("STORAGE_TCPPORT")
 var OpenBMCCommand *exec.Cmd = nil
 var OpenBMCOutput io.ReadCloser
 
+
 var LinuxBOOTCommand *exec.Cmd = nil
 var LinuxBOOTOutput io.ReadCloser
 
@@ -221,6 +222,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                                                 }
                                                                 f.Close()
                                                         } ()
+							// we have to push the log to the storage area
 						}
 					
 					} else {
@@ -303,11 +305,13 @@ func home(w http.ResponseWriter, r *http.Request) {
 							linuxbootDockerID = scanner.Text()
 							fmt.Printf("New container: %s\n", linuxbootDockerID)
 							go func() {	
+								var linuxbootLog strings.Builder
 								for scanner.Scan() {
 									line := scanner.Text()
-									f.WriteString(line+"\n")
+									linuxbootLog.WriteString(line+"\n")
 								}
-								f.Close()
+								
+								base.HTTPPutRequest("http://"+storageUri+storageTcpPort+"/user/"+username+"/linuxboot/",[]byte(linuxbootLog.String()),"text/plain")
 							} ()
 						}
 

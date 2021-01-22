@@ -85,6 +85,19 @@ func storeFirmware(username string, r *http.Request, firmware string) (int) {
         return 1
 }
 
+func storeLog(username string, r *http.Request, firmware string) (int) {
+        _, err := os.Stat(storageRoot + "/" + string(username[0]))
+
+        file.Lock()
+        defer file.Unlock()
+        if (  os.IsNotExist(err) ) {
+                // we must create the directory which will contain the file
+                _ = os.Mkdir(storageRoot + "/" + string(username[0]), os.ModePerm)
+        }
+        _ = ioutil.WriteFile(storageRoot + "/" + string(username[0]) + "/" + firmware + "_" + username + ".log", base.HTTPGetBody(r), os.ModePerm)
+        return 1
+}
+
 func getSystemBIOS(username string, w http.ResponseWriter) {
 	content,_ := ioutil.ReadFile(storageRoot + "/" + string(username[0]) + "/" + "linuxboot_" + username + ".rom")
 	w.Header().Add("Content-Length", strconv.Itoa(len(content)))
@@ -212,7 +225,17 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 						}
 					}
 				} else {
-					createEntry(username,string(base.HTTPGetBody(r)))	
+					if ( r.Header.Get("Content-Type") == "text/plain" ) {
+						if ( command == "linuxboot" ) {
+	                                                storeLog(username,r, "linuxboot")
+	                                        } else {
+	                                                if ( command == "openbmc" ) {
+	                                                        storeLog(username,r, "openbmc")
+	                                                }
+	                                        }
+					} else {
+						createEntry(username,string(base.HTTPGetBody(r)))	
+					}
 				}
 			} else {
 				createImage(username,string(base.HTTPGetBody(r)))
