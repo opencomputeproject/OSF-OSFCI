@@ -463,9 +463,9 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 			case "getLinuxBoot":
 				getLinuxBoot(username, w)
                         case "getOpenBMCLog":
-                                getOpenBMCLog(username, w)
+                                getOpenBMCBuildLog(username, w)
                         case "getLinuxBootLog":
-                                getLinuxBootLog(username, w)
+                                getLinuxBootBuildLog(username, w)
 			default:
 			}
                 case http.MethodPut:
