@@ -9,7 +9,7 @@ WORKDIR /app
 # Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 
-# let's build
+# lets build
 RUN apt-get --allow-unauthenticated update --allow-insecure-repositories
 RUN apt-get update && apt install -qq -y locales
 RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
