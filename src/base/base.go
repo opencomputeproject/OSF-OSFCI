@@ -110,8 +110,11 @@ var smtpPassword = os.Getenv("SMTP_PASSWORD")
 var bCC = os.Getenv("BCC_ADDRESS")
 
 func SendEmail(email string, subject string, validationString string) {
+    var aut smtp.Auth
     servername := smtpServer
     host, _, _ := net.SplitHostPort(servername)
+    shortServer := strings.Split(servername,":")
+    smtpPort := shortServer[1]
     // If I have a short login (aka the login do not contain the domain name from the SMTP server)
     shortName := strings.Split(smtpAccount, "@")
     var from mail.Address
@@ -138,8 +141,9 @@ func SendEmail(email string, subject string, validationString string) {
     message += "\r\n" + body
 
     // Connect to the SMTP Server
-
-    auth := smtp.PlainAuth("",smtpAccount, smtpPassword, host)
+    if ( len(smtpPassword) > 0 ) {
+	    auth := smtp.PlainAuth("",smtpAccount, smtpPassword, host)
+    }
 
     // TLS config
     tlsconfig := &tls.Config {
@@ -157,12 +161,15 @@ func SendEmail(email string, subject string, validationString string) {
     }
 
     // comment that line to use SSL connection
-
-    conn.StartTLS(tlsconfig)
+    if ( smtpPort != "25" ) {
+        conn.StartTLS(tlsconfig)
+    }
 
     // Auth
-    if err = conn.Auth(auth); err != nil {
-        log.Panic(err)
+    if ( len(smtpPassword) > 1 ) {
+	    if err = conn.Auth(auth); err != nil {
+	        log.Panic(err)
+	    }
     }
 
     // To && From
@@ -208,12 +215,15 @@ func SendEmail(email string, subject string, validationString string) {
     }
 
     // comment that line to use SSL connection
-
-    conn.StartTLS(tlsconfig)
+    if ( smtpPort != "25" ) {
+	    conn.StartTLS(tlsconfig)
+    }
 
     // Auth
-    if err = conn.Auth(auth); err != nil {
-        log.Panic(err)
+    if ( len(smtpPassword) > 1 ) {
+    	if err = conn.Auth(auth); err != nil {
+        	log.Panic(err)
+    	}
     }
 
     // To && From
