@@ -110,7 +110,7 @@ var smtpPassword = os.Getenv("SMTP_PASSWORD")
 var bCC = os.Getenv("BCC_ADDRESS")
 
 func SendEmail(email string, subject string, validationString string) {
-    var aut smtp.Auth
+    var auth smtp.Auth
     servername := smtpServer
     host, _, _ := net.SplitHostPort(servername)
     shortServer := strings.Split(servername,":")
@@ -142,7 +142,7 @@ func SendEmail(email string, subject string, validationString string) {
 
     // Connect to the SMTP Server
     if ( len(smtpPassword) > 0 ) {
-	    auth := smtp.PlainAuth("",smtpAccount, smtpPassword, host)
+	    auth = smtp.PlainAuth("",smtpAccount, smtpPassword, host)
     }
 
     // TLS config
