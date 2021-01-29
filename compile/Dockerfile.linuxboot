@@ -9,7 +9,7 @@ WORKDIR /app
 # Copy the source from the current directory to the Working Directory inside the container
 COPY . .
 
-# let's build
+# lets build
 ENV GOPATH=$GOPATH:/go/src/base
 RUN apt-get --allow-unauthenticated update --allow-insecure-repositories
 RUN apt-get update && apt install -qq -y locales
