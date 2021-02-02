@@ -6,6 +6,8 @@ export GOPATH=:/go/src/base:/home/linuxboot/mainboards/$BOARDS
 if [ "$PROXY" != "" ]
 then
 git config --global https.proxy $PROXY
+git config --global http.proxy $PROXY
+git config --global url.https://github.com/.insteadOf git://github.com/
 fi
 git clone $GITHUBREPO
 cd mainboards
