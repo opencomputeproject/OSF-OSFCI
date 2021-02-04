@@ -1,0 +1,9 @@
+.dropdown-menu {
+    cursor: pointer;
+}
+.navbar-nav .nav-link {
+        cursor: pointer;
+}
+.navbar-brand {
+        cursor: pointer;
+}
