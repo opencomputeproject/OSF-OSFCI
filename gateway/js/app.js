@@ -179,7 +179,7 @@ function run_ci(servername, RemainingSecond) {
 	$("#gitToken").css("display","");
 	$("#Token").on("change", function() {
                 var Data = $("#Token").val();
-                Url_rel = '/ci/'+mylocalStorage['username']+'/gitToken/';
+                Url_rel = '/ci/gitToken/'+mylocalStorage['username'];
                 BuildSignedAuth(Url_rel, 'PUT' , "text/plain", function(authString) {
 	                $.ajax({
 				url: window.location.origin + Url_rel,

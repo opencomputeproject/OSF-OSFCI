@@ -160,7 +160,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         	username = keys[1]
 	                                        gitToken = keys[2]
 					} else {
-						username = keys[0]
+						username = keys[1]
 					}
 					fmt.Printf("%s %s\n",username, keys)
 					fmt.Printf("GitToken: %s\n",gitToken)
