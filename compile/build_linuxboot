@@ -9,6 +9,11 @@ git config --global https.proxy $PROXY
 git config --global http.proxy $PROXY
 git config --global url.https://github.com/.insteadOf git://github.com/
 fi
+if [ "$GITTOKEN" != "OSFCIemptyOSFCI" ]
+then
+	newRepo=`echo $GITHUBREPO | sed "s/:\/\//:\/\/$GITTOKEN\@/"`
+	export GITHUBREPO=$newRepo
+fi
 git clone $GITHUBREPO
 cd mainboards
 git checkout -b $BRANCH origin/$BRANCH

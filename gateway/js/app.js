@@ -174,6 +174,29 @@ function run_ci(servername, RemainingSecond) {
 	$('#help').css("display","none");
 	$('#dropdown').css("display","none");
 
+
+	// We must add an input field into the navbar to gather the github Token entry
+	$("#gitToken").css("display","");
+	$("#Token").on("change", function() {
+                var Data = $("#Token").val();
+                Url_rel = '/ci/'+mylocalStorage['username']+'/gitToken/';
+                BuildSignedAuth(Url_rel, 'PUT' , "text/plain", function(authString) {
+	                $.ajax({
+				url: window.location.origin + Url_rel,
+				type: 'PUT',
+				headers: {
+					"Authorization": "OSF " + mylocalStorage['accessKey'] + ':' + authString['signedString'],
+					"Content-Type" : "text/plain",
+					"myDate" : authString['formattedDate']
+				},
+				data: Data,
+				contentType: 'text/plain',
+				success: function(response) {
+				}
+			});
+		});
+	});
+
 	$("#EndSession").css("display","");
 
 

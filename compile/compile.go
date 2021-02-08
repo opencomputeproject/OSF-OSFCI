@@ -146,12 +146,25 @@ func home(w http.ResponseWriter, r *http.Request) {
 		case "buildbmcfirmware":
                         switch r.Method {
                                 case http.MethodPut:
+					var gitToken string
 				        if ( OpenBMCCommand != nil ) {
                         		        unix.Kill(OpenBMCCommand.Process.Pid, unix.SIGINT)
 						_ = <- OpenBMCBuildChannel
 						OpenBMCCommand = nil
                         		}
-					username = tail[1:]
+					fmt.Printf("Tail: %s\n", tail)
+					keys := strings.Split(tail,"/")
+
+                                        gitToken = "OSFCIemptyOSFCI"
+					if ( len(keys) >2 ) {
+                                        	username = keys[1]
+	                                        gitToken = keys[2]
+					} else {
+						username = keys[0]
+					}
+					fmt.Printf("%s %s\n",username, keys)
+					fmt.Printf("GitToken: %s\n",gitToken)
+
                                         data := base.HTTPGetBody(r)
                                         keywords := strings.Fields(string(data))
                                         githubRepo := keywords[0]
@@ -177,6 +190,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 					args = append (args, storageUri)
                                         args = append (args, storageTcpPort)
 					args = append (args, interactive)
+					args = append (args, gitToken)
 
                                         args = append (args, proxy)
                                         OpenBMCCommand = exec.Command(startOpenBMCBuildBin, args...)
@@ -239,7 +253,15 @@ func home(w http.ResponseWriter, r *http.Request) {
                                                 _ = <- LinuxBOOTBuildChannel
 						LinuxBOOTCommand = nil
                                         }
-					username = tail[1:]
+					// We must retrieve the Token
+					keys := strings.Split(tail,"/")
+
+					username = keys[1]
+					gitToken := keys[2]
+					if ( len(gitToken) == 0 ) {
+						gitToken = "OSFCIemptyOSFCI"
+					}
+
 					data := base.HTTPGetBody(r)
 					keywords := strings.Fields(string(data))
 					githubRepo := keywords[0]
@@ -265,6 +287,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                         args = append (args, storageUri)
                                         args = append (args, storageTcpPort)
 					args = append (args, interactive)
+					args = append (args, gitToken)
 
                                         args = append (args, proxy)
 
