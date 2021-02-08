@@ -6,7 +6,8 @@ BOARDS=$4
 STORAGE_URI=$5
 STORAGE_TCPPORT=$6
 INTERACTIVE=$7
-PROXY=$8
+GITTOKEN=$8
+PROXY=$9
 SUM=`md5sum <<EOF
 $USERNAME
 EOF`
@@ -24,7 +25,7 @@ then
         export KEYPATH=/volume/authorized_keys
 fi
 cp $FIRMWARES_PATH/default.rom /tmp/volume/linuxboot_$USERNAME/
-docker run -d --name linuxboot_$SUM -v /tmp/volume/linuxboot_$USERNAME:/volume -e KEYPATH=$KEYPATH -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e BOARDS=$BOARDS -e PROXY=$PROXY --rm=true  linuxboot 
+docker run -d --network host --name linuxboot_$SUM -v /tmp/volume/linuxboot_$USERNAME:/volume -e KEYPATH=$KEYPATH -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e BOARDS=$BOARDS -e PROXY=$PROXY -e GITTOKEN=$GITTOKEN --rm=true  linuxboot 
 docker logs -f linuxboot_$SUM
 docker wait linuxboot_$SUM
 if [ -f /tmp/volume/linuxboot_$USERNAME/linuxboot.rom ]
@@ -35,6 +36,14 @@ echo "Image successfully generated ..."
 echo "shadow test_$USERNAME.rom" 
 $BINARIES_PATH/shadow $FIRMWARES_PATH/test_$USERNAME.rom
 echo "DONE !" 
+if [ "$http_proxy" != "" ]
+then
+unset http_proxy
+fi
+if [ "$https_proxy" != "" ]
+then
+unset https_proxy
+fi
 curl -H "Content-Type:application/octet-stream" -T $FIRMWARES_PATH/test_$USERNAME.rom http://$STORAGE_URI$STORAGE_TCPPORT/user/$USERNAME/linuxboot/test_$USERNAME.rom
 fi
 if [ "$INTERACTIVE" == 1 ]

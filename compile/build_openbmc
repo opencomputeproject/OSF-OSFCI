@@ -2,6 +2,8 @@
 # This script is executed within a Docker container
 
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+echo "proxy in use: $PROXY"
+
 if [ "$PROXY" != "" ]
 then
 git config --global https.proxy $PROXY
@@ -9,6 +11,15 @@ git config --global http.proxy $PROXY
 git config --global url.https://github.com/.insteadOf git://github.com/
 npm config set proxy $PROXY
 npm config set https-proxy $PROXY
+export http_proxy=$PROXY
+export https_proxy=$PROXY
+fi
+
+if [ "$GITTOKEN" != "OSFCIemptyOSFCI" ]
+then
+	git config --global github.token $GITTOKEN
+        newRepo=`echo $GITHUBREPO | sed "s/:\/\//:\/\/$GITTOKEN\@/"`
+        export GITHUBREPO=$newRepo
 fi
 git clone $GITHUBREPO
 cd openbmc

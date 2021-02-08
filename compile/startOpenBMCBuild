@@ -6,7 +6,8 @@ RECIPES=$4
 STORAGE_URI=$5
 STORAGE_TCPPORT=$6
 INTERACTIVE=$7
-PROXY=$8
+GITTOKEN=$8
+PROXY=$9
 SUM=`md5sum <<EOF
 $USERNAME
 EOF`
@@ -17,7 +18,7 @@ mkdir /tmp/volume/openbmc_$USERNAME
 else
 rm -rf /tmp/volume/openbmc_$USERNAME/*
 fi
-docker run -d --name openbmc_$SUM -v /datas:/datas -v /tmp/volume/openbmc_$USERNAME:/volume -e RECIPES=$RECIPES -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e PROXY=$PROXY -e INTERACTIVE=$INTERACTIVE --rm=true  -t openbmc
+docker run -d --network host --name openbmc_$SUM -v /datas:/datas -v /tmp/volume/openbmc_$USERNAME:/volume -e RECIPES=$RECIPES -e GITHUBREPO=$GITHUBREPO -e BRANCH=$BRANCH -e PROXY=$PROXY -e INTERACTIVE=$INTERACTIVE -e GITTOKEN=$GITTOKEN --rm=true  -t openbmc
 docker logs -f openbmc_$SUM
 docker wait openbmc_$SUM
 if [ -f /tmp/volume/openbmc_$USERNAME/obmc-dl360poc.static.mtd ]
@@ -26,6 +27,14 @@ then
 cp /tmp/volume/openbmc_$USERNAME/obmc-dl360poc.static.mtd $FIRMWARES_PATH/test_openbmc_$USERNAME.mtd
 echo "Image successfully generated ..."
 echo "DONE !"
+if [ "$http_proxy" != "" ]
+then
+unset http_proxy
+fi
+if [ "$https_proxy" != "" ]
+then
+unset https_proxy
+fi
 curl -H "Content-Type:application/octet-stream" -T $FIRMWARES_PATH/test_openbmc_$USERNAME.mtd http://$STORAGE_URI$STORAGE_TCPPORT/user/$USERNAME/openbmc/test_$USERNAME.rom
 fi
 if [ "$INTERACTIVE" == "1" ]

@@ -51,6 +51,7 @@ type serverEntry struct {
 	compileIp string
         bmcIp string
 	currentOwner string
+	gitToken string
 	queue int
 	expiration time.Time
 }
@@ -194,6 +195,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 						ciServers.mux.Lock()
 						ciServers.servers[i].expiration = time.Now();
        		                                ciServers.servers[i].currentOwner = ""
+						ciServers.servers[i].gitToken =""
 						// We have to reset the associated compile node and associated ctrl node
 						client := &http.Client{}
                                                 var req *http.Request
@@ -325,6 +327,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 							// This is done by resetting the expiration
 							ciServers.servers[i].expiration = time.Now();
 							ciServers.servers[i].currentOwner = ""
+							ciServers.servers[i].gitToken =""
 							client := &http.Client{}
 	                                                var req *http.Request
        		                                        req, _ = http.NewRequest("GET","http://"+ciServers.servers[i].compileIp+compileTcpPort+"/cleanUp", nil)
@@ -566,6 +569,20 @@ func home(w http.ResponseWriter, r *http.Request) {
 	                        r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 	                        proxy.ServeHTTP(w , r)
 			}
+		case "gitToken":
+			if ( cacheIndex != -1 ) {
+				_, tail = ShiftPath( r.URL.Path)
+                                keys := strings.Split(tail,"/")
+                                login := keys[2]
+                                command := keys[1]
+				if ( !checkAccess(w, r, login, command)  ) {
+                                w.Write([]byte("Access denied"))
+                                         return
+                                }
+				data := base.HTTPGetBody(r)
+				ciServers.servers[cacheIndex].gitToken = string(data)
+				fmt.Printf("Active token: %s\n", ciServers.servers[cacheIndex].gitToken)
+			}
 		case "buildbiosfirmware":
 			if ( cacheIndex != -1 ) {
 				_, tail = ShiftPath( r.URL.Path)
@@ -573,9 +590,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 				login := keys[2]
 				command := keys[1]
 			        if ( !checkAccess(w, r, login, command)  ) {
-       	 		        w.Write([]byte("Access denied"))
-		               		 return
-       		 		}
+			        w.Write([]byte("Access denied"))
+					 return
+				}
 				// We have to forward the request to the compile server
 				// which will start the compilation process and return
 				// the code to connect to the ttyd daemon
@@ -583,8 +600,8 @@ func home(w http.ResponseWriter, r *http.Request) {
        		                url, _ := url.Parse("http://"+ciServers.servers[cacheIndex].compileIp+compileTcpPort)
        		                proxy := httputil.NewSingleHostReverseProxy(url)
        		                r.URL.Host = "http://"+ciServers.servers[cacheIndex].compileIp+compileTcpPort
-				fmt.Printf("Tail %s\n",tail)
-       		                r.URL.Path = tail
+				// This approach is not really safe we shall transfer the Token through a specific call
+       		                r.URL.Path = tail + "/" + ciServers.servers[cacheIndex].gitToken
        		                r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
        		                proxy.ServeHTTP(w , r)
 			}
@@ -605,8 +622,7 @@ func home(w http.ResponseWriter, r *http.Request) {
                                 url, _ := url.Parse("http://"+ciServers.servers[cacheIndex].compileIp+compileTcpPort)
                                 proxy := httputil.NewSingleHostReverseProxy(url)
                                 r.URL.Host = "http://"+ciServers.servers[cacheIndex].compileIp+compileTcpPort
-                                fmt.Printf("Tail %s\n",tail)
-                                r.URL.Path = tail
+                                r.URL.Path = tail +"/" + ciServers.servers[cacheIndex].gitToken
                                 r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
                                 proxy.ServeHTTP(w , r)
                         }
@@ -753,6 +769,7 @@ func main() {
     newEntry.tcpPort=CTRLTcpPort
     newEntry.compileIp=compileUri
     newEntry.currentOwner=""
+    newEntry.gitToken=""
     // the server is expired
     newEntry.expiration = time.Now()
     // by the way its bmc interface is
