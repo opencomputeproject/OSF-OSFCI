@@ -22,5 +22,7 @@ edit the build.sh script first and adapt the environment variable to your enviro
 # Authors
 
 Jean-Marie Verdun
+
 Pradeep Reddy
+
 Gregg Shick
