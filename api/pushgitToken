@@ -1,0 +1,70 @@
+# (c) Hewlett Packard Enterprise LP - 2020
+#!/bin/bash -x
+
+function check_requirements() {
+	for i in jq openssl base64 curl
+	do
+		command=`which $i`
+		if [ "$command" == "" ]
+		then
+			echo "Error: Please install $i or verify it is accessible through your default execution path variable"
+			exit 1
+		fi
+	done
+}
+
+function help() {
+   echo "pushgitToken is a command line tool allowing you to push your git access token to an OSFCI instance"
+   echo ""
+   echo "Mandatory options are:"
+   echo "-t or --gittoken : personal access token for github access"
+   exit 0
+}
+
+check_requirements
+
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -t|--gittoken)
+    gitToken="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    *)    # unknown option
+    shift # past argument
+    help
+    exit 1
+    ;;
+esac
+done
+
+if [ "$gitToken" == "" ]
+then
+echo "Error missing firmware parameter : -f|--firmware"
+echo ""
+help
+fi
+
+username=`cat $HOME/.osfci/auth | awk '{ print $1}'`
+
+accessKey=`cat $HOME/.osfci/auth | awk '{ print $2 }'`
+secretKey=`cat $HOME/.osfci/auth | awk '{ print $3 }'`
+
+dateFormatted=`TZ=GMT date -R`
+relativePath="/ci/gitToken/$username"
+contentType="text/plain"
+stringToSign="PUT\n\n${contentType}\n${dateFormatted}\n${relativePath}"
+signature=`echo -en ${stringToSign} | openssl sha1 -hmac ${secretKey} -binary | base64`
+
+curl -b $HOME/.osfci/$username.jar -d"$gitToken" -X PUT \
+-H "Host: osfci.tech" \
+-H "Authorization: OSF ${accessKey}:${signature}" \
+-H "Content-Type: ${contentType}" \
+-H "mydate: ${dateFormatted}" \
+"https://osfci.tech/ci/gitToken/$username"
+
+echo "token sent"
+echo ""
