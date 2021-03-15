@@ -21,8 +21,10 @@ edit the build.sh script first and adapt the environment variable to your enviro
 
 # Authors
 
-Jean-Marie Verdun
+Jean-Marie Verdun (Founder & Lead)
 
 Pradeep Reddy
 
 Gregg Shick
+
+Arun Darlie Koshy
