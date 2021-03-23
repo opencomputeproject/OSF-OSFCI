@@ -16,7 +16,10 @@ import (
 	"time"
 )
 
+//StorageURI set from env
 var StorageURI = os.Getenv("STORAGE_URI")
+
+//StorageTCPPORT set from env
 var StorageTCPPORT = os.Getenv("STORAGE_TCPPORT")
 
 type cacheEntry struct {
@@ -57,58 +60,56 @@ func userExist(username string) bool {
 	if result == "Error" {
 		fmt.Printf("User doesn't exist\n")
 		return false
-	} else {
-
-		return true
 	}
+	return true
 }
 
 func userGetInfo(nickname string) *userPublic {
 	// We must call the storage backend service to get access to the resource
 	// We could have a bucket / fileid approach which could be translated into flat file
 	// or database management
-	var temp_value *base.User
-	var return_value *userPublic
+	var tempValue *base.User
+	var returnValue *userPublic
 	var result string
 	if userExist(nickname) {
 		result = base.HTTPGetRequest("http://" + StorageURI + StorageTCPPORT + "/user/" + nickname)
-		temp_value = new(base.User)
-		json.Unmarshal([]byte(result), temp_value)
-		return_value = new(userPublic)
-		return_value.Nickname = temp_value.Nickname
-		return_value.NicknameRW = "0"
-		return_value.NicknameLABEL = "This is your unique identifier. It will appeared within your publications and used to refer you as author. It is visible to any other users."
-		return_value.TokenType = temp_value.TokenType
-		return_value.TokenTypeRW = "0"
-		return_value.TokenAuth = temp_value.TokenAuth
-		return_value.TokenAuthRW = "0"
-		return_value.TokenSecret = temp_value.TokenSecret
-		return_value.TokenSecretLABEL = "TokenType, TokenAuth and TokenSecret are private values that you shouldn't share with anybody. They are automatically assigned to you as to provide you unique authentication capabilities to this service."
-		return_value.TokenSecretRW = "0"
-		return_value.CreationDate = temp_value.CreationDate
-		return_value.CreationDateRW = "0"
-		return_value.Lastlogin = temp_value.Lastlogin
-		return_value.LastloginRW = "0"
-		return_value.Email = temp_value.Email
-		return_value.EmailLABEL = "Your primary email address. It won't be shared with anybody. Warning your email address must be verified each time you change it. During that process your account is disabled and can't be recovered without contacting us."
-		return_value.EmailRW = "1"
+		tempValue = new(base.User)
+		json.Unmarshal([]byte(result), tempValue)
+		returnValue = new(userPublic)
+		returnValue.Nickname = tempValue.Nickname
+		returnValue.NicknameRW = "0"
+		returnValue.NicknameLABEL = "This is your unique identifier. It will appeared within your publications and used to refer you as author. It is visible to any other users."
+		returnValue.TokenType = tempValue.TokenType
+		returnValue.TokenTypeRW = "0"
+		returnValue.TokenAuth = tempValue.TokenAuth
+		returnValue.TokenAuthRW = "0"
+		returnValue.TokenSecret = tempValue.TokenSecret
+		returnValue.TokenSecretLABEL = "TokenType, TokenAuth and TokenSecret are private values that you shouldn't share with anybody. They are automatically assigned to you as to provide you unique authentication capabilities to this service."
+		returnValue.TokenSecretRW = "0"
+		returnValue.CreationDate = tempValue.CreationDate
+		returnValue.CreationDateRW = "0"
+		returnValue.Lastlogin = tempValue.Lastlogin
+		returnValue.LastloginRW = "0"
+		returnValue.Email = tempValue.Email
+		returnValue.EmailLABEL = "Your primary email address. It won't be shared with anybody. Warning your email address must be verified each time you change it. During that process your account is disabled and can't be recovered without contacting us."
+		returnValue.EmailRW = "1"
 	}
 
-	return return_value
+	return returnValue
 }
 
 func userGetInternalInfo(nickname string) *base.User {
 	// We must call the storage backend service to get access to the resource
 	// We could have a bucket / fileid approach which could be translated into flat file
 	// or database management
-	var return_value *base.User
+	var returnValue *base.User
 	var result string
 	if userExist(nickname) {
 		result = base.HTTPGetRequest("http://" + StorageURI + StorageTCPPORT + "/user/" + nickname)
-		return_value = new(base.User)
-		json.Unmarshal([]byte(result), return_value)
+		returnValue = new(base.User)
+		json.Unmarshal([]byte(result), returnValue)
 	}
-	return return_value
+	return returnValue
 }
 
 func updateAccount(username string, w http.ResponseWriter, r *http.Request) bool {
