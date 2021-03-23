@@ -107,9 +107,6 @@ func checkAccess(w http.ResponseWriter, r *http.Request, login string, command s
 	switch command {
 	case "getToken":
 		return r.Method == http.MethodGet || r.Method == http.MethodPost
-			return true
-		}
-		return false		
 	case "validateUser":
 		return true
 	case "resetPassword":
