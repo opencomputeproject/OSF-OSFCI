@@ -106,7 +106,7 @@ func ShiftPath(p string) (head, tail string) {
 func checkAccess(w http.ResponseWriter, r *http.Request, login string, command string) bool {
 	switch command {
 	case "getToken":
-		if r.Method == http.MethodGet || r.Method == http.MethodPost {
+		return r.Method == http.MethodGet || r.Method == http.MethodPost
 			return true
 		}
 		return false		
