@@ -1,3 +1,5 @@
+// OSFCI Server module
+
 package main
 
 import (
@@ -26,29 +28,49 @@ import (
 
 var tlsCertPath = os.Getenv("TLS_CERT_PATH")
 var tlsKeyPath = os.Getenv("TLS_KEY_PATH")
+
+//DNSDomain set from env
 var DNSDomain = os.Getenv("DNS_DOMAIN")
 var staticAssetsDir = os.Getenv("STATIC_ASSETS_DIR")
+
+//TTYDHostConsole set from env
 var TTYDHostConsole = os.Getenv("TTYD_HOST_CONSOLE_PORT")
+
+//TTYDem100Bios set from env
 var TTYDem100Bios = os.Getenv("TTYD_EM100_BIOS_PORT")
+
+//TTYDem100BMC set from env
 var TTYDem100BMC = os.Getenv("TTYD_EM100_BMC_PORT")
+
+//TTYDOSLoader set from env
 var TTYDOSLoader = os.Getenv("TTYD_OS_LOADER")
+
+//CTRLIp set from env
 var CTRLIp = os.Getenv("CTRL_IP")
+
+//CTRLTcpPort set from env
 var CTRLTcpPort = os.Getenv("CTRL_TCPPORT")
 var certStorage = os.Getenv("CERT_STORAGE")
+
+//ExpectedBMCIp set from env
 var ExpectedBMCIp = os.Getenv("EXPECT_BMC_IP")
-var credentialUri = os.Getenv("CREDENTIALS_URI")
+var credentialURI = os.Getenv("CREDENTIALS_URI")
 var credentialPort = os.Getenv("CREDENTIALS_TCPPORT")
-var compileUri = os.Getenv("COMPILE_URI")
-var compileTcpPort = os.Getenv("COMPILE_TCPPORT")
+var compileURI = os.Getenv("COMPILE_URI")
+var compileTCPPort = os.Getenv("COMPILE_TCPPORT")
+
+//StorageURI set from env
 var StorageURI = os.Getenv("STORAGE_URI")
+
+//StorageTCPPORT set from env
 var StorageTCPPORT = os.Getenv("STORAGE_TCPPORT")
 
 type serverEntry struct {
 	servername   string
 	ip           string
 	tcpPort      string
-	compileIp    string
-	bmcIp        string
+	compileIP    string
+	bmcIP        string
 	currentOwner string
 	gitToken     string
 	queue        int
@@ -71,6 +93,7 @@ func httpsRedirect(w http.ResponseWriter, r *http.Request) {
 	)
 }
 
+// ShiftPath cleans up path
 func ShiftPath(p string) (head, tail string) {
 	p = path.Clean("/" + p)
 	i := strings.Index(p[1:], "/") + 1
@@ -83,11 +106,10 @@ func ShiftPath(p string) (head, tail string) {
 func checkAccess(w http.ResponseWriter, r *http.Request, login string, command string) bool {
 	switch command {
 	case "getToken":
-		if r.Method == http.MethodGet || r.Method == http.MethodPost {
+		return r.Method == http.MethodGet || r.Method == http.MethodPost
 			return true
-		} else {
-			return false
 		}
+		return false		
 	case "validateUser":
 		return true
 	case "resetPassword":
@@ -121,14 +143,14 @@ func checkAccess(w http.ResponseWriter, r *http.Request, login string, command s
 
 			result := base.HTTPGetRequest("http://" + r.Host + ":9100" + "/user/" + username + "/userGetInternalInfo")
 
-			var return_data *base.User
-			return_data = new(base.User)
-			json.Unmarshal([]byte(result), return_data)
+			var returnData *base.User
+			returnData = new(base.User)
+			json.Unmarshal([]byte(result), returnData)
 
 			// I am getting the Secret Key and the Nickname
 			stringToSign := method + "\n\n" + r.Header.Get("Content-Type") + "\n" + r.Header.Get("myDate") + "\n" + r.URL.Path
 
-			secretKey := return_data.TokenSecret
+			secretKey := returnData.TokenSecret
 			nickname := username
 			if nickname != login {
 				return false
@@ -162,7 +184,7 @@ func user(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// parse the url
-	url, _ := url.Parse("http://" + credentialUri + credentialPort)
+	url, _ := url.Parse("http://" + credentialURI + credentialPort)
 
 	// create the reverse proxy
 	proxy := httputil.NewSingleHostReverseProxy(url)
@@ -187,7 +209,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 	if cookieErr == nil {
 		if cookie.Value != "" {
-			for i, _ := range ciServers.servers {
+			for i := range ciServers.servers {
 				if ciServers.servers[i].currentOwner == cookie.Value {
 					// Before indexing we must validate that the server is still ours
 					if time.Now().After(ciServers.servers[i].expiration) {
@@ -201,7 +223,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].ip+ciServers.servers[i].tcpPort+"/poweroff", nil)
 						_, _ = client.Do(req)
 						client = &http.Client{}
-						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIp+"/cleanUp", nil)
+						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+"/cleanUp", nil)
 						_, _ = client.Do(req)
 						ciServers.mux.Unlock()
 					} else {
@@ -243,7 +265,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 				actualTime := time.Now().Add(time.Second * 3600 * 365 * 10)
 				index := 0
 				ciServers.mux.Lock()
-				for i, _ := range ciServers.servers {
+				for i := range ciServers.servers {
 					if time.Now().After(ciServers.servers[i].expiration) {
 						// the server is available we can allocate it
 						ciServers.servers[i].expiration = time.Now().Add(time.Second * time.Duration(base.MaxServerAge))
@@ -253,7 +275,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 						myoutput.Servername = ciServers.servers[i].servername
 						myoutput.Waittime = "0"
 						myoutput.RemainingTime = fmt.Sprintf("%d", base.MaxServerAge)
-						return_data, _ := json.Marshal(myoutput)
+						returnData, _ := json.Marshal(myoutput)
 						if ciServers.servers[i].queue > 0 {
 							ciServers.servers[i].queue = ciServers.servers[i].queue - 1
 						}
@@ -263,9 +285,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].ip+ciServers.servers[i].tcpPort+"/poweroff", nil)
 						_, _ = client.Do(req)
 						client = &http.Client{}
-						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIp+"/cleanUp", nil)
+						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+"/cleanUp", nil)
 						_, _ = client.Do(req)
-						w.Write([]byte(return_data))
+						w.Write([]byte(returnData))
 						return
 					} else {
 						// We can check also if the user is just coming back ?
@@ -278,17 +300,17 @@ func home(w http.ResponseWriter, r *http.Request) {
 							req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].ip+ciServers.servers[i].tcpPort+"/poweroff", nil)
 							_, _ = client.Do(req)
 							client = &http.Client{}
-							req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIp+"/cleanUp", nil)
+							req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+"/cleanUp", nil)
 							_, _ = client.Do(req)
 							myoutput.Servername = ciServers.servers[i].servername
 							myoutput.Waittime = "0"
 							myoutput.RemainingTime = fmt.Sprintf("%d", ciServers.servers[i].expiration.Unix()-time.Now().Unix())
-							return_data, _ := json.Marshal(myoutput)
+							returnData, _ := json.Marshal(myoutput)
 							if ciServers.servers[i].queue > 0 {
 								ciServers.servers[i].queue = ciServers.servers[i].queue - 1
 							}
 							ciServers.mux.Unlock()
-							w.Write([]byte(return_data))
+							w.Write([]byte(returnData))
 							// We probably need to turn it off just to clean it
 							return
 						}
@@ -307,8 +329,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 				ciServers.servers[index].queue = ciServers.servers[index].queue + 1
 				ciServers.mux.Unlock()
 				myoutput.RemainingTime = fmt.Sprintf("%d", 0)
-				return_data, _ := json.Marshal(myoutput)
-				w.Write([]byte(return_data))
+				returnData, _ := json.Marshal(myoutput)
+				w.Write([]byte(returnData))
 			}
 		}
 	case "stopServer":
@@ -319,7 +341,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		// we must validate that the cookie if the right one
 		if cookieErr == nil {
 			ciServers.mux.Lock()
-			for i, _ := range ciServers.servers {
+			for i := range ciServers.servers {
 				if ciServers.servers[i].servername == servername {
 					if ciServers.servers[i].currentOwner == cookie.Value {
 						// Ok we can free the server
@@ -329,7 +351,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 						ciServers.servers[i].gitToken = ""
 						client := &http.Client{}
 						var req *http.Request
-						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIp+compileTcpPort+"/cleanUp", nil)
+						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+compileTCPPort+"/cleanUp", nil)
 						_, _ = client.Do(req)
 					}
 				}
@@ -364,13 +386,13 @@ func home(w http.ResponseWriter, r *http.Request) {
 			_, _ = client.Do(req)
 		}
 	case "bmcup":
-		bmcIp := ""
+		bmcIP := ""
 		var Up string
 		if cacheIndex != -1 {
-			bmcIp = ciServers.servers[cacheIndex].bmcIp
+			bmcIP = ciServers.servers[cacheIndex].bmcIP
 		}
-		if bmcIp != "" {
-			conn, err := net.DialTimeout("tcp", bmcIp+":443", 220*time.Millisecond)
+		if bmcIP != "" {
+			conn, err := net.DialTimeout("tcp", bmcIP+":443", 220*time.Millisecond)
 			if err == nil {
 				conn.Close()
 				// The controller is up
@@ -381,8 +403,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 		} else {
 			Up = "0"
 		}
-		return_value, _ := json.Marshal(Up)
-		w.Write([]byte(return_value))
+		returnValue, _ := json.Marshal(Up)
+		w.Write([]byte(returnValue))
 	case "console":
 		if cacheIndex != -1 {
 			fmt.Printf("Console request\n")
@@ -399,9 +421,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 		}
 	case "isRunning":
 		if cacheIndex != -1 {
-			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIp + compileTcpPort)
+			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIP + compileTCPPort)
 			proxy := httputil.NewSingleHostReverseProxy(url)
-			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIp + compileTcpPort
+			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIP + compileTCPPort
 			fmt.Printf("Tail %s\n", tail)
 			r.URL.Path = tail
 			r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
@@ -439,9 +461,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 		}
 	case "smbiosbuildconsole":
 		if cacheIndex != -1 {
-			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIp + ":7681")
+			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIP + ":7681")
 			proxy := httputil.NewSingleHostReverseProxy(url)
-			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIp + TTYDem100Bios
+			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIP + TTYDem100Bios
 			filePath := strings.Split(tail, "/")
 			r.URL.Path = "/"
 			if len(filePath) > 2 {
@@ -452,9 +474,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 		}
 	case "bmcbuildconsole":
 		if cacheIndex != -1 {
-			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIp + ":7682")
+			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIP + ":7682")
 			proxy := httputil.NewSingleHostReverseProxy(url)
-			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIp + TTYDem100BMC
+			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIP + TTYDem100BMC
 			filePath := strings.Split(tail, "/")
 			r.URL.Path = "/"
 			if len(filePath) > 2 {
@@ -596,9 +618,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 			// which will start the compilation process and return
 			// the code to connect to the ttyd daemon
 			fmt.Printf("Forward biosfirmware build\n")
-			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIp + compileTcpPort)
+			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIP + compileTCPPort)
 			proxy := httputil.NewSingleHostReverseProxy(url)
-			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIp + compileTcpPort
+			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIP + compileTCPPort
 			// This approach is not really safe we shall transfer the Token through a specific call
 			r.URL.Path = tail + "/" + ciServers.servers[cacheIndex].gitToken
 			r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
@@ -618,9 +640,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 			// which will start the compilation process and return
 			// the code to connect to the ttyd daemon
 			fmt.Printf("Forward bmcfirmware build\n")
-			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIp + compileTcpPort)
+			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIP + compileTCPPort)
 			proxy := httputil.NewSingleHostReverseProxy(url)
-			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIp + compileTcpPort
+			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIP + compileTCPPort
 			r.URL.Path = tail + "/" + ciServers.servers[cacheIndex].gitToken
 			r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 			proxy.ServeHTTP(w, r)
@@ -678,15 +700,15 @@ func bmcweb(w http.ResponseWriter, r *http.Request) {
 	// if it is not allocated to any then we probably need to reroute him
 	// to the homepage !
 
-	bmcIp := ""
+	bmcIP := ""
 	if err == nil {
 		if cookie.Value != "" {
 			// We must get the IP address from the cache
-			for i, _ := range ciServers.servers {
+			for i := range ciServers.servers {
 				if ciServers.servers[i].currentOwner == cookie.Value {
 					if time.Now().Before(ciServers.servers[i].expiration) {
 						// We still own the server and we can go to the BMC
-						bmcIp = ciServers.servers[i].bmcIp
+						bmcIP = ciServers.servers[i].bmcIP
 					}
 				}
 			}
@@ -702,7 +724,7 @@ func bmcweb(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	if bmcIp == "" {
+	if bmcIP == "" {
 		if DNSDomain != "" {
 			http.Redirect(w, r, "https://"+DNSDomain+"/ci", 302)
 		}
@@ -711,7 +733,7 @@ func bmcweb(w http.ResponseWriter, r *http.Request) {
 	// We must know if iLo is started or not ?
 	// if not then we have to reroute to the actual homepage
 	// We can make a request to the website or
-	conn, err := net.DialTimeout("tcp", bmcIp+":443", 220*time.Millisecond)
+	conn, err := net.DialTimeout("tcp", bmcIP+":443", 220*time.Millisecond)
 	if err != nil {
 		if DNSDomain != "" {
 			http.Redirect(w, r, "https://"+DNSDomain+"/ci", 302)
@@ -721,7 +743,7 @@ func bmcweb(w http.ResponseWriter, r *http.Request) {
 		conn.Close()
 	}
 	// Must specify the iLo Web address
-	url, _ := url.Parse("https://" + bmcIp + ":443")
+	url, _ := url.Parse("https://" + bmcIP + ":443")
 	proxy := httputil.NewSingleHostReverseProxy(url)
 	var InsecureTransport http.RoundTripper = &http.Transport{
 		Dial: (&net.Dialer{
@@ -765,13 +787,13 @@ func main() {
 	newEntry.servername = "dl360"
 	newEntry.ip = CTRLIp
 	newEntry.tcpPort = CTRLTcpPort
-	newEntry.compileIp = compileUri
+	newEntry.compileIP = compileURI
 	newEntry.currentOwner = ""
 	newEntry.gitToken = ""
 	// the server is expired
 	newEntry.expiration = time.Now()
 	// by the way its bmc interface is
-	newEntry.bmcIp = ExpectedBMCIp
+	newEntry.bmcIP = ExpectedBMCIp
 	newEntry.queue = 0
 
 	ciServers.mux.Lock()
