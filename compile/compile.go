@@ -46,7 +46,6 @@ var LinuxBOOTOutput io.ReadCloser
 //OpenBMCBuildChannel chan setup
 var OpenBMCBuildChannel chan string
 
-
 //LinuxBOOTBuildChannel chan setup
 var LinuxBOOTBuildChannel chan string
 var dockerClient *client.Client
