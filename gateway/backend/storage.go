@@ -34,9 +34,8 @@ func getEntry(username string) (string, int) {
 			return string(b), 1
 		}
 		return "", 0
-	} else {
-		return "", 0
 	}
+	return "", 0
 }
 
 // This is creating a user file entry
