@@ -1,3 +1,5 @@
+// OSFCI Controller module
+
 package main
 
 import (
@@ -18,19 +20,22 @@ import (
 var binariesPath = os.Getenv("BINARIES_PATH")
 var firmwaresPath = os.Getenv("FIRMWARES_PATH")
 var distrosPath = os.Getenv("DISTROS_PATH")
-var compileUri = os.Getenv("COMPILE_URI")
-var compileTcpPort = os.Getenv("COMPILE_TCPPORT")
-var storageUri = os.Getenv("STORAGE_URI")
-var storageTcpPort = os.Getenv("STORAGE_TCPPORT")
+var compileURI = os.Getenv("COMPILE_URI")
+var compileTCPPort = os.Getenv("COMPILE_TCPPORT")
+var storageURI = os.Getenv("STORAGE_URI")
+var storageTCPPort = os.Getenv("STORAGE_TCPPORT")
 var isEmulatorsPool = os.Getenv("IS_EMULATORS_POOL")
 var em100Bios = os.Getenv("EM100BIOS")
 var em100Bmc = os.Getenv("EM100BMC")
 var bmcSerial = os.Getenv("BMC_SERIAL")
 
+//OpenBMCEm100Command string
 var OpenBMCEm100Command *exec.Cmd = nil
 var bmcSerialConsoleCmd *exec.Cmd = nil
+//RomEm100Command string
 var RomEm100Command *exec.Cmd = nil
 
+// ShiftPath cleans up path
 func ShiftPath(p string) (head, tail string) {
 	p = path.Clean("/" + p)
 	i := strings.Index(p[1:], "/") + 1
@@ -177,8 +182,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 			}()
 			// We must hang off after being sure that the console daemon is properly starter
 			conn, err := net.DialTimeout("tcp", "localhost:7681", 220*time.Millisecond)
-			max_loop := 5
-			for err != nil && max_loop > 0 {
+			maxLoop := 5
+			for err != nil && maxLoop > 0 {
 				conn, err = net.DialTimeout("tcp", "localhost:7681", 220*time.Millisecond)
 			}
 			if err != nil {
@@ -186,10 +191,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 				// Let's report an error
 				w.Write([]byte("Error"))
 				return
-			} else {
-				conn.Close()
 			}
+			conn.Close()
 		}
+
 	case "biosfirmware":
 		switch r.Method {
 		case http.MethodPost:
@@ -242,8 +247,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 				done <- RomEm100Command.Wait()
 			}()
 			conn, err := net.DialTimeout("tcp", "localhost:7683", 220*time.Millisecond)
-			max_loop := 5
-			for err != nil && max_loop > 0 {
+			maxLoop := 5
+			for err != nil && maxLoop > 0 {
 				conn, err = net.DialTimeout("tcp", "localhost:7683", 220*time.Millisecond)
 			}
 			if err != nil {
@@ -251,19 +256,18 @@ func home(w http.ResponseWriter, r *http.Request) {
 				// Let's report an error
 				w.Write([]byte("Error"))
 				return
-			} else {
-				conn.Close()
 			}
-
+			conn.Close()
 		}
+
 	case "loadfromstoragesmbios":
 		// We must get the username from the request
 		_, tail := ShiftPath(r.URL.Path)
 		login := tail[1:]
 		// We have to retrieve the BIOS from the compile server
 
-		_ = base.HTTPGetRequest("http://" + compileUri + compileTcpPort + "/cleanUp/rom")
-		myfirmware := base.HTTPGetRequest("http://" + storageUri + storageTcpPort + "/user/" + login + "/getFirmware")
+		_ = base.HTTPGetRequest("http://" + compileURI + compileTCPPort + "/cleanUp/rom")
+		myfirmware := base.HTTPGetRequest("http://" + storageURI + storageTCPPort + "/user/" + login + "/getFirmware")
 		// f, err := os.Create("firmwares/linuxboot_"+login+".rom", os.O_WRONLY|os.O_CREATE, 0666)
 		f, err := os.Create(firmwaresPath + "/linuxboot_" + login + ".rom")
 		defer f.Close()
@@ -301,8 +305,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 		// total wait time can be up to 3s
 		time.Sleep(2)
 		conn, err := net.DialTimeout("tcp", "localhost:7683", 220*time.Millisecond)
-		max_loop := 5
-		for err != nil && max_loop > 0 {
+		maxLoop := 5
+		for err != nil && maxLoop > 0 {
 			conn, err = net.DialTimeout("tcp", "localhost:7683", 220*time.Millisecond)
 		}
 		if err != nil {
@@ -310,17 +314,17 @@ func home(w http.ResponseWriter, r *http.Request) {
 			// Let's report an error
 			w.Write([]byte("Error"))
 			return
-		} else {
-			conn.Close()
 		}
+		conn.Close()
+		
 	case "loadfromstoragebmc":
 		// We must get the username from the request
 		_, tail := ShiftPath(r.URL.Path)
 		login := tail[1:]
 		// We have to retrieve the BIOS from the storage server
 
-		_ = base.HTTPGetRequest("http://" + compileUri + compileTcpPort + "/cleanUp/bmc")
-		myfirmware := base.HTTPGetRequest("http://" + storageUri + storageTcpPort + "/user/" + login + "/getBMCFirmware")
+		_ = base.HTTPGetRequest("http://" + compileURI + compileTCPPort + "/cleanUp/bmc")
+		myfirmware := base.HTTPGetRequest("http://" + storageURI + storageTCPPort + "/user/" + login + "/getBMCFirmware")
 		// f, err := os.Create("firmwares/openbmc_"+login+".rom", os.O_WRONLY|os.O_CREATE, 0666)
 		f, err := os.Create(firmwaresPath + "/openbmc_" + login + ".rom")
 		defer f.Close()
@@ -373,8 +377,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 			done <- OpenBMCEm100Command.Wait()
 		}()
 		conn, err := net.DialTimeout("tcp", "localhost:7681", 220*time.Millisecond)
-		max_loop := 5
-		for err != nil && max_loop > 0 {
+		maxLoop := 5
+		for err != nil && maxLoop > 0 {
 			conn, err = net.DialTimeout("tcp", "localhost:7681", 220*time.Millisecond)
 		}
 		if err != nil {
@@ -382,9 +386,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 			// Let's report an error
 			w.Write([]byte("Error"))
 			return
-		} else {
-			conn.Close()
 		}
+		conn.Close()
+		
 	case "startbmc":
 		fmt.Printf("BMC start received\n")
 		var args []string
@@ -434,8 +438,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 		}()
 		// We must hang off after being sure that the console daemon is properly starter
 		conn, err := net.DialTimeout("tcp", "localhost:7681", 220*time.Millisecond)
-		max_loop := 5
-		for err != nil && max_loop > 0 {
+		maxLoop := 5
+		for err != nil && maxLoop > 0 {
 			conn, err = net.DialTimeout("tcp", "localhost:7681", 220*time.Millisecond)
 		}
 		if err != nil {
@@ -443,9 +447,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 			// Let's report an error
 			w.Write([]byte("Error"))
 			return
-		} else {
-			conn.Close()
 		}
+		conn.Close()
+		
 	case "startsmbios":
 		// we must forward the request to the relevant test server
 		fmt.Printf("System BIOS start received\n")
@@ -477,8 +481,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 			done <- RomEm100Command.Wait()
 		}()
 		conn, err := net.DialTimeout("tcp", "localhost:7683", 220*time.Millisecond)
-		max_loop := 5
-		for err != nil && max_loop > 0 {
+		maxLoop := 5
+		for err != nil && maxLoop > 0 {
 			conn, err = net.DialTimeout("tcp", "localhost:7683", 220*time.Millisecond)
 		}
 		if err != nil {
@@ -486,9 +490,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 			// Let's report an error
 			w.Write([]byte("Error"))
 			return
-		} else {
-			conn.Close()
 		}
+		conn.Close()
+
 	case "poweron":
 		fmt.Printf("start power\n")
 		args := []string{"on"}
@@ -498,6 +502,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		go func() {
 			done <- cmd.Wait()
 		}()
+
 	case "bmcup":
 
 	case "poweroff":
@@ -523,11 +528,11 @@ func main() {
 	print("| Development version -       |\n")
 	print("=============================== \n")
 
-	var ctrlTcpPort = os.Getenv("CTRL_TCPPORT")
+	var ctrlTCPPort = os.Getenv("CTRL_TCPPORT")
 	mux := http.NewServeMux()
 
 	// Highest priority must be set to the signed request
 	mux.HandleFunc("/", home)
 
-	log.Fatal(http.ListenAndServe(ctrlTcpPort, mux))
+	log.Fatal(http.ListenAndServe(ctrlTCPPort, mux))
 }
