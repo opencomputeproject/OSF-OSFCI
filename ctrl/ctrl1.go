@@ -260,7 +260,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		// We must get the username from the request
 		_, tail := ShiftPath(r.URL.Path)
 		login := tail[1:]
-		// We have to retreive the BIOS from the compile server
+		// We have to retrieve the BIOS from the compile server
 
 		_ = base.HTTPGetRequest("http://" + compileUri + compileTcpPort + "/cleanUp/rom")
 		myfirmware := base.HTTPGetRequest("http://" + storageUri + storageTcpPort + "/user/" + login + "/getFirmware")
@@ -317,7 +317,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		// We must get the username from the request
 		_, tail := ShiftPath(r.URL.Path)
 		login := tail[1:]
-		// We have to retreive the BIOS from the storage server
+		// We have to retrieve the BIOS from the storage server
 
 		_ = base.HTTPGetRequest("http://" + compileUri + compileTcpPort + "/cleanUp/bmc")
 		myfirmware := base.HTTPGetRequest("http://" + storageUri + storageTcpPort + "/user/" + login + "/getBMCFirmware")
