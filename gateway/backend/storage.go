@@ -32,12 +32,10 @@ func getEntry(username string) (string, int) {
 			// We must return the file content into a string
 			b, _ := ioutil.ReadFile(storageRoot + "/" + string(username[0]) + "/" + username)
 			return string(b), 1
-		} else {
-			return "", 0
 		}
-	} else {
 		return "", 0
 	}
+	return "", 0
 }
 
 // This is creating a user file entry
@@ -137,11 +135,10 @@ func getImage(username string) string {
 		content, _ := ioutil.ReadFile(staticAssetsDir + "images/forklift.png")
 		encodedContent := base64.StdEncoding.EncodeToString(content)
 		return encodedContent
-	} else {
-		content, _ := ioutil.ReadFile(storageRoot + "/" + string(username[0]) + "/" + username + ".jpg")
-		encodedContent := base64.StdEncoding.EncodeToString(content)
-		return encodedContent
 	}
+	content, _ := ioutil.ReadFile(storageRoot + "/" + string(username[0]) + "/" + username + ".jpg")
+	encodedContent := base64.StdEncoding.EncodeToString(content)
+	return encodedContent
 }
 
 func deleteEntry(username string, content string) int {
@@ -191,7 +188,7 @@ func distrosCallback(w http.ResponseWriter, r *http.Request) {
 func userCallback(w http.ResponseWriter, r *http.Request) {
 	var username string
 	var filecontent string
-	var return_value int
+	var returnValue int
 	// We must breakdown the words, because username is not always the last word
 	path := strings.Split(r.URL.Path, "/")
 	if len(path) < 3 {
@@ -220,8 +217,8 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 		case "getBMCFirmwareBuildLog":
 			getOpenBMCBuildLog(username, w)
 		default:
-			filecontent, return_value = getEntry(username)
-			if return_value != 0 {
+			filecontent, returnValue = getEntry(username)
+			if returnValue != 0 {
 				fmt.Fprint(w, filecontent)
 			} else {
 				fmt.Fprintf(w, "Error")

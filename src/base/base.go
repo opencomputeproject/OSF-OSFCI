@@ -21,325 +21,319 @@
 // SOFTWARE.
 
 package base
+
 import (
-    "net/http"
-    "log"
-    "io/ioutil"
-    "fmt"
-    "math/rand"
-    "golang.org/x/crypto/bcrypt"
-    "time"
-    "bytes"
-    "net/smtp"
-    "net/mail"
-    "net"
-    "crypto/tls"
-    "crypto/hmac"
-    "encoding/base64"
-    "crypto/sha1"
-    "strings"
-    "os"
+	"bytes"
+	"crypto/hmac"
+	"crypto/sha1"
+	"crypto/tls"
+	"encoding/base64"
+	"fmt"
+	"golang.org/x/crypto/bcrypt"
+	"io/ioutil"
+	"log"
+	"math/rand"
+	"net"
+	"net/http"
+	"net/mail"
+	"net/smtp"
+	"os"
+	"strings"
+	"time"
 )
 
 type User struct {
-        Nickname string
-        Password string
-        TokenType string
-        TokenAuth string
-        TokenSecret string
-        CreationDate string
-        Lastlogin string
-        Email string
-        Active int
-        ValidationString string
-        Ports string
-        Server string
+	Nickname         string
+	Password         string
+	TokenType        string
+	TokenAuth        string
+	TokenSecret      string
+	CreationDate     string
+	Lastlogin        string
+	Email            string
+	Active           int
+	ValidationString string
+	Ports            string
+	Server           string
 }
 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/")
 var simpleLetters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 var randInit = 0
-var MaxAge = 3600*24
-var MaxServerAge = 60*30
+var MaxAge = 3600 * 24
+var MaxServerAge = 60 * 30
 
 func randAlphaSlashPlus(n int) string {
-    if ( randInit == 0 ) {
-	rand.Seed(time.Now().UnixNano())
-    }
-    b := make([]rune, n)
-    for i := range b {
-        b[i] = letters[rand.Intn(len(letters))]
-    }
-    return string(b)
+	if randInit == 0 {
+		rand.Seed(time.Now().UnixNano())
+	}
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
 }
 
 func randAlpha(n int) string {
-    if ( randInit == 0 ) {
-        rand.Seed(time.Now().UnixNano())
-    }
-    b := make([]rune, n)
-    for i := range b {
-        b[i] = simpleLetters[rand.Intn(len(simpleLetters))]
-    }
-    return string(b)
+	if randInit == 0 {
+		rand.Seed(time.Now().UnixNano())
+	}
+	b := make([]rune, n)
+	for i := range b {
+		b[i] = simpleLetters[rand.Intn(len(simpleLetters))]
+	}
+	return string(b)
 }
 
-func GenerateAccountACKLink(length int) (string) {
+func GenerateAccountACKLink(length int) string {
 	return randAlpha(length)
 }
 
-func GenerateAuthToken(TokenType string, length int) (string) {
+func GenerateAuthToken(TokenType string, length int) string {
 	return randAlphaSlashPlus(length)
 }
 
 func HashPassword(password string) (string, error) {
-    bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-    return string(bytes), err
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(bytes), err
 }
 
 func CheckPasswordHash(password, hash string) bool {
-    err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
-    return err == nil
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil
 }
 
 // Send some email
 
 var smtpServer = os.Getenv("SMTP_SERVER") // example: smtp.google.com:587
-var smtpAccount =  os.Getenv("SMTP_ACCOUNT") 
+var smtpAccount = os.Getenv("SMTP_ACCOUNT")
 var smtpPassword = os.Getenv("SMTP_PASSWORD")
 var bCC = os.Getenv("BCC_ADDRESS")
 
 func SendEmail(email string, subject string, validationString string) {
-    var auth smtp.Auth
-    servername := smtpServer
-    host, _, _ := net.SplitHostPort(servername)
-    shortServer := strings.Split(servername,":")
-    smtpPort := shortServer[1]
-    // If I have a short login (aka the login do not contain the domain name from the SMTP server)
-    shortName := strings.Split(smtpAccount, "@")
-    var from mail.Address
-    if ( len(shortName) > 1 ) {
-      from = mail.Address{"", smtpAccount}
-    } else {
-      from = mail.Address{"", smtpAccount+"@"+host}
-    }
-    to   := mail.Address{"", email}
-    subj := subject
-    body := validationString
+	var auth smtp.Auth
+	servername := smtpServer
+	host, _, _ := net.SplitHostPort(servername)
+	shortServer := strings.Split(servername, ":")
+	smtpPort := shortServer[1]
+	// If I have a short login (aka the login do not contain the domain name from the SMTP server)
+	shortName := strings.Split(smtpAccount, "@")
+	var from mail.Address
+	if len(shortName) > 1 {
+		from = mail.Address{"", smtpAccount}
+	} else {
+		from = mail.Address{"", smtpAccount + "@" + host}
+	}
+	to := mail.Address{"", email}
+	subj := subject
+	body := validationString
 
-    // Setup headers
-    headers := make(map[string]string)
-    headers["From"] = from.String()
-    headers["To"] = to.String()
-    headers["Subject"] = subj
+	// Setup headers
+	headers := make(map[string]string)
+	headers["From"] = from.String()
+	headers["To"] = to.String()
+	headers["Subject"] = subj
 
-    // Setup message
-    message := ""
-    for k,v := range headers {
-        message += fmt.Sprintf("%s: %s\r\n", k, v)
-    }
-    message += "\r\n" + body
+	// Setup message
+	message := ""
+	for k, v := range headers {
+		message += fmt.Sprintf("%s: %s\r\n", k, v)
+	}
+	message += "\r\n" + body
 
-    // Connect to the SMTP Server
-    if ( len(smtpPassword) > 0 ) {
-	    auth = smtp.PlainAuth("",smtpAccount, smtpPassword, host)
-    }
+	// Connect to the SMTP Server
+	if len(smtpPassword) > 0 {
+		auth = smtp.PlainAuth("", smtpAccount, smtpPassword, host)
+	}
 
-    // TLS config
-    tlsconfig := &tls.Config {
-        InsecureSkipVerify: true,
-        ServerName: host,
-    }
+	// TLS config
+	tlsconfig := &tls.Config{
+		InsecureSkipVerify: true,
+		ServerName:         host,
+	}
 
+	// uncomment the following line to use a pure SSL connection without STARTTLS
 
-    // uncomment the following line to use a pure SSL connection without STARTTLS
+	//conn, err := tls.Dial("tcp", servername, tlsconfig)
+	conn, err := smtp.Dial(servername)
+	if err != nil {
+		log.Panic(err)
+	}
 
-    //conn, err := tls.Dial("tcp", servername, tlsconfig)
-    conn, err := smtp.Dial( servername)
-    if err != nil {
-        log.Panic(err)
-    }
+	// comment that line to use SSL connection
+	if smtpPort != "25" {
+		conn.StartTLS(tlsconfig)
+	}
 
-    // comment that line to use SSL connection
-    if ( smtpPort != "25" ) {
-        conn.StartTLS(tlsconfig)
-    }
+	// Auth
+	if len(smtpPassword) > 1 {
+		if err = conn.Auth(auth); err != nil {
+			log.Panic(err)
+		}
+	}
 
-    // Auth
-    if ( len(smtpPassword) > 1 ) {
-	    if err = conn.Auth(auth); err != nil {
-	        log.Panic(err)
-	    }
-    }
+	// To && From
+	if err = conn.Mail(from.Address); err != nil {
+		log.Panic(err)
+	}
 
-    // To && From
-    if err = conn.Mail(from.Address); err != nil {
-        log.Panic(err)
-    }
+	if err = conn.Rcpt(to.Address); err != nil {
+		log.Panic(err)
+	}
 
-    if err = conn.Rcpt(to.Address); err != nil {
-        log.Panic(err)
-    }
+	// Data
+	w, err := conn.Data()
+	if err != nil {
+		log.Panic(err)
+	}
 
-    // Data
-    w, err := conn.Data()
-    if err != nil {
-        log.Panic(err)
-    }
+	_, err = w.Write([]byte(message))
+	if err != nil {
+		log.Panic(err)
+	}
 
-    _, err = w.Write([]byte(message))
-    if err != nil {
-        log.Panic(err)
-    }
+	err = w.Close()
+	if err != nil {
+		log.Panic(err)
+	}
 
-    err = w.Close()
-    if err != nil {
-        log.Panic(err)
-    }
+	conn.Quit()
 
-    conn.Quit()
+	if bCC != "" {
+		to = mail.Address{"", bCC}
+		headers["To"] = to.String()
+		// Setup message
+		message := ""
+		for k, v := range headers {
+			message += fmt.Sprintf("%s: %s\r\n", k, v)
+		}
+		message += "\r\n" + "The following email address has request an account on OSFCI: " + email
 
-    if ( bCC != "" ) {
-    to   = mail.Address{"", bCC}
-    headers["To"] = to.String()
-    // Setup message
-    message := ""
-    for k,v := range headers {
-        message += fmt.Sprintf("%s: %s\r\n", k, v)
-    }
-    message += "\r\n" + "The following email address has request an account on OSFCI: " + email
+		conn, err := smtp.Dial(servername)
+		if err != nil {
+			log.Panic(err)
+		}
 
-    conn, err := smtp.Dial( servername)
-    if err != nil {
-        log.Panic(err)
-    }
+		// comment that line to use SSL connection
+		if smtpPort != "25" {
+			conn.StartTLS(tlsconfig)
+		}
 
-    // comment that line to use SSL connection
-    if ( smtpPort != "25" ) {
-	    conn.StartTLS(tlsconfig)
-    }
+		// Auth
+		if len(smtpPassword) > 1 {
+			if err = conn.Auth(auth); err != nil {
+				log.Panic(err)
+			}
+		}
 
-    // Auth
-    if ( len(smtpPassword) > 1 ) {
-    	if err = conn.Auth(auth); err != nil {
-        	log.Panic(err)
-    	}
-    }
+		// To && From
+		if err = conn.Mail(from.Address); err != nil {
+			log.Panic(err)
+		}
 
-    // To && From
-    if err = conn.Mail(from.Address); err != nil {
-        log.Panic(err)
-    }
+		if err = conn.Rcpt(to.Address); err != nil {
+			log.Panic(err)
+		}
 
-    if err = conn.Rcpt(to.Address); err != nil {
-        log.Panic(err)
-    }
+		// Data
+		w, err := conn.Data()
+		if err != nil {
+			log.Panic(err)
+		}
 
-    // Data
-    w, err := conn.Data()
-    if err != nil {
-        log.Panic(err)
-    }
+		_, err = w.Write([]byte(message))
+		if err != nil {
+			log.Panic(err)
+		}
 
-    _, err = w.Write([]byte(message))
-    if err != nil {
-        log.Panic(err)
-    }
+		err = w.Close()
+		if err != nil {
+			log.Panic(err)
+		}
 
-    err = w.Close()
-    if err != nil {
-        log.Panic(err)
-    }
+		conn.Quit()
 
-    conn.Quit()
-
-
-    }
-
-
+	}
 
 	if err != nil {
 		log.Printf("smtp error: %s", err)
 	}
-	
+
 }
 
-
-func Request(method string, Uri string, Path string, Data string, content []byte, query string, Key string, SecretKey string) ( *http.Response, error) {
+func Request(method string, Uri string, Path string, Data string, content []byte, query string, Key string, SecretKey string) (*http.Response, error) {
 
 	client := &http.Client{}
 
-        myDate := time.Now().UTC().Format(http.TimeFormat)
-        myDate = strings.Replace(myDate, "GMT", "+0000", -1)
+	myDate := time.Now().UTC().Format(http.TimeFormat)
+	myDate = strings.Replace(myDate, "GMT", "+0000", -1)
 	var req *http.Request
-	if ( content != nil ) {
-        	req, _ = http.NewRequest(method,Uri, bytes.NewReader(content))
+	if content != nil {
+		req, _ = http.NewRequest(method, Uri, bytes.NewReader(content))
 	} else {
-		req, _ = http.NewRequest(method,Uri, nil)
+		req, _ = http.NewRequest(method, Uri, nil)
 	}
 
-       stringToSign := method + "\n\n"+Data+"\n"+myDate+"\n"+Path
+	stringToSign := method + "\n\n" + Data + "\n" + myDate + "\n" + Path
 
-       mac := hmac.New(sha1.New, []byte(SecretKey))
-       mac.Write([]byte(stringToSign))
-       expectedMAC := mac.Sum(nil)
-       signature:=base64.StdEncoding.EncodeToString(expectedMAC)
+	mac := hmac.New(sha1.New, []byte(SecretKey))
+	mac.Write([]byte(stringToSign))
+	expectedMAC := mac.Sum(nil)
+	signature := base64.StdEncoding.EncodeToString(expectedMAC)
 
-       req.Header.Set("Authorization","AWS "+Key+":"+signature)
-       req.Header.Set("Date", myDate)
-       req.Header.Set("Content-Type", Data)
-       if ( len(content) > 0 ) {
-       		req.ContentLength = int64(len(content))
-       }
+	req.Header.Set("Authorization", "AWS "+Key+":"+signature)
+	req.Header.Set("Date", myDate)
+	req.Header.Set("Content-Type", Data)
+	if len(content) > 0 {
+		req.ContentLength = int64(len(content))
+	}
 
-       req.URL.RawQuery = query
+	req.URL.RawQuery = query
 
-
-        // That is a new request so let's do it
-        var response *http.Response
+	// That is a new request so let's do it
+	var response *http.Response
 	var err error
-        response, err  = client.Do(req)
+	response, err = client.Do(req)
 	return response, err
 
 }
 
-
 // Some HTTP request
 // Get request to the storage backend
 
-func HTTPGetRequest(request string) (string){
-        resp, err := http.Get(request)
-        if err != nil {
-                log.Fatalln(err)
-        }
+func HTTPGetRequest(request string) string {
+	resp, err := http.Get(request)
+	if err != nil {
+		log.Fatalln(err)
+	}
 
-        body, err := ioutil.ReadAll(resp.Body)
-        if err != nil {
-                log.Fatalln(err)
-        }
-	return(string(body))
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return (string(body))
 }
 
-func HTTPDeleteRequest(request string){
+func HTTPDeleteRequest(request string) {
 	client := &http.Client{}
 	content := []byte{0}
 	httprequest, err := http.NewRequest("DELETE", request, bytes.NewReader(content))
-        httprequest.ContentLength = 0
-        response, err := client.Do(httprequest)
-        if err != nil {
-                log.Fatal(err)
-        } else {
-                defer response.Body.Close()
-                _, err := ioutil.ReadAll(response.Body)
-                if err != nil {
-                        log.Fatal(err)
-                }
-        }
+	httprequest.ContentLength = 0
+	response, err := client.Do(httprequest)
+	if err != nil {
+		log.Fatal(err)
+	} else {
+		defer response.Body.Close()
+		_, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
 
 // Put request to the storage backend
 
-func HTTPPutRequest(request string, content []byte, contentType string) (string){
+func HTTPPutRequest(request string, content []byte, contentType string) string {
 	client := &http.Client{}
 	httprequest, err := http.NewRequest("PUT", request, bytes.NewReader(content))
 	httprequest.Header.Set("Content-Type", contentType)
@@ -358,13 +352,12 @@ func HTTPPutRequest(request string, content []byte, contentType string) (string)
 	return ""
 }
 
-
-func HTTPGetBody(r *http.Request) ([]byte) {
+func HTTPGetBody(r *http.Request) []byte {
 	buf, _ := ioutil.ReadAll(r.Body)
 	rdr1 := ioutil.NopCloser(bytes.NewBuffer(buf))
 	rdr2 := ioutil.NopCloser(bytes.NewBuffer(buf))
 	b := new(bytes.Buffer)
 	b.ReadFrom(rdr1)
 	r.Body = rdr2
-	return(b.Bytes())
+	return (b.Bytes())
 }

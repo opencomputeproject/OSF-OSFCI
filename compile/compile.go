@@ -46,7 +46,6 @@ var LinuxBOOTOutput io.ReadCloser
 //OpenBMCBuildChannel chan setup
 var OpenBMCBuildChannel chan string
 
-
 //LinuxBOOTBuildChannel chan setup
 var LinuxBOOTBuildChannel chan string
 var dockerClient *client.Client
@@ -130,7 +129,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		}
 	case "getFirmware":
 		login := tail[1:]
-		// We must retreive the username BIOS and return it as the response body
+		// We must retrieve the username BIOS and return it as the response body
 		if LinuxBOOTCommand != nil {
 			unix.Kill(LinuxBOOTCommand.Process.Pid, unix.SIGINT)
 			_ = <-LinuxBOOTBuildChannel
@@ -143,7 +142,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		w.Write(firmware)
 	case "getBMCFirmware":
 		login := tail[1:]
-		// We must retreive the username BIOS and return it as the response body
+		// We must retrieve the username BIOS and return it as the response body
 		if OpenBMCCommand != nil {
 			unix.Kill(OpenBMCCommand.Process.Pid, unix.SIGINT)
 			_ = <-OpenBMCBuildChannel
