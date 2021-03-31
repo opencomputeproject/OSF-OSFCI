@@ -1,14 +1,47 @@
 function navbarHover() {
-$('body').on('mouseover mouseout', '.dropdown', function(e) {
-    var dropdown = $(e.target).closest('.dropdown');
-    var menu = $('.dropdown-menu', dropdown);
+var masterTimeout;
+$('#dropdownMaster').on('mouseover', function(e) {
+    var dropdown = $(e.target);
+    var menu = $('#menuMaster');
     dropdown.addClass('show');
     menu.addClass('show');
+});
+
+$('#dropdownMaster').on('mouseout', function(e) {
+    var dropdown = $(e.target);
+    var menu = $('#menuMaster');
     setTimeout(function () {
-        dropdown[dropdown.is(':hover') ? 'addClass' : 'removeClass']('show');
-        menu[dropdown.is(':hover') ? 'addClass' : 'removeClass']('show');
+    	if ( !($('#dropdownSecondary').is(':hover')) ) {
+		if ( !($('#dropdownMaster').is(':hover')) ) {
+		    	 dropdown.removeClass('show');
+			 menu.removeClass('show');
+			 $('#navbarDropdownMenuLink').removeClass('show');
+		}
+    	}
+	
     }, 300);
 });
+
+$('#dropdownSecondary').on('mouseover', function(e) {
+    clearTimeout(masterTimeout);
+    var dropdown = $(e.target);
+    var menu = $('#menuSecondary');
+    dropdown.addClass('show');
+    menu.addClass('show');
+});
+
+$('#dropdownSecondary').on('mouseout', function(e) {
+    var dropdown = $(e.target);
+    var menu = $('#menuSecondary');
+    setTimeout(function () {
+	if ( !($('#dropdownSecondary').is(':hover')) ) {
+	    dropdown.removeClass('show');
+	    menu.removeClass('show');
+	}
+    }, 300);
+});
+
+
 }
 
 function loginBtn() {
@@ -39,7 +72,7 @@ $('#MyAccount').on('click', function(e) {
 	myAccount();
 });
 
-$('#InteractiveSession').on('click', function(e) {
+$('#dl360').on('click', function(e) {
         InteractiveSession();
 });
 	// We must check if we are logged in or not ?

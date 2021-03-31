@@ -37,14 +37,21 @@
     <button type="button" class="btn btn-danger btn-sm" id='EndSession' style="display:none; margin-left:10px;"
 	data-toggle="modal" data-target="#modalSession" >End Session</button>
     <!-- Dropdown -->
-      <li class="nav-item dropdown ml-md-auto" id="dropdown">
-        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdown"
+    <li class="nav-item dropdown ml-md-auto" id="dropdownMaster">
+        <a class="nav-link dropdown-toggle" id="navbarDropdownMenuLink" data-toggle="dropdownMaster"
           aria-haspopup="true" aria-expanded="false">Dropdown</a>
-        <div class="dropdown-menu dropdown-primary" aria-labelledby="navbarDropdownMenuLink">
-          <a class="dropdown-item" id='MyAccount'>My Account</a>
-          <a class="dropdown-item" id='InteractiveSession'>Interactive Session</a>
-        </div>
-      </li>
+        <ul class="dropdown-menu dropdown-primary" aria-labelledby="navbarDropdownMenuLink" id="menuMaster">
+          <li><a class="dropdown-item" id='MyAccount'>My Account</a></li>
+          <li class="dropdown-submenu" id="dropdownSecondary">
+		<a class="dropdown-toggle" data-toggle="dropdownSecondary" aria-haspopup="true" aria-expanded="false" id='InteractiveSession'>
+			<span class="nav-label">Interactive Session</span><span class="caret"></span>
+		</a>
+		<ul class="dropdown-menu" aria-labelledby="InteractiveSession" id="menuSecondary">
+		  <li><a class="dropdown-item" id="dl360">dl360</a></li>
+		</ul>
+          </li>
+        </ul>
+    </li>
     <form id="input-navbar" class="form-inline ml-auto">
       <div class="md-form my-0">
         <input class="form-control mr-sm-2" type="text" placeholder="Search" aria-label="Search">
