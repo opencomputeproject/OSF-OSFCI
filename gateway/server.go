@@ -254,7 +254,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	// If that is not the case we deny the request
 	// And need to re route the end user to an end of session
 	switch head {
-	case "getServers":
+	case "getServermodels":
 		var activeProducts []serverProduct
 		for i := range ciServersProducts {
 			if ciServersProducts[i].Active != 0 {
