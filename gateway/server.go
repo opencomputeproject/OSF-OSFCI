@@ -65,6 +65,14 @@ var StorageURI = os.Getenv("STORAGE_URI")
 //StorageTCPPORT set from env
 var StorageTCPPORT = os.Getenv("STORAGE_TCPPORT")
 
+type serverProduct struct {
+	Product string
+	Brand   string
+	Active  int
+}
+
+var ciServersProducts []serverProduct
+
 type serverEntry struct {
 	servername   string
 	ip           string
@@ -75,6 +83,7 @@ type serverEntry struct {
 	gitToken     string
 	queue        int
 	expiration   time.Time
+	ProductIndex int
 }
 
 type serversList struct {
@@ -245,6 +254,18 @@ func home(w http.ResponseWriter, r *http.Request) {
 	// If that is not the case we deny the request
 	// And need to re route the end user to an end of session
 	switch head {
+	case "getServermodels":
+		var activeProducts []serverProduct
+		for i := range ciServersProducts {
+			if ciServersProducts[i].Active != 0 {
+				activeProducts = append(activeProducts, ciServersProducts[i])
+			}
+		}
+		returnData, err := json.Marshal(activeProducts)
+		if err != nil {
+			log.Fatal(err)
+		}
+		w.Write([]byte(returnData))
 	case "getServer":
 		// We need to have a valid cookie and associated Public Key / Private Key otherwise
 		// We can't request a server
@@ -286,31 +307,30 @@ func home(w http.ResponseWriter, r *http.Request) {
 						_, _ = client.Do(req)
 						w.Write([]byte(returnData))
 						return
-					} else {
-						// We can check also if the user is just coming back ?
-						// their could be a case where the user reloaded it's session
-						// we can bring it back the server for his own usage
-						if ciServers.servers[i].currentOwner == cookie.Value {
-							// let's give it back to the user after a cleaning
-							client := &http.Client{}
-							var req *http.Request
-							req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].ip+ciServers.servers[i].tcpPort+"/poweroff", nil)
-							_, _ = client.Do(req)
-							client = &http.Client{}
-							req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+"/cleanUp", nil)
-							_, _ = client.Do(req)
-							myoutput.Servername = ciServers.servers[i].servername
-							myoutput.Waittime = "0"
-							myoutput.RemainingTime = fmt.Sprintf("%d", ciServers.servers[i].expiration.Unix()-time.Now().Unix())
-							returnData, _ := json.Marshal(myoutput)
-							if ciServers.servers[i].queue > 0 {
-								ciServers.servers[i].queue = ciServers.servers[i].queue - 1
-							}
-							ciServers.mux.Unlock()
-							w.Write([]byte(returnData))
-							// We probably need to turn it off just to clean it
-							return
+					}
+					// We can check also if the user is just coming back ?
+					// their could be a case where the user reloaded it's session
+					// we can bring it back the server for his own usage
+					if ciServers.servers[i].currentOwner == cookie.Value {
+						// let's give it back to the user after a cleaning
+						client := &http.Client{}
+						var req *http.Request
+						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].ip+ciServers.servers[i].tcpPort+"/poweroff", nil)
+						_, _ = client.Do(req)
+						client = &http.Client{}
+						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+"/cleanUp", nil)
+						_, _ = client.Do(req)
+						myoutput.Servername = ciServers.servers[i].servername
+						myoutput.Waittime = "0"
+						myoutput.RemainingTime = fmt.Sprintf("%d", ciServers.servers[i].expiration.Unix()-time.Now().Unix())
+						returnData, _ := json.Marshal(myoutput)
+						if ciServers.servers[i].queue > 0 {
+							ciServers.servers[i].queue = ciServers.servers[i].queue - 1
 						}
+						ciServers.mux.Unlock()
+						w.Write([]byte(returnData))
+						// We probably need to turn it off just to clean it
+						return
 					}
 					// used to calculate potential wait time
 					if actualTime.After(ciServers.servers[i].expiration) {
@@ -736,9 +756,8 @@ func bmcweb(w http.ResponseWriter, r *http.Request) {
 			http.Redirect(w, r, "https://"+DNSDomain+"/ci", 302)
 		}
 		return
-	} else {
-		conn.Close()
 	}
+	conn.Close()
 	// Must specify the iLo Web address
 	url, _ := url.Parse("https://" + bmcIP + ":443")
 	proxy := httputil.NewSingleHostReverseProxy(url)
@@ -779,6 +798,18 @@ func main() {
 	// We must build our server pool for the moment
 	// This is define by the environment variable
 	// But this could be done by a registration mechanism later
+
+	var newFamily serverProduct
+
+	newFamily.Brand = "HPE"
+	newFamily.Product = "DL360"
+	newFamily.Active = 1
+	ciServersProducts = append(ciServersProducts, newFamily)
+
+	newFamily.Product = "DL325"
+	newFamily.Active = 0
+	ciServersProducts = append(ciServersProducts, newFamily)
+
 	var newEntry serverEntry
 
 	newEntry.servername = "dl360"
@@ -792,6 +823,7 @@ func main() {
 	// by the way its bmc interface is
 	newEntry.bmcIP = ExpectedBMCIp
 	newEntry.queue = 0
+	newEntry.ProductIndex = 0
 
 	ciServers.mux.Lock()
 	ciServers.servers = append(ciServers.servers, newEntry)
