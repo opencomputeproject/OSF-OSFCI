@@ -267,6 +267,15 @@ func home(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Write([]byte(returnData))
 	case "getServer":
+		var serverTypeIndex int
+		serverTypeIndex = -1
+		_, tail := ShiftPath(tail)
+		serverType, _ := ShiftPath(tail)
+		for i := range ciServersProducts {
+			if ciServersProducts[i].Product == serverType {
+				serverTypeIndex = i
+			}
+		}
 		// We need to have a valid cookie and associated Public Key / Private Key otherwise
 		// We can't request a server
 		if cookieErr == nil {
@@ -285,57 +294,61 @@ func home(w http.ResponseWriter, r *http.Request) {
 				ciServers.mux.Lock()
 				for i := range ciServers.servers {
 					if time.Now().After(ciServers.servers[i].expiration) {
-						// the server is available we can allocate it
-						ciServers.servers[i].expiration = time.Now().Add(time.Second * time.Duration(base.MaxServerAge))
-						ciServers.servers[i].currentOwner = cookie.Value
-						ciServers.mux.Unlock()
+						if ciServers.servers[i].ProductIndex == serverTypeIndex {
+							// the server is available we can allocate it
+							ciServers.servers[i].expiration = time.Now().Add(time.Second * time.Duration(base.MaxServerAge))
+							ciServers.servers[i].currentOwner = cookie.Value
+							ciServers.mux.Unlock()
 
-						myoutput.Servername = ciServers.servers[i].servername
-						myoutput.Waittime = "0"
-						myoutput.RemainingTime = fmt.Sprintf("%d", base.MaxServerAge)
-						returnData, _ := json.Marshal(myoutput)
-						if ciServers.servers[i].queue > 0 {
-							ciServers.servers[i].queue = ciServers.servers[i].queue - 1
+							myoutput.Servername = ciServers.servers[i].servername
+							myoutput.Waittime = "0"
+							myoutput.RemainingTime = fmt.Sprintf("%d", base.MaxServerAge)
+							returnData, _ := json.Marshal(myoutput)
+							if ciServers.servers[i].queue > 0 {
+								ciServers.servers[i].queue = ciServers.servers[i].queue - 1
+							}
+							// We probably need to turn it off just to clean it
+							client := &http.Client{}
+							var req *http.Request
+							req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].ip+ciServers.servers[i].tcpPort+"/poweroff", nil)
+							_, _ = client.Do(req)
+							client = &http.Client{}
+							req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+"/cleanUp", nil)
+							_, _ = client.Do(req)
+							w.Write([]byte(returnData))
+							return
 						}
-						// We probably need to turn it off just to clean it
-						client := &http.Client{}
-						var req *http.Request
-						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].ip+ciServers.servers[i].tcpPort+"/poweroff", nil)
-						_, _ = client.Do(req)
-						client = &http.Client{}
-						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+"/cleanUp", nil)
-						_, _ = client.Do(req)
-						w.Write([]byte(returnData))
-						return
-					}
-					// We can check also if the user is just coming back ?
-					// their could be a case where the user reloaded it's session
-					// we can bring it back the server for his own usage
-					if ciServers.servers[i].currentOwner == cookie.Value {
-						// let's give it back to the user after a cleaning
-						client := &http.Client{}
-						var req *http.Request
-						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].ip+ciServers.servers[i].tcpPort+"/poweroff", nil)
-						_, _ = client.Do(req)
-						client = &http.Client{}
-						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+"/cleanUp", nil)
-						_, _ = client.Do(req)
-						myoutput.Servername = ciServers.servers[i].servername
-						myoutput.Waittime = "0"
-						myoutput.RemainingTime = fmt.Sprintf("%d", ciServers.servers[i].expiration.Unix()-time.Now().Unix())
-						returnData, _ := json.Marshal(myoutput)
-						if ciServers.servers[i].queue > 0 {
-							ciServers.servers[i].queue = ciServers.servers[i].queue - 1
+						// We can check also if the user is just coming back ?
+						// their could be a case where the user reloaded it's session
+						// we can bring it back the server for his own usage
+						if ciServers.servers[i].currentOwner == cookie.Value {
+							// let's give it back to the user after a cleaning
+							client := &http.Client{}
+							var req *http.Request
+							req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].ip+ciServers.servers[i].tcpPort+"/poweroff", nil)
+							_, _ = client.Do(req)
+							client = &http.Client{}
+							req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+"/cleanUp", nil)
+							_, _ = client.Do(req)
+							myoutput.Servername = ciServers.servers[i].servername
+							myoutput.Waittime = "0"
+							myoutput.RemainingTime = fmt.Sprintf("%d", ciServers.servers[i].expiration.Unix()-time.Now().Unix())
+							returnData, _ := json.Marshal(myoutput)
+							if ciServers.servers[i].queue > 0 {
+								ciServers.servers[i].queue = ciServers.servers[i].queue - 1
+							}
+							ciServers.mux.Unlock()
+							w.Write([]byte(returnData))
+							// We probably need to turn it off just to clean it
+							return
 						}
-						ciServers.mux.Unlock()
-						w.Write([]byte(returnData))
-						// We probably need to turn it off just to clean it
-						return
 					}
 					// used to calculate potential wait time
-					if actualTime.After(ciServers.servers[i].expiration) {
-						actualTime = ciServers.servers[i].expiration
-						index = i
+					if ciServers.servers[i].ProductIndex == serverTypeIndex {
+						if actualTime.After(ciServers.servers[i].expiration) {
+							actualTime = ciServers.servers[i].expiration
+							index = i
+						}
 					}
 
 				}
@@ -802,11 +815,11 @@ func main() {
 	var newFamily serverProduct
 
 	newFamily.Brand = "HPE"
-	newFamily.Product = "DL360"
+	newFamily.Product = "DL360_GEN10"
 	newFamily.Active = 1
 	ciServersProducts = append(ciServersProducts, newFamily)
 
-	newFamily.Product = "DL325"
+	newFamily.Product = "DL325_GEN10PLUS"
 	newFamily.Active = 0
 	ciServersProducts = append(ciServersProducts, newFamily)
 
