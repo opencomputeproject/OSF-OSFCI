@@ -1,4 +1,5 @@
 #!/bin/bash
+BINARIES_PATH=$(grep -A0 'BINARIES_PATH' "/usr/local/production/config/ctrl1conf.yaml" | cut -d: -f2 | sed 's/[\" ]//g')
 IFS=$'\n'
 usbtree=( $($BINARIES_PATH/uhubctl) )
 current_hub=""
@@ -41,6 +42,7 @@ then
 exit 0
 fi
 IFS=$'\n'
+EM100_DEVID=$(grep -A0 'EM100_DEVID' "/usr/local/production/config/ctrl1conf.yaml" | sed -n -e 's/^.*: //p')
 device_list=( $(lsusb -d $EM100_DEVID) )
 counter=0
 for i in ${device_list[@]}

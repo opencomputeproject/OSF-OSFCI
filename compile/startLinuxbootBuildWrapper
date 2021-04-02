@@ -1,5 +1,6 @@
 #!/bin/bash
 ttydPID="-2"
+BINARIES_PATH=$(grep -A0 'BINARIES_PATH' "/usr/local/production/config/compiler1conf.yaml" | cut -d: -f2 | sed 's/[\" ]//g')
 SUM=`md5sum <<EOF
 $1
 EOF`

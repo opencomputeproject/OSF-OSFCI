@@ -3,8 +3,9 @@
 package main
 
 import (
-	"base"
+	"base.com/base"
 	"fmt"
+	"github.com/spf13/viper"
 	"golang.org/x/sys/unix"
 	"io"
 	"log"
@@ -17,23 +18,50 @@ import (
 	"time"
 )
 
-var binariesPath = os.Getenv("BINARIES_PATH")
-var firmwaresPath = os.Getenv("FIRMWARES_PATH")
-var distrosPath = os.Getenv("DISTROS_PATH")
-var compileURI = os.Getenv("COMPILE_URI")
-var compileTCPPort = os.Getenv("COMPILE_TCPPORT")
-var storageURI = os.Getenv("STORAGE_URI")
-var storageTCPPort = os.Getenv("STORAGE_TCPPORT")
-var isEmulatorsPool = os.Getenv("IS_EMULATORS_POOL")
-var em100Bios = os.Getenv("EM100BIOS")
-var em100Bmc = os.Getenv("EM100BMC")
-var bmcSerial = os.Getenv("BMC_SERIAL")
+var binariesPath string
+var firmwaresPath string
+var distrosPath string
+var compileURI string
+var compileTCPPort string
+var storageURI string
+var storageTCPPort string
+var isEmulatorsPool string
+var em100Bios string
+var em100Bmc string
+var bmcSerial string
 
 //OpenBMCEm100Command string
 var OpenBMCEm100Command *exec.Cmd = nil
 var bmcSerialConsoleCmd *exec.Cmd = nil
 //RomEm100Command string
 var RomEm100Command *exec.Cmd = nil
+
+//Initialize controller1 config
+func initCtrlconfig() (error) {
+        viper.SetConfigName("ctrl1conf")
+        viper.SetConfigType("yaml")
+        viper.AddConfigPath("/usr/local/production/config/")
+        viper.AutomaticEnv()
+
+        err := viper.ReadInConfig()
+        if err != nil {
+                return err
+        }
+
+        binariesPath = viper.GetString("BINARIES_PATH")
+        firmwaresPath = viper.GetString("FIRMWARES_PATH")
+        distrosPath = viper.GetString("DISTROS_PATH")
+        compileURI = viper.GetString("COMPILE_URI")
+        compileTCPPort = viper.GetString("COMPILE_TCPPORT")
+        storageURI = viper.GetString("STORAGE_URI")
+        storageTCPPort = viper.GetString("STORAGE_TCPPORT")
+        isEmulatorsPool = viper.GetString("IS_EMULATORS_POOL")
+        em100Bios = viper.GetString("EM100BIOS")
+        em100Bmc = viper.GetString("EM100BMC")
+        bmcSerial = viper.GetString("BMC_SERIAL")
+
+        return nil
+}
 
 // ShiftPath cleans up path
 func ShiftPath(p string) (head, tail string) {
@@ -528,7 +556,11 @@ func main() {
 	print("| Development version -       |\n")
 	print("=============================== \n")
 
-	var ctrlTCPPort = os.Getenv("CTRL_TCPPORT")
+	err := initCtrlconfig()
+	if err != nil {
+		log.Fatal(err)
+	}
+	var ctrlTCPPort = viper.GetString("CTRL_TCPPORT")
 	mux := http.NewServeMux()
 
 	// Highest priority must be set to the signed request

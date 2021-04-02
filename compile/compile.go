@@ -3,7 +3,7 @@
 package main
 
 import (
-	"base"
+	"base.com/base"
 	"bufio"
 	"context"
 	"crypto/md5"
@@ -11,6 +11,7 @@ import (
 	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
+	"github.com/spf13/viper"
 	"golang.org/x/sys/unix"
 	"io"
 	"log"
@@ -23,13 +24,13 @@ import (
 	"time"
 )
 
-var compileTCPPort = os.Getenv("COMPILE_TCPPORT")
-var startLinuxbootBuildBin = os.Getenv("LINUXBOOT_BUILD")
-var startOpenBMCBuildBin = os.Getenv("OPENBMC_BUILD")
-var binariesPath = os.Getenv("BINARIES_PATH")
-var firmwaresPath = os.Getenv("FIRMWARES_PATH")
-var storageURI = os.Getenv("STORAGE_URI")
-var storageTCPPort = os.Getenv("STORAGE_TCPPORT")
+var compileTCPPort string
+var startLinuxbootBuildBin string
+var startOpenBMCBuildBin string
+var binariesPath string
+var firmwaresPath string
+var storageURI string
+var storageTCPPort string
 
 //OpenBMCCommand  initialized
 var OpenBMCCommand *exec.Cmd = nil
@@ -52,6 +53,29 @@ var dockerClient *client.Client
 var username string
 var linuxbootDockerID string
 var openbmcDockerID string
+
+//initialize compiler config
+func initCompilerconfig() (error) {
+        viper.SetConfigName("compiler1conf")
+        viper.SetConfigType("yaml")
+        viper.AddConfigPath("/usr/local/production/config/")
+        viper.AutomaticEnv()
+
+        err := viper.ReadInConfig()
+        if err != nil {
+                return err
+        }
+
+        compileTCPPort = viper.GetString("COMPILE_TCPPORT")
+        startLinuxbootBuildBin = viper.GetString("LINUXBOOT_BUILD")
+        startOpenBMCBuildBin = viper.GetString("OPENBMC_BUILD")
+        binariesPath = viper.GetString("BINARIES_PATH")
+        firmwaresPath = viper.GetString("FIRMWARES_PATH")
+        storageURI = viper.GetString("STORAGE_URI")
+        storageTCPPort = viper.GetString("STORAGE_TCPPORT")
+
+        return nil
+}
 
 // ShiftPath to check if a docker container is running
 // docker inspect -f '{{.State.Running}}' linuxboot_vejmarie2
@@ -181,7 +205,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 			githubBranch := keywords[1]
 			recipes := keywords[2]
 			interactive := keywords[3]
-			proxy := os.Getenv("PROXY")
+			proxy := viper.GetString("PROXY")
 			// We have to fork the build
 			// The script is startLinuxbootBuild
 			// It is getting 3 parameters
@@ -277,7 +301,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 			githubBranch := keywords[1]
 			board := keywords[2]
 			interactive := keywords[3]
-			proxy := os.Getenv("PROXY")
+			proxy := viper.GetString("PROXY")
 			// We have to fork the build
 			// The script is startLinuxbootBuild
 			// It is getting 3 parameters
@@ -359,6 +383,11 @@ func main() {
 	print("| Starting Compile backen     |\n")
 	print("| Development version -       |\n")
 	print("=============================== \n")
+
+	err := initCompilerconfig()
+        if err != nil {
+                log.Fatal(err)
+        }
 
 	dockerClient, _ = client.NewEnvClient()
 

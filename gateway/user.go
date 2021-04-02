@@ -1,26 +1,24 @@
 package main
 
 import (
-	"base"
+	"base.com/base"
 	"crypto/rand"
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/spf13/viper"
 	"io"
 	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"time"
 )
 
-//StorageURI set from env
-var StorageURI = os.Getenv("STORAGE_URI")
-
-//StorageTCPPORT set from env
-var StorageTCPPORT = os.Getenv("STORAGE_TCPPORT")
+var StorageURI string
+var StorageTCPPORT string
+var CredentialURI string
 
 type cacheEntry struct {
 	Nickname string
@@ -50,6 +48,26 @@ type userPublic struct {
 	Email            string
 	EmailRW          string
 	EmailLABEL       string
+}
+
+//Initialize User config
+func initUserconfig() (error){
+        viper.SetConfigName("gatewayconf")
+        viper.SetConfigType("yaml")
+        viper.AddConfigPath("/usr/local/production/config/")
+        viper.AutomaticEnv()
+
+        err := viper.ReadInConfig()
+        if err != nil {
+                return err
+        }
+        //StorageURI set from config file
+        StorageURI = viper.GetString("STORAGE_URI")
+
+        //StorageTCPPORT set from config file
+        StorageTCPPORT = viper.GetString("STORAGE_TCPPORT")
+	CredentialURI = viper.GetString("CREDENTIALS_TCPPORT")
+        return nil
 }
 
 func userExist(username string) bool {
@@ -539,8 +557,12 @@ func main() {
 	print("| Private use only            |\n")
 	print("=============================== \n")
 
+        err := initUserconfig()
+        if err != nil {
+                log.Fatal(err)
+        }
+
 	mux := http.NewServeMux()
-	var CredentialURI = os.Getenv("CREDENTIALS_TCPPORT")
 	print("Attaching to " + CredentialURI + "\n")
 	// Serve one page site dynamic pages
 	mux.HandleFunc("/user/", userCallback)

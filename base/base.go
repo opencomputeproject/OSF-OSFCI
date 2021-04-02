@@ -29,6 +29,7 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
+	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
 	"log"
@@ -37,7 +38,6 @@ import (
 	"net/http"
 	"net/mail"
 	"net/smtp"
-	"os"
 	"strings"
 	"time"
 )
@@ -105,13 +105,35 @@ func CheckPasswordHash(password, hash string) bool {
 
 // Send some email
 
-var smtpServer = os.Getenv("SMTP_SERVER") // example: smtp.google.com:587
-var smtpAccount = os.Getenv("SMTP_ACCOUNT")
-var smtpPassword = os.Getenv("SMTP_PASSWORD")
-var bCC = os.Getenv("BCC_ADDRESS")
+var smtpServer string
+var smtpAccount string
+var smtpPassword string
+var bCC string
+
+func initSmtpconfig() (error) {
+        viper.SetConfigName("gatewayconf")
+        viper.SetConfigType("yaml")
+        viper.AddConfigPath("/usr/local/production/config/")
+        viper.AutomaticEnv()
+
+        err := viper.ReadInConfig()
+        if err != nil {
+                return err
+        }
+        smtpServer = viper.GetString("SMTP_SERVER") // example: smtp.google.com:587
+        smtpAccount =  viper.GetString("SMTP_ACCOUNT")
+        smtpPassword = viper.GetString("SMTP_PASSWORD")
+        bCC = viper.GetString("BCC_ADDRESS")
+
+        return nil
+}
 
 func SendEmail(email string, subject string, validationString string) {
 	var auth smtp.Auth
+	err := initSmtpconfig()
+	if err != nil {
+		log.Println("SMTP Config Error", err)
+	}
 	servername := smtpServer
 	host, _, _ := net.SplitHostPort(servername)
 	shortServer := strings.Split(servername, ":")

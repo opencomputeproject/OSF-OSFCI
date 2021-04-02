@@ -8,6 +8,8 @@ STORAGE_TCPPORT=$6
 INTERACTIVE=$7
 GITTOKEN=$8
 PROXY=$9
+BINARIES_PATH=$(grep -A0 'BINARIES_PATH' "/usr/local/production/config/compiler1conf.yaml" | cut -d: -f2 | sed 's/[\" ]//g')
+FIRMWARES_PATH=$(grep -A0 'FIRMWARES_PATH' "/usr/local/production/config/compiler1conf.yaml" | cut -d: -f2 | sed 's/[\" ]//g')
 SUM=`md5sum <<EOF
 $USERNAME
 EOF`
