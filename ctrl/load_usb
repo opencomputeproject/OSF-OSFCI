@@ -1,3 +1,4 @@
 #!/bin/bash
 # we must run the application into a screen
+BINARIES_PATH=$(grep -A0 'BINARIES_PATH' "/usr/local/production/config/ctrl1conf.yaml" | cut -d: -f2 | sed 's/[\" ]//g')
 $BINARIES_PATH/ttyd -p 7684 screen $BINARIES_PATH/startUsbLoader "$@"

@@ -1,9 +1,13 @@
 #!/bin/bash
 filename="${1##*/}"
+DISTROS_PATH=$(grep -A0 'DISTROS_PATH' "/usr/local/production/config/ctrl1conf.yaml" | cut -d: -f2 | sed 's/[\" ]//g')
+STORAGE_URI=$(grep -A0 'STORAGE_URI' "/usr/local/production/config/ctrl1conf.yaml" | cut -d: -f2 | sed 's/[\ ]//g')
+STORAGE_TCPPORT=$(grep -A0 'STORAGE_TCPPORT' "/usr/local/production/config/ctrl1conf.yaml" | cut -d: -f3 | sed 's/[\" ]//g')
+USB_STORAGE=$(grep -A0 'USB_STORAGE' "/usr/local/production/config/ctrl1conf.yaml" | sed -n -e 's/^.*: //p' | sed 's/[\" ]//g')
 echo "Loading $filename"
 echo $DISTROS_PATH
 \rm -rf $DISTROS_PATH/*
-wget -O $1 http://$STORAGE_URI$STORAGE_TCPPORT/distros/$filename
+wget -O $1 http://$STORAGE_URI:$STORAGE_TCPPORT/distros/$filename
 # Reconnect USB_STORAGE in the case a previous soft reset happened
 eject -t $USB_STORAGE
 dd if=$1 bs=4M | pv | dd of=$USB_STORAGE bs=4M oflag=sync

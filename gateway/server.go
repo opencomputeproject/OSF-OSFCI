@@ -3,7 +3,7 @@
 package main
 
 import (
-	"base"
+	"base/base"
 	"bytes"
 	"crypto/hmac"
 	"crypto/sha1"
@@ -11,6 +11,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/spf13/viper"
 	"golang.org/x/crypto/acme/autocert"
 	"html/template"
 	"io/ioutil"
@@ -19,51 +20,30 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"os"
 	"path"
 	"strings"
 	"sync"
 	"time"
 )
 
-var tlsCertPath = os.Getenv("TLS_CERT_PATH")
-var tlsKeyPath = os.Getenv("TLS_KEY_PATH")
-
-//DNSDomain set from env
-var DNSDomain = os.Getenv("DNS_DOMAIN")
-var staticAssetsDir = os.Getenv("STATIC_ASSETS_DIR")
-
-//TTYDHostConsole set from env
-var TTYDHostConsole = os.Getenv("TTYD_HOST_CONSOLE_PORT")
-
-//TTYDem100Bios set from env
-var TTYDem100Bios = os.Getenv("TTYD_EM100_BIOS_PORT")
-
-//TTYDem100BMC set from env
-var TTYDem100BMC = os.Getenv("TTYD_EM100_BMC_PORT")
-
-//TTYDOSLoader set from env
-var TTYDOSLoader = os.Getenv("TTYD_OS_LOADER")
-
-//CTRLIp set from env
-var CTRLIp = os.Getenv("CTRL_IP")
-
-//CTRLTcpPort set from env
-var CTRLTcpPort = os.Getenv("CTRL_TCPPORT")
-var certStorage = os.Getenv("CERT_STORAGE")
-
-//ExpectedBMCIp set from env
-var ExpectedBMCIp = os.Getenv("EXPECT_BMC_IP")
-var credentialURI = os.Getenv("CREDENTIALS_URI")
-var credentialPort = os.Getenv("CREDENTIALS_TCPPORT")
-var compileURI = os.Getenv("COMPILE_URI")
-var compileTCPPort = os.Getenv("COMPILE_TCPPORT")
-
-//StorageURI set from env
-var StorageURI = os.Getenv("STORAGE_URI")
-
-//StorageTCPPORT set from env
-var StorageTCPPORT = os.Getenv("STORAGE_TCPPORT")
+var tlsCertPath string
+var tlsKeyPath string
+var DNSDomain string
+var staticAssetsDir string
+var TTYDHostConsole string
+var TTYDem100Bios string
+var TTYDem100BMC string
+var TTYDOSLoader string
+var CTRLIp string
+var CTRLTcpPort string
+var certStorage string
+var ExpectedBMCIp string
+var credentialURI string
+var credentialPort string
+var compileURI string
+var compileTCPPort string
+var StorageURI string
+var StorageTCPPORT string
 
 type serverProduct struct {
 	Product string
@@ -92,6 +72,59 @@ type serversList struct {
 }
 
 var ciServers serversList
+
+//Initialize the config variables
+func initServerconfig() (error){
+        viper.SetConfigName("gatewayconf")
+        viper.SetConfigType("yaml")
+        viper.AddConfigPath("/usr/local/production/config/")
+        viper.AutomaticEnv()
+
+        err := viper.ReadInConfig()
+        if err != nil {
+                return err
+        }
+
+        tlsCertPath = viper.GetString("TLS_CERT_PATH")
+        tlsKeyPath = viper.GetString("TLS_KEY_PATH")
+
+        //DNSDomain set from config file
+        DNSDomain = viper.GetString("DNS_DOMAIN")
+        staticAssetsDir = viper.GetString("STATIC_ASSETS_DIR")
+
+        //TTYDHostConsole set from config file
+        TTYDHostConsole = viper.GetString("TTYD_HOST_CONSOLE_PORT")
+
+        //TTYDem100Bios set from config file
+        TTYDem100Bios = viper.GetString("TTYD_EM100_BIOS_PORT")
+
+        //TTYDem100BMC set from config file
+        TTYDem100BMC = viper.GetString("TTYD_EM100_BMC_PORT")
+
+        //TTYDOSLoader set from config file
+        TTYDOSLoader = viper.GetString("TTYD_OS_LOADER")
+
+        //CTRLIp set from config file
+        CTRLIp = viper.GetString("CTRL_IP")
+
+        //CTRLTcpPort set from config file
+        CTRLTcpPort = viper.GetString("CTRL_TCPPORT")
+        certStorage = viper.GetString("CERT_STORAGE")
+
+        //ExpectedBMCIp set from config file
+        ExpectedBMCIp = viper.GetString("EXPECT_BMC_IP")
+        credentialURI = viper.GetString("CREDENTIALS_URI")
+        credentialPort = viper.GetString("CREDENTIALS_TCPPORT")
+        compileURI = viper.GetString("COMPILE_URI")
+        compileTCPPort = viper.GetString("COMPILE_TCPPORT")
+
+        //StorageURI set from config file
+        StorageURI = viper.GetString("STORAGE_URI")
+
+        //StorageTCPPORT set from config file
+        StorageTCPPORT = viper.GetString("STORAGE_TCPPORT")
+        return nil
+}
 
 // httpsRedirect redirects http requests to https
 func httpsRedirect(w http.ResponseWriter, r *http.Request) {
@@ -800,6 +833,12 @@ func main() {
 	print("| Private use only            |\n")
 	print("=============================== \n")
 	print(" Please do not forget to set TLS_CERT_PATH/TLS_KEY_PATH/STATIC_ASSETS_DIR to there relevant path\n")
+
+        err := initServerconfig()
+        //If there is error reading the config file log error and exit
+        if err != nil {
+                log.Fatal(err)
+        }
 
 	mux := http.NewServeMux()
 
