@@ -1,9 +1,10 @@
 package main
 
 import (
-	"base"
+	"base/base"
 	"encoding/base64"
 	"fmt"
+	"github.com/spf13/viper"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -13,10 +14,26 @@ import (
 	"sync"
 )
 
-var storageRoot = os.Getenv("STORAGE_ROOT")
+var storageRoot string
 
 // write operation must be protected by a Mutex
 var file sync.RWMutex
+
+//Initialize storage config
+func initStorageconfig() (error) {
+        viper.SetConfigName("gatewayconf")
+        viper.SetConfigType("yaml")
+        viper.AddConfigPath("/usr/local/production/config/")
+        viper.AutomaticEnv()
+
+        err := viper.ReadInConfig()
+        if err != nil {
+                return err
+        }
+        storageRoot = viper.GetString("STORAGE_ROOT")
+
+        return nil
+}
 
 // This is getting a user file entry
 
@@ -131,7 +148,7 @@ func getImage(username string) string {
 
 	_, err = os.Stat(storageRoot + "/" + string(username[0]) + "/" + username + ".jpg")
 	if os.IsNotExist(err) {
-		var staticAssetsDir = os.Getenv("STATIC_ASSETS_DIR")
+		var staticAssetsDir = viper.GetString("STATIC_ASSETS_DIR")
 		content, _ := ioutil.ReadFile(staticAssetsDir + "images/forklift.png")
 		encodedContent := base64.StdEncoding.EncodeToString(content)
 		return encodedContent
@@ -265,10 +282,17 @@ func main() {
 	print("| Private use only            |\n")
 	print("=============================== \n")
 
-	mux := http.NewServeMux()
-	var StorageURI = os.Getenv("STORAGE_URI")
-	var StorageTCPPORT = os.Getenv("STORAGE_TCPPORT")
+        err := initStorageconfig()
+        if err != nil {
+                log.Fatal(err)
+        }
 
+	mux := http.NewServeMux()
+	var StorageURI = viper.GetString("STORAGE_URI")
+	var StorageTCPPORT = viper.GetString("STORAGE_TCPPORT")
+
+	fmt.Println("StorageURI =", StorageURI)
+	fmt.Println("StorageTCPPORT =",StorageTCPPORT)
 	mux.HandleFunc("/user/", userCallback)
 	mux.HandleFunc("/distros/", distrosCallback)
 
