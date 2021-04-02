@@ -19,7 +19,7 @@ if [ -f "go.sum" ] ; then
 fi
 cd $1/base/
 pwd
-go mod init base.com/base
+go mod init base/base
 cd /home/ciadmin/build/
 pwd
 go get golang.org/x/crypto/acme/autocert

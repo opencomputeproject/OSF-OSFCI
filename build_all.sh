@@ -23,8 +23,8 @@ pwd
 go mod init base.com/base
 cd /home/ciadmin/build/
 pwd
-go mod init github.com/spf13
-go mod edit -replace base.com/base=$1/base
+go mod init github/spf13
+go mod edit -replace base/base=$1/base
 go mod tidy
 echo "Building Server.go ...\n"
 go build $1/gateway/server.go
