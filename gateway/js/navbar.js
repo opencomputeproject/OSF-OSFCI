@@ -45,36 +45,33 @@ $('#dropdownSecondary').on('mouseout', function(e) {
 }
 
 function loginBtn() {
-$('#loginNavbar').on('click', function(e) {
-	if ( typeof(mylocalStorage) !== 'undefined' ) 
-	if (( "string" === typeof(mylocalStorage['secretKey']) ) & ( "string" === typeof(mylocalStorage['accessKey']) ))
-	{
-		disconnect();
-	}
-	else
-	{
-		clearDocument();
-		loadHTML("html/navbar.html");
-		loadJS("js/navbar.js");
-		navbarHover();
-		loginBtn();
-       		$(document.body).append("<center><h1>Welcome Back !</h1><center>");
-	       	loadHTML("html/loginForm.html");
-       		loadJS("js/login.js");
-        	managePasswordForgotten();
-        	loadJS("js/forms.js");
-        	formSubmission('#login','getToken','','Password missmatch');
-        	loadHTML("footer.html");
-	}
-});
+	$('#loginNavbar').on('click', function(e) {
+		if ( typeof(mylocalStorage) !== 'undefined' ) 
+			if (( "string" === typeof(mylocalStorage['secretKey']) ) & ( "string" === typeof(mylocalStorage['accessKey']) ))
+			{
+				disconnect();
+			}
+			else
+			{
+				clearDocument();
+				loadHTML("html/navbar.html");
+				loadJS("js/navbar.js");
+				navbarHover();
+				loginBtn();
+		       		$(document.body).append("<center><h1>Welcome Back !</h1><center>");
+			       	loadHTML("html/loginForm.html");
+		       		loadJS("js/login.js");
+		        	managePasswordForgotten();
+		        	loadJS("js/forms.js");
+		        	formSubmission('#login','getToken','','Password missmatch');
+		        	loadHTML("footer.html");
+		}
+	});
 
-$('#MyAccount').on('click', function(e) {
-	myAccount();
-});
+	$('#MyAccount').on('click', function(e) {
+		myAccount();
+	});
 
-$('#dl360').on('click', function(e) {
-        InteractiveSession();
-});
 	// We must check if we are logged in or not ?
 	// and replace the button text
 	if ( typeof(mylocalStorage) !== 'undefined' )
@@ -102,3 +99,23 @@ $('#features').on("click", function(event) {
         loginBtn();
 	loadHTML("html/features.html");
 });
+
+
+// We have to build the navbar production option
+
+$.ajax({
+	type: "GET",
+	contentType: 'application/json',
+	url: window.location.origin + '/ci/getServermodels/',
+	success: function(response){
+			var obj = JSON.parse(response);
+			obj.forEach(function(item) {
+				$('#menuSecondary').html('<li><a class="dropdown-item" id="'+item.Product+'">' + item.Product + '</a></li>');
+				$('#'+item.Product).on('click', function(e) {
+  				      InteractiveSession(item.Product);
+				});
+			});
+	}
+});
+
+

@@ -107,7 +107,7 @@ function homebutton(){
 
 
 
-function start_ci() {
+function start_ci(machine) {
 
 	// This function can start only if I can get a server otherwise 
 	// it won't work
@@ -124,7 +124,7 @@ function start_ci() {
         $.ajax({
                   type: "GET",
                   contentType: 'application/json',
-                  url: window.location.origin + '/ci/'+ 'getServer',
+                  url: window.location.origin + '/ci/'+ 'getServer/' + machine,
                   success: function(response){
 			var answer = JSON.parse(response);
 			if ( answer.Waittime == "0" ) {
@@ -801,8 +801,8 @@ var getUrlParameter = function getUrlParameter(sParam) {
     }
 };
 
-function InteractiveSession() {
-	start_ci();
+function InteractiveSession(machine) {
+	start_ci(machine);
 }
 
 function BuildSignedAuth(uri, op, contentType, callback) {
