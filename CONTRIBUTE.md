@@ -18,7 +18,7 @@ yet and some housecleaning needs done to achieve that.
 
 - Example:
     ```
-    go fmt ctrl1.go
+    gofmt -s -w ctrl1.go
     golint ctrl1.go
     ```
 
@@ -44,4 +44,4 @@ Testing by the Advanced Technology Team and contributors.
 
 ## References
 
-This document is inspired by https://raw.githubusercontent.com/u-root/u-root/master/CONTRIBUTING.md
+This document is inspired by standards followed by https://github.com/u-root/u-root
