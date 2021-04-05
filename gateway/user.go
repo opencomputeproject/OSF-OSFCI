@@ -16,8 +16,11 @@ import (
 	"time"
 )
 
+//StorageURI is read from config
 var StorageURI string
+//StorageTCPPORT is read from config
 var StorageTCPPORT string
+//CredentialURI is read from config
 var CredentialURI string
 
 type cacheEntry struct {
@@ -51,23 +54,23 @@ type userPublic struct {
 }
 
 //Initialize User config
-func initUserconfig() (error){
-        viper.SetConfigName("gatewayconf")
-        viper.SetConfigType("yaml")
-        viper.AddConfigPath("/usr/local/production/config/")
-        viper.AutomaticEnv()
+func initUserconfig() error {
+	viper.SetConfigName("gatewayconf")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath("/usr/local/production/config/")
+	viper.AutomaticEnv()
 
-        err := viper.ReadInConfig()
-        if err != nil {
-                return err
-        }
-        //StorageURI set from config file
-        StorageURI = viper.GetString("STORAGE_URI")
+	err := viper.ReadInConfig()
+	if err != nil {
+		return err
+	}
+	//StorageURI set from config file
+	StorageURI = viper.GetString("STORAGE_URI")
 
-        //StorageTCPPORT set from config file
-        StorageTCPPORT = viper.GetString("STORAGE_TCPPORT")
+	//StorageTCPPORT set from config file
+	StorageTCPPORT = viper.GetString("STORAGE_TCPPORT")
 	CredentialURI = viper.GetString("CREDENTIALS_TCPPORT")
-        return nil
+	return nil
 }
 
 func userExist(username string) bool {
@@ -557,10 +560,10 @@ func main() {
 	print("| Private use only            |\n")
 	print("=============================== \n")
 
-        err := initUserconfig()
-        if err != nil {
-                log.Fatal(err)
-        }
+	err := initUserconfig()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	mux := http.NewServeMux()
 	print("Attaching to " + CredentialURI + "\n")

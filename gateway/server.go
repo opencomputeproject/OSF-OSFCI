@@ -28,21 +28,31 @@ import (
 
 var tlsCertPath string
 var tlsKeyPath string
+//DNSDomain is read from config
 var DNSDomain string
 var staticAssetsDir string
+//TTYDHostConsole is read from config
 var TTYDHostConsole string
+//TTYDem100Bios is read from config
 var TTYDem100Bios string
+//TTYDem100BMC is read from config
 var TTYDem100BMC string
+// TTYDOSLoader is read from config
 var TTYDOSLoader string
+// CTRLIp is read from config
 var CTRLIp string
+// CTRLTcpPort is read from config
 var CTRLTcpPort string
 var certStorage string
+// ExpectedBMCIp is read from config
 var ExpectedBMCIp string
 var credentialURI string
 var credentialPort string
 var compileURI string
 var compileTCPPort string
+//StorageURI is read from config
 var StorageURI string
+//StorageTCPPORT is read from config
 var StorageTCPPORT string
 
 type serverProduct struct {
@@ -74,56 +84,56 @@ type serversList struct {
 var ciServers serversList
 
 //Initialize the config variables
-func initServerconfig() (error){
-        viper.SetConfigName("gatewayconf")
-        viper.SetConfigType("yaml")
-        viper.AddConfigPath("/usr/local/production/config/")
-        viper.AutomaticEnv()
+func initServerconfig() error {
+	viper.SetConfigName("gatewayconf")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath("/usr/local/production/config/")
+	viper.AutomaticEnv()
 
-        err := viper.ReadInConfig()
-        if err != nil {
-                return err
-        }
+	err := viper.ReadInConfig()
+	if err != nil {
+		return err
+	}
 
-        tlsCertPath = viper.GetString("TLS_CERT_PATH")
-        tlsKeyPath = viper.GetString("TLS_KEY_PATH")
+	tlsCertPath = viper.GetString("TLS_CERT_PATH")
+	tlsKeyPath = viper.GetString("TLS_KEY_PATH")
 
-        //DNSDomain set from config file
-        DNSDomain = viper.GetString("DNS_DOMAIN")
-        staticAssetsDir = viper.GetString("STATIC_ASSETS_DIR")
+	//DNSDomain set from config file
+	DNSDomain = viper.GetString("DNS_DOMAIN")
+	staticAssetsDir = viper.GetString("STATIC_ASSETS_DIR")
 
-        //TTYDHostConsole set from config file
-        TTYDHostConsole = viper.GetString("TTYD_HOST_CONSOLE_PORT")
+	//TTYDHostConsole set from config file
+	TTYDHostConsole = viper.GetString("TTYD_HOST_CONSOLE_PORT")
 
-        //TTYDem100Bios set from config file
-        TTYDem100Bios = viper.GetString("TTYD_EM100_BIOS_PORT")
+	//TTYDem100Bios set from config file
+	TTYDem100Bios = viper.GetString("TTYD_EM100_BIOS_PORT")
 
-        //TTYDem100BMC set from config file
-        TTYDem100BMC = viper.GetString("TTYD_EM100_BMC_PORT")
+	//TTYDem100BMC set from config file
+	TTYDem100BMC = viper.GetString("TTYD_EM100_BMC_PORT")
 
-        //TTYDOSLoader set from config file
-        TTYDOSLoader = viper.GetString("TTYD_OS_LOADER")
+	//TTYDOSLoader set from config file
+	TTYDOSLoader = viper.GetString("TTYD_OS_LOADER")
 
-        //CTRLIp set from config file
-        CTRLIp = viper.GetString("CTRL_IP")
+	//CTRLIp set from config file
+	CTRLIp = viper.GetString("CTRL_IP")
 
-        //CTRLTcpPort set from config file
-        CTRLTcpPort = viper.GetString("CTRL_TCPPORT")
-        certStorage = viper.GetString("CERT_STORAGE")
+	//CTRLTcpPort set from config file
+	CTRLTcpPort = viper.GetString("CTRL_TCPPORT")
+	certStorage = viper.GetString("CERT_STORAGE")
 
-        //ExpectedBMCIp set from config file
-        ExpectedBMCIp = viper.GetString("EXPECT_BMC_IP")
-        credentialURI = viper.GetString("CREDENTIALS_URI")
-        credentialPort = viper.GetString("CREDENTIALS_TCPPORT")
-        compileURI = viper.GetString("COMPILE_URI")
-        compileTCPPort = viper.GetString("COMPILE_TCPPORT")
+	//ExpectedBMCIp set from config file
+	ExpectedBMCIp = viper.GetString("EXPECT_BMC_IP")
+	credentialURI = viper.GetString("CREDENTIALS_URI")
+	credentialPort = viper.GetString("CREDENTIALS_TCPPORT")
+	compileURI = viper.GetString("COMPILE_URI")
+	compileTCPPort = viper.GetString("COMPILE_TCPPORT")
 
-        //StorageURI set from config file
-        StorageURI = viper.GetString("STORAGE_URI")
+	//StorageURI set from config file
+	StorageURI = viper.GetString("STORAGE_URI")
 
-        //StorageTCPPORT set from config file
-        StorageTCPPORT = viper.GetString("STORAGE_TCPPORT")
-        return nil
+	//StorageTCPPORT set from config file
+	StorageTCPPORT = viper.GetString("STORAGE_TCPPORT")
+	return nil
 }
 
 // httpsRedirect redirects http requests to https
@@ -834,11 +844,11 @@ func main() {
 	print("=============================== \n")
 	print(" Please do not forget to set TLS_CERT_PATH/TLS_KEY_PATH/STATIC_ASSETS_DIR to there relevant path\n")
 
-        err := initServerconfig()
-        //If there is error reading the config file log error and exit
-        if err != nil {
-                log.Fatal(err)
-        }
+	err := initServerconfig()
+	//If there is error reading the config file log error and exit
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	mux := http.NewServeMux()
 

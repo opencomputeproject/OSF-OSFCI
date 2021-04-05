@@ -20,19 +20,19 @@ var storageRoot string
 var file sync.RWMutex
 
 //Initialize storage config
-func initStorageconfig() (error) {
-        viper.SetConfigName("gatewayconf")
-        viper.SetConfigType("yaml")
-        viper.AddConfigPath("/usr/local/production/config/")
-        viper.AutomaticEnv()
+func initStorageconfig() error {
+	viper.SetConfigName("gatewayconf")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath("/usr/local/production/config/")
+	viper.AutomaticEnv()
 
-        err := viper.ReadInConfig()
-        if err != nil {
-                return err
-        }
-        storageRoot = viper.GetString("STORAGE_ROOT")
+	err := viper.ReadInConfig()
+	if err != nil {
+		return err
+	}
+	storageRoot = viper.GetString("STORAGE_ROOT")
 
-        return nil
+	return nil
 }
 
 // This is getting a user file entry
@@ -282,17 +282,17 @@ func main() {
 	print("| Private use only            |\n")
 	print("=============================== \n")
 
-        err := initStorageconfig()
-        if err != nil {
-                log.Fatal(err)
-        }
+	err := initStorageconfig()
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	mux := http.NewServeMux()
 	var StorageURI = viper.GetString("STORAGE_URI")
 	var StorageTCPPORT = viper.GetString("STORAGE_TCPPORT")
 
 	fmt.Println("StorageURI =", StorageURI)
-	fmt.Println("StorageTCPPORT =",StorageTCPPORT)
+	fmt.Println("StorageTCPPORT =", StorageTCPPORT)
 	mux.HandleFunc("/user/", userCallback)
 	mux.HandleFunc("/distros/", distrosCallback)
 
