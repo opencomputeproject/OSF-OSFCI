@@ -6,7 +6,7 @@ We need help with this project. Contributions are very welcome. See open [issues
 
 Please submit to https://github.com/HewlettPackard/osfci/issues
 
-## Communication
+## Discussions and get in touch with us!
 
 Please get in touch via https://github.com/HewlettPackard/osfci/discussions
 
