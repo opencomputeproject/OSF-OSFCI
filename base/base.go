@@ -42,6 +42,7 @@ import (
 	"time"
 )
 
+//User structure holds authorized users details
 type User struct {
 	Nickname         string
 	Password         string
@@ -60,7 +61,11 @@ type User struct {
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/")
 var simpleLetters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 var randInit = 0
+
+//MaxAge defines cookie expiration
 var MaxAge = 3600 * 24
+
+//MaxServerAge  defines server allocation length : currently 60 seconds * 30 == 30 minutes
 var MaxServerAge = 60 * 30
 
 func randAlphaSlashPlus(n int) string {
@@ -85,19 +90,23 @@ func randAlpha(n int) string {
 	return string(b)
 }
 
+//GenerateAccountACKLink generates account verification link
 func GenerateAccountACKLink(length int) string {
 	return randAlpha(length)
 }
 
+//GenerateAuthToken creates auth token for created user
 func GenerateAuthToken(TokenType string, length int) string {
 	return randAlphaSlashPlus(length)
 }
 
+//HashPassword gets hash from password
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(bytes), err
 }
 
+//CheckPasswordHash checks given password
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
@@ -110,24 +119,25 @@ var smtpAccount string
 var smtpPassword string
 var bCC string
 
-func initSmtpconfig() (error) {
-        viper.SetConfigName("gatewayconf")
-        viper.SetConfigType("yaml")
-        viper.AddConfigPath("/usr/local/production/config/")
-        viper.AutomaticEnv()
+func initSmtpconfig() error {
+	viper.SetConfigName("gatewayconf")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath("/usr/local/production/config/")
+	viper.AutomaticEnv()
 
-        err := viper.ReadInConfig()
-        if err != nil {
-                return err
-        }
-        smtpServer = viper.GetString("SMTP_SERVER") // example: smtp.google.com:587
-        smtpAccount =  viper.GetString("SMTP_ACCOUNT")
-        smtpPassword = viper.GetString("SMTP_PASSWORD")
-        bCC = viper.GetString("BCC_ADDRESS")
+	err := viper.ReadInConfig()
+	if err != nil {
+		return err
+	}
+	smtpServer = viper.GetString("SMTP_SERVER") // example: smtp.google.com:587
+	smtpAccount = viper.GetString("SMTP_ACCOUNT")
+	smtpPassword = viper.GetString("SMTP_PASSWORD")
+	bCC = viper.GetString("BCC_ADDRESS")
 
-        return nil
+	return nil
 }
 
+//SendEmail provides email function for varied interactions
 func SendEmail(email string, subject string, validationString string) {
 	var auth smtp.Auth
 	err := initSmtpconfig()
@@ -283,7 +293,8 @@ func SendEmail(email string, subject string, validationString string) {
 
 }
 
-func Request(method string, Uri string, Path string, Data string, content []byte, query string, Key string, SecretKey string) (*http.Response, error) {
+//Request handler
+func Request(method string, resURI string, Path string, Data string, content []byte, query string, Key string, SecretKey string) (*http.Response, error) {
 
 	client := &http.Client{}
 
@@ -291,9 +302,9 @@ func Request(method string, Uri string, Path string, Data string, content []byte
 	myDate = strings.Replace(myDate, "GMT", "+0000", -1)
 	var req *http.Request
 	if content != nil {
-		req, _ = http.NewRequest(method, Uri, bytes.NewReader(content))
+		req, _ = http.NewRequest(method, resURI, bytes.NewReader(content))
 	} else {
-		req, _ = http.NewRequest(method, Uri, nil)
+		req, _ = http.NewRequest(method, resURI, nil)
 	}
 
 	stringToSign := method + "\n\n" + Data + "\n" + myDate + "\n" + Path
@@ -320,9 +331,8 @@ func Request(method string, Uri string, Path string, Data string, content []byte
 
 }
 
-// Some HTTP request
+// HTTPGetRequest handles some HTTP request
 // Get request to the storage backend
-
 func HTTPGetRequest(request string) string {
 	resp, err := http.Get(request)
 	if err != nil {
@@ -336,6 +346,7 @@ func HTTPGetRequest(request string) string {
 	return (string(body))
 }
 
+// HTTPDeleteRequest handles Delete request to backend
 func HTTPDeleteRequest(request string) {
 	client := &http.Client{}
 	content := []byte{0}
@@ -353,8 +364,7 @@ func HTTPDeleteRequest(request string) {
 	}
 }
 
-// Put request to the storage backend
-
+// HTTPPutRequest handles Put request to the storage backend
 func HTTPPutRequest(request string, content []byte, contentType string) string {
 	client := &http.Client{}
 	httprequest, err := http.NewRequest("PUT", request, bytes.NewReader(content))
@@ -374,6 +384,7 @@ func HTTPPutRequest(request string, content []byte, contentType string) string {
 	return ""
 }
 
+// HTTPGetBody handles request body for redirects
 func HTTPGetBody(r *http.Request) []byte {
 	buf, _ := ioutil.ReadAll(r.Body)
 	rdr1 := ioutil.NopCloser(bytes.NewBuffer(buf))

@@ -55,26 +55,26 @@ var linuxbootDockerID string
 var openbmcDockerID string
 
 //initialize compiler config
-func initCompilerconfig() (error) {
-        viper.SetConfigName("compiler1conf")
-        viper.SetConfigType("yaml")
-        viper.AddConfigPath("/usr/local/production/config/")
-        viper.AutomaticEnv()
+func initCompilerconfig() error {
+	viper.SetConfigName("compiler1conf")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath("/usr/local/production/config/")
+	viper.AutomaticEnv()
 
-        err := viper.ReadInConfig()
-        if err != nil {
-                return err
-        }
+	err := viper.ReadInConfig()
+	if err != nil {
+		return err
+	}
 
-        compileTCPPort = viper.GetString("COMPILE_TCPPORT")
-        startLinuxbootBuildBin = viper.GetString("LINUXBOOT_BUILD")
-        startOpenBMCBuildBin = viper.GetString("OPENBMC_BUILD")
-        binariesPath = viper.GetString("BINARIES_PATH")
-        firmwaresPath = viper.GetString("FIRMWARES_PATH")
-        storageURI = viper.GetString("STORAGE_URI")
-        storageTCPPort = viper.GetString("STORAGE_TCPPORT")
+	compileTCPPort = viper.GetString("COMPILE_TCPPORT")
+	startLinuxbootBuildBin = viper.GetString("LINUXBOOT_BUILD")
+	startOpenBMCBuildBin = viper.GetString("OPENBMC_BUILD")
+	binariesPath = viper.GetString("BINARIES_PATH")
+	firmwaresPath = viper.GetString("FIRMWARES_PATH")
+	storageURI = viper.GetString("STORAGE_URI")
+	storageTCPPort = viper.GetString("STORAGE_TCPPORT")
 
-        return nil
+	return nil
 }
 
 // ShiftPath to check if a docker container is running
@@ -385,9 +385,9 @@ func main() {
 	print("=============================== \n")
 
 	err := initCompilerconfig()
-        if err != nil {
-                log.Fatal(err)
-        }
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	dockerClient, _ = client.NewEnvClient()
 
