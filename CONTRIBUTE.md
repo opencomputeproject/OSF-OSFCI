@@ -6,6 +6,10 @@ We need help with this project. Contributions are very welcome. See open [issues
 
 Please submit to https://github.com/HewlettPackard/osfci/issues
 
+## Communication
+
+Please get in touch via https://github.com/HewlettPackard/osfci/discussions
+
 ## Coding Style
 
 The ``osfci`` project aims to follow the standard formatting recommendations
