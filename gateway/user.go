@@ -18,8 +18,10 @@ import (
 
 //StorageURI is read from config
 var StorageURI string
+
 //StorageTCPPORT is read from config
 var StorageTCPPORT string
+
 //CredentialURI is read from config
 var CredentialURI string
 

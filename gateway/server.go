@@ -28,30 +28,40 @@ import (
 
 var tlsCertPath string
 var tlsKeyPath string
+
 //DNSDomain is read from config
 var DNSDomain string
 var staticAssetsDir string
+
 //TTYDHostConsole is read from config
 var TTYDHostConsole string
+
 //TTYDem100Bios is read from config
 var TTYDem100Bios string
+
 //TTYDem100BMC is read from config
 var TTYDem100BMC string
+
 // TTYDOSLoader is read from config
 var TTYDOSLoader string
+
 // CTRLIp is read from config
 var CTRLIp string
+
 // CTRLTcpPort is read from config
 var CTRLTcpPort string
 var certStorage string
+
 // ExpectedBMCIp is read from config
 var ExpectedBMCIp string
 var credentialURI string
 var credentialPort string
 var compileURI string
 var compileTCPPort string
+
 //StorageURI is read from config
 var StorageURI string
+
 //StorageTCPPORT is read from config
 var StorageTCPPORT string
 
