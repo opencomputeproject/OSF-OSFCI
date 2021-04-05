@@ -294,7 +294,7 @@ func SendEmail(email string, subject string, validationString string) {
 }
 
 //Request handler
-func Request(method string, URI string, Path string, Data string, content []byte, query string, Key string, SecretKey string) (*http.Response, error) {
+func Request(method string, resURI string, Path string, Data string, content []byte, query string, Key string, SecretKey string) (*http.Response, error) {
 
 	client := &http.Client{}
 
@@ -302,9 +302,9 @@ func Request(method string, URI string, Path string, Data string, content []byte
 	myDate = strings.Replace(myDate, "GMT", "+0000", -1)
 	var req *http.Request
 	if content != nil {
-		req, _ = http.NewRequest(method, URI, bytes.NewReader(content))
+		req, _ = http.NewRequest(method, resURI, bytes.NewReader(content))
 	} else {
-		req, _ = http.NewRequest(method, URI, nil)
+		req, _ = http.NewRequest(method, resURI, nil)
 	}
 
 	stringToSign := method + "\n\n" + Data + "\n" + myDate + "\n" + Path
