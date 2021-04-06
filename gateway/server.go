@@ -45,15 +45,9 @@ var TTYDem100BMC string
 // TTYDOSLoader is read from config
 var TTYDOSLoader string
 
-// CTRLIp is read from config
-var CTRLIp string
-
-// CTRLTcpPort is read from config
-var CTRLTcpPort string
 var certStorage string
 
 // ExpectedBMCIp is read from config
-var ExpectedBMCIp string
 var credentialURI string
 var credentialPort string
 var compileURI string
@@ -124,15 +118,8 @@ func initServerconfig() error {
 	//TTYDOSLoader set from config file
 	TTYDOSLoader = viper.GetString("TTYD_OS_LOADER")
 
-	//CTRLIp set from config file
-	CTRLIp = viper.GetString("CTRL_IP")
-
-	//CTRLTcpPort set from config file
-	CTRLTcpPort = viper.GetString("CTRL_TCPPORT")
 	certStorage = viper.GetString("CERT_STORAGE")
 
-	//ExpectedBMCIp set from config file
-	ExpectedBMCIp = viper.GetString("EXPECT_BMC_IP")
 	credentialURI = viper.GetString("CREDENTIALS_URI")
 	credentialPort = viper.GetString("CREDENTIALS_TCPPORT")
 	compileURI = viper.GetString("COMPILE_URI")
@@ -872,34 +859,60 @@ func main() {
 	// But this could be done by a registration mechanism later
 
 	var newFamily serverProduct
-
-	newFamily.Brand = "HPE"
-	newFamily.Product = "DL360_GEN10"
-	newFamily.Active = 1
-	ciServersProducts = append(ciServersProducts, newFamily)
-
-	newFamily.Product = "DL325_GEN10PLUS"
-	newFamily.Active = 0
-	ciServersProducts = append(ciServersProducts, newFamily)
+	var family string
+	for i := 1; ; i++ {
+		family = fmt.Sprintf("family%d", i)
+		viperstring := "serverfamily." + family
+		if viper.IsSet(viperstring) {
+			brandstring := viperstring + ".Brand"
+			modelstring := viperstring + ".model"
+			Activestring := viperstring + ".Active"
+			newFamily.Brand = viper.GetString(brandstring)
+			newFamily.Product = viper.GetString(modelstring)
+			newFamily.Active = viper.Get(Activestring).(int)
+			ciServersProducts = append(ciServersProducts, newFamily)
+			continue
+		} else {
+			break
+		}
+	}
 
 	var newEntry serverEntry
-
-	newEntry.servername = "dl360"
-	newEntry.ip = CTRLIp
-	newEntry.tcpPort = CTRLTcpPort
-	newEntry.compileIP = compileURI
-	newEntry.currentOwner = ""
-	newEntry.gitToken = ""
-	// the server is expired
-	newEntry.expiration = time.Now()
-	// by the way its bmc interface is
-	newEntry.bmcIP = ExpectedBMCIp
-	newEntry.queue = 0
-	newEntry.ProductIndex = 0
-
-	ciServers.mux.Lock()
-	ciServers.servers = append(ciServers.servers, newEntry)
-	ciServers.mux.Unlock()
+	var ctrl string
+	for i := 1; ; i++ {
+		ctrl = fmt.Sprintf("ctrl%d", i)
+		viperstring := "controller." + ctrl
+		if viper.IsSet(viperstring) {
+			serversrting := viperstring + ".servername"
+			bmcipstring := viperstring + ".SUTbmcIP"
+			compileripstring := viperstring + ".compilerIP"
+			ipstring := viperstring + ".ip"
+			tcpportstring := viperstring + ".tcpPort"
+			typetring := viperstring + ".SUTtype"
+			newEntry.servername = viper.GetString(serversrting)
+			newEntry.ip = viper.GetString(ipstring)
+			newEntry.tcpPort = viper.GetString(tcpportstring)
+			newEntry.compileIP = viper.GetString(compileripstring)
+			newEntry.currentOwner = ""
+			newEntry.gitToken = ""
+			newEntry.expiration = time.Now()
+			newEntry.bmcIP = viper.GetString(bmcipstring)
+			newEntry.queue = 0
+			servertype := viper.GetString(typetring)
+			fmt.Println("servertype=", servertype)
+			if servertype == "DL360_Gen10" {
+				newEntry.ProductIndex = 0
+			} else if servertype == "DL325_GEN10PLUS" {
+				newEntry.ProductIndex = 1
+			}
+			ciServers.mux.Lock()
+			ciServers.servers = append(ciServers.servers, newEntry)
+			ciServers.mux.Unlock()
+			continue
+		} else {
+			break
+		}
+	}
 
 	if DNSDomain != "" {
 		// if DNS_DOMAIN is set then we run in a production environment
