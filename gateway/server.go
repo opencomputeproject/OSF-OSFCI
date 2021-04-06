@@ -866,10 +866,10 @@ func main() {
 		if viper.IsSet(viperstring) {
 			brandstring := viperstring + ".Brand"
 			modelstring := viperstring + ".model"
-			Activestring := viperstring + ".Active"
+			activestring := viperstring + ".Active"
 			newFamily.Brand = viper.GetString(brandstring)
 			newFamily.Product = viper.GetString(modelstring)
-			newFamily.Active = viper.Get(Activestring).(int)
+			newFamily.Active = viper.Get(activestring).(int)
 			ciServersProducts = append(ciServersProducts, newFamily)
 			continue
 		} else {
@@ -883,13 +883,13 @@ func main() {
 		ctrl = fmt.Sprintf("ctrl%d", i)
 		viperstring := "controller." + ctrl
 		if viper.IsSet(viperstring) {
-			serversrting := viperstring + ".servername"
+			serverstring := viperstring + ".servername"
 			bmcipstring := viperstring + ".SUTbmcIP"
 			compileripstring := viperstring + ".compilerIP"
 			ipstring := viperstring + ".ip"
 			tcpportstring := viperstring + ".tcpPort"
 			typetring := viperstring + ".SUTtype"
-			newEntry.servername = viper.GetString(serversrting)
+			newEntry.servername = viper.GetString(serverstring)
 			newEntry.ip = viper.GetString(ipstring)
 			newEntry.tcpPort = viper.GetString(tcpportstring)
 			newEntry.compileIP = viper.GetString(compileripstring)
@@ -900,9 +900,10 @@ func main() {
 			newEntry.queue = 0
 			servertype := viper.GetString(typetring)
 			fmt.Println("servertype=", servertype)
-			if servertype == "DL360_Gen10" {
+			switch servertype {
+			case "DL360_Gen10":
 				newEntry.ProductIndex = 0
-			} else if servertype == "DL325_GEN10PLUS" {
+			case "DL325_GEN10PLUS":
 				newEntry.ProductIndex = 1
 			}
 			ciServers.mux.Lock()
