@@ -109,8 +109,12 @@ $.ajax({
 	url: window.location.origin + '/ci/getServermodels/',
 	success: function(response){
 			var obj = JSON.parse(response);
+			var htmlcode = "";
 			obj.forEach(function(item) {
-				$('#menuSecondary').html('<li><a class="dropdown-item" id="'+item.Product+'">' + item.Product + '</a></li>');
+				htmlcode = htmlcode + '<li><a class="dropdown-item" id="'+item.Product+'">' + item.Product + '</a></li>';
+			});
+			$('#menuSecondary').html(htmlcode);
+			obj.forEach(function(item) {
 				$('#'+item.Product).on('click', function(e) {
   				      InteractiveSession(item.Product);
 				});
