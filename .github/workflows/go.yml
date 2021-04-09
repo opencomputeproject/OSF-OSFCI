@@ -23,3 +23,8 @@ jobs:
       with:
         gofmt-path: './'
         gofmt-flags: '-l -d'
+
+    - name: lint check
+      uses: Jerome1337/golint-action@v1.0.2
+      with:
+        golint-path: './...'
