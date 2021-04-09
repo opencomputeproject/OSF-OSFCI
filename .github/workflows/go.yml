@@ -23,6 +23,3 @@ jobs:
       with:
         gofmt-path: './'
         gofmt-flags: '-l -d'
-
-    - name: Run golangci-lint    
-      uses: actions-contrib/golangci-lint@v1
