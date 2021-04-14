@@ -12,8 +12,8 @@ var sugarLogger *zap.SugaredLogger
 func main() {
 	InitLogger()
 	defer sugarLogger.Sync()
-	SimpleHTTPGet("www.google.com")
-	SimpleHTTPGet("http://www.google.com")
+	SimpleHTTPGet("www.osfci.tech")
+	SimpleHTTPGet("http://www.osfci.tech")
 }
 
 //InitLogger logger init
