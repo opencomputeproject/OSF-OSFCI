@@ -19,6 +19,8 @@ if [ -f "go.sum" ] ; then
 fi
 cd $1/base/
 pwd
+go get -u go.uber.org/zap
+go get gopkg.in/natefinch/lumberjack.v2
 go mod init base/base
 cd /home/ciadmin/build/
 pwd
@@ -26,7 +28,7 @@ go get golang.org/x/crypto/acme/autocert
 go get golang.org/x/sys/unix
 go get -v github.com/go-session/session
 go mod init github.com/spf13
-go mod edit -replace base.com/base=$1/base
+go mod edit -replace base/base=$1/base
 go mod tidy
 echo "Building Server.go ...\n"
 go build $1/gateway/server.go
