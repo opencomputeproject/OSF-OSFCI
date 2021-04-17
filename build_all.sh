@@ -20,7 +20,9 @@ if [ -f "go.sum" ] ; then
 fi
 cd $1/base/
 pwd
-go mod init base.com/base
+go get -u go.uber.org/zap
+go get gopkg.in/natefinch/lumberjack.v2
+go mod init base/base
 cd /home/ciadmin/build/
 pwd
 go mod init github/spf13
