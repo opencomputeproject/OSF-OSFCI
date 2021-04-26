@@ -29,6 +29,8 @@ var isEmulatorsPool string
 var em100Bios string
 var em100Bmc string
 var bmcSerial string
+var originalBmc string
+var originalBios string
 
 //OpenBMCEm100Command string
 var OpenBMCEm100Command *exec.Cmd = nil
@@ -60,6 +62,8 @@ func initCtrlconfig() error {
 	em100Bios = viper.GetString("EM100BIOS")
 	em100Bmc = viper.GetString("EM100BMC")
 	bmcSerial = viper.GetString("BMC_SERIAL")
+	originalBmc = viper.GetString("ORIGINAL_BMC")
+	originalBios = viper.GetString("ORIGINAL_BIOS")
 
 	return nil
 }
@@ -434,7 +438,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		args = append(args, em100Bmc)
 		args = append(args, "-T")
 		args = append(args, "-d")
-		args = append(args, firmwaresPath+"/ilo_dl360_OpenBMC.rom")
+		args = append(args, firmwaresPath+"/"+originalBmc)
 		args = append(args, "-r")
 		args = append(args, "-v")
 		args = append(args, "-O")
@@ -496,7 +500,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		args = append(args, em100Bios)
 		args = append(args, "-T")
 		args = append(args, "-d")
-		args = append(args, firmwaresPath+"/SBIOS_OpenBMC.rom")
+		args = append(args, firmwaresPath+"/"+originalBios)
 		args = append(args, "-r")
 		args = append(args, "-v")
 		args = append(args, "-O")
