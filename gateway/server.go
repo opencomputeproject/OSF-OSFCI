@@ -848,9 +848,9 @@ func init() {
 
 	err := base.NewLogger(config)
 	if err != nil {
-		base.Zlog.Fatalf("Could not instantiate log %s", err.Error())
+		base.Zlog.Fatalf("Could not instantiate server log %s", err.Error())
 	}
-	base.Zlog.Infof("Starting logger...")
+	base.Zlog.Infof("Starting server logger...")
 }
 
 func main() {
