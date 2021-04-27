@@ -1,3 +1,4 @@
+/*Package base logger notes: same as zap.go*/
 package base
 
 import "errors"

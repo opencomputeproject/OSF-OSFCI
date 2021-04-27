@@ -837,50 +837,20 @@ func bmcweb(w http.ResponseWriter, r *http.Request) {
 func init() {
 
 	config := base.Configuration{
-		EnableConsole:     false,                                   //Whether to print the outpul on the console, Good for debugging purpose in local
+		EnableConsole:     false,                                   //print output on the console, Good for debugging in local
 		ConsoleLevel:      base.Debug,                              //Debug level log
 		ConsoleJSONFormat: false,                                   //Console log in JSON format, false will print in raw format on console
 		EnableFile:        true,                                    // Logging in File
-		FileLevel:         base.Info,                               // File log leve\
+		FileLevel:         base.Info,                               // File log level
 		FileJSONFormat:    false,                                   // File JSON Format, False will print in file in raw Format
 		FileLocation:      "/usr/local/production/logs/server.log", //File location where log needs to be appended
 	}
 
 	err := base.NewLogger(config)
 	if err != nil {
-		base.Zlog.Fatalf("Could not instantiate log %s", err.Error())
+		base.Zlog.Fatalf("Could not instantiate server log %s", err.Error())
 	}
-	base.Zlog.Infof("Starting logger...")
-}
-
-//Debugf debug log level
-func Debugf(format string, args ...interface{}) {
-	base.Debugf(format, args...)
-}
-
-//Infof info log level
-func Infof(format string, args ...interface{}) {
-	base.Infof(format, args...)
-}
-
-//Warnf warning log level
-func Warnf(format string, args ...interface{}) {
-	base.Warnf(format, args...)
-}
-
-//Errorf error log level
-func Errorf(format string, args ...interface{}) {
-	base.Errorf(format, args...)
-}
-
-//Fatalf fatal log level
-func Fatalf(format string, args ...interface{}) {
-	base.Fatalf(format, args...)
-}
-
-//Panicf panic log level
-func Panicf(format string, args ...interface{}) {
-	base.Panicf(format, args...)
+	base.Zlog.Infof("Starting server logger...")
 }
 
 func main() {
