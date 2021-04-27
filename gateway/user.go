@@ -554,7 +554,29 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "401 Unknown request\n", 401)
 	}
 }
+
+//Default Intialize
+func init() {
+
+	config := base.Configuration{
+		EnableConsole:     false,                                 //Whether to print the outpul on the console, Good for debugging purpose in local
+		ConsoleLevel:      base.Debug,                            //Debug level log
+		ConsoleJSONFormat: false,                                 //Console log in JSON format, false will print in raw format on console
+		EnableFile:        true,                                  // Logging in File
+		FileLevel:         base.Info,                             // File log leve\
+		FileJSONFormat:    false,                                 // File JSON Format, False will print in file in raw Format
+		FileLocation:      "/usr/local/production/logs/user.log", //File location where log needs to be appended
+	}
+
+	err := base.NewLogger(config)
+	if err != nil {
+		base.Zlog.Fatalf("Could not instantiate user log %s", err.Error())
+	}
+	base.Zlog.Infof("Starting user logger...")
+}
+
 func main() {
+	base.Zlog.Infof("Starting user...")
 	// http to https redirection
 	print("=============================== \n")
 	print("| Starting user credentials  |\n")
