@@ -853,36 +853,6 @@ func init() {
 	base.Zlog.Infof("Starting logger...")
 }
 
-//Debugf debug log level
-func Debugf(format string, args ...interface{}) {
-	base.Debugf(format, args...)
-}
-
-//Infof info log level
-func Infof(format string, args ...interface{}) {
-	base.Infof(format, args...)
-}
-
-//Warnf warning log level
-func Warnf(format string, args ...interface{}) {
-	base.Warnf(format, args...)
-}
-
-//Errorf error log level
-func Errorf(format string, args ...interface{}) {
-	base.Errorf(format, args...)
-}
-
-//Fatalf fatal log level
-func Fatalf(format string, args ...interface{}) {
-	base.Fatalf(format, args...)
-}
-
-//Panicf panic log level
-func Panicf(format string, args ...interface{}) {
-	base.Panicf(format, args...)
-}
-
 func main() {
 	base.Zlog.Infof("Starting server...")
 	print("=============================== \n")
