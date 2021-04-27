@@ -559,7 +559,7 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 func init() {
 
 	config := base.Configuration{
-		EnableConsole:     false,                                 //Whether to print the outpul on the console, Good for debugging purpose in local
+		EnableConsole:     false,                                 //print output on the console, Good for debugging in local
 		ConsoleLevel:      base.Debug,                            //Debug level log
 		ConsoleJSONFormat: false,                                 //Console log in JSON format, false will print in raw format on console
 		EnableFile:        true,                                  // Logging in File
