@@ -31,6 +31,8 @@ var em100Bmc string
 var bmcSerial string
 var originalBmc string
 var originalBios string
+var bmcrecipe string
+var biosrecipe string
 
 //OpenBMCEm100Command string
 var OpenBMCEm100Command *exec.Cmd = nil
@@ -64,6 +66,8 @@ func initCtrlconfig() error {
 	bmcSerial = viper.GetString("BMC_SERIAL")
 	originalBmc = viper.GetString("ORIGINAL_BMC")
 	originalBios = viper.GetString("ORIGINAL_BIOS")
+	bmcrecipe = viper.GetString("BMC_RECIPE")
+	biosrecipe = viper.GetString("BIOS_RECIPE")
 
 	return nil
 }
@@ -300,7 +304,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		// We have to retrieve the BIOS from the compile server
 
 		_ = base.HTTPGetRequest("http://" + compileURI + compileTCPPort + "/cleanUp/rom")
-		myfirmware := base.HTTPGetRequest("http://" + storageURI + storageTCPPort + "/user/" + login + "/getFirmware")
+		myfirmware := base.HTTPGetRequest("http://" + storageURI + storageTCPPort + "/user/" + login + "/getFirmware/" + biosrecipe +"/")
 		// f, err := os.Create("firmwares/linuxboot_"+login+".rom", os.O_WRONLY|os.O_CREATE, 0666)
 		f, err := os.Create(firmwaresPath + "/linuxboot_" + login + ".rom")
 		defer f.Close()
@@ -357,7 +361,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		// We have to retrieve the BIOS from the storage server
 
 		_ = base.HTTPGetRequest("http://" + compileURI + compileTCPPort + "/cleanUp/bmc")
-		myfirmware := base.HTTPGetRequest("http://" + storageURI + storageTCPPort + "/user/" + login + "/getBMCFirmware")
+		myfirmware := base.HTTPGetRequest("http://" + storageURI + storageTCPPort + "/user/" + login + "/getBMCFirmware/" + bmcrecipe + "/")
 		// f, err := os.Create("firmwares/openbmc_"+login+".rom", os.O_WRONLY|os.O_CREATE, 0666)
 		f, err := os.Create(firmwaresPath + "/openbmc_" + login + ".rom")
 		defer f.Close()
