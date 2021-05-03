@@ -555,7 +555,28 @@ func home(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+//Default Intialize
+func init() {
+
+	config := base.Configuration{
+		EnableConsole:     false,                                 //print output on the console, Good for debugging in local
+		ConsoleLevel:      base.Debug,                            //Debug level log
+		ConsoleJSONFormat: false,                                 //Console log in JSON format, false will print in raw format on console
+		EnableFile:        true,                                  // Logging in File
+		FileLevel:         base.Info,                             // File log level
+		FileJSONFormat:    false,                                 // File JSON Format, False will print in file in raw Format
+		FileLocation:      "/usr/local/production/logs/ctrl.log", //File location where log needs to be appended
+	}
+
+	err := base.NewLogger(config)
+	if err != nil {
+		base.Zlog.Fatalf("Could not instantiate controller log %s", err.Error())
+	}
+	base.Zlog.Infof("Starting controller logger...")
+}
+
 func main() {
+	base.Zlog.Infof("Starting controller...")
 	print("=============================== \n")
 	print("| Starting frontend           |\n")
 	print("| Development version -       |\n")
