@@ -34,4 +34,4 @@ bitbake obmc-phosphor-image
 else
 bitbake -v obmc-phosphor-image
 fi
-cp tmp/deploy/images/dl360poc/obmc-phosphor-image-dl360poc-*.static.mtd /volume/obmc-dl360poc.static.mtd
+cp tmp/deploy/images/$RECIPES/obmc-phosphor-image-$RECIPES-*.static.mtd /volume/obmc-$RECIPES.static.mtd

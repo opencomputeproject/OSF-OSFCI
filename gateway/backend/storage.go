@@ -112,26 +112,26 @@ func storeLog(username string, r *http.Request, firmware string) int {
 	return 1
 }
 
-func getSystemBIOS(username string, w http.ResponseWriter) {
-	content, _ := ioutil.ReadFile(storageRoot + "/" + string(username[0]) + "/" + "linuxboot_" + username + ".rom")
+func getSystemBIOS(username string, w http.ResponseWriter, recipe string) {
+	content, _ := ioutil.ReadFile(storageRoot + "/" + string(username[0]) + "/" + "linuxboot_" + recipe + "_" + username + ".rom")
 	w.Header().Add("Content-Length", strconv.Itoa(len(content)))
 	w.Write(content)
 }
 
-func getSystemBIOSBuildLog(username string, w http.ResponseWriter) {
-	content, _ := ioutil.ReadFile(storageRoot + "/" + string(username[0]) + "/" + "linuxboot_" + username + ".log")
+func getSystemBIOSBuildLog(username string, w http.ResponseWriter, recipe string) {
+	content, _ := ioutil.ReadFile(storageRoot + "/" + string(username[0]) + "/" + "linuxboot_" + recipe + "_" + username + ".log")
 	w.Header().Add("Content-Length", strconv.Itoa(len(content)))
 	w.Write(content)
 }
 
-func getOpenBMC(username string, w http.ResponseWriter) {
-	content, _ := ioutil.ReadFile(storageRoot + "/" + string(username[0]) + "/" + "openbmc_" + username + ".rom")
+func getOpenBMC(username string, w http.ResponseWriter, recipe string) {
+	content, _ := ioutil.ReadFile(storageRoot + "/" + string(username[0]) + "/" + "openbmc_" + recipe + "_" + username + ".rom")
 	w.Header().Add("Content-Length", strconv.Itoa(len(content)))
 	w.Write(content)
 }
 
-func getOpenBMCBuildLog(username string, w http.ResponseWriter) {
-	content, _ := ioutil.ReadFile(storageRoot + "/" + string(username[0]) + "/" + "openbmc_" + username + ".log")
+func getOpenBMCBuildLog(username string, w http.ResponseWriter, recipe string) {
+	content, _ := ioutil.ReadFile(storageRoot + "/" + string(username[0]) + "/" + "openbmc_" + recipe + "_" + username + ".log")
 	w.Header().Add("Content-Length", strconv.Itoa(len(content)))
 	w.Write(content)
 }
@@ -214,8 +214,10 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 	}
 	username = path[2]
 	var command string
+	var recipe string
 	if len(path) > 3 {
 		command = path[3]
+		recipe = path[4]
 	}
 	switch r.Method {
 	case http.MethodGet:
@@ -226,13 +228,13 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 		case "avatar":
 			w.Write([]byte(getImage(username)))
 		case "getFirmware":
-			getSystemBIOS(username, w)
+			getSystemBIOS(username, w, recipe)
 		case "getBMCFirmware":
-			getOpenBMC(username, w)
+			getOpenBMC(username, w, recipe)
 		case "getFirmwareBuildLog":
-			getSystemBIOSBuildLog(username, w)
+			getSystemBIOSBuildLog(username, w, recipe)
 		case "getBMCFirmwareBuildLog":
-			getOpenBMCBuildLog(username, w)
+			getOpenBMCBuildLog(username, w, recipe)
 		default:
 			filecontent, returnValue = getEntry(username)
 			if returnValue != 0 {
@@ -247,19 +249,19 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 			if r.Header.Get("Content-Type") == "application/octet-stream" {
 				// We got a firmware
 				if command == "linuxboot" {
-					storeFirmware(username, r, "linuxboot")
+					storeFirmware(username, r, "linuxboot_"+recipe)
 				} else {
 					if command == "openbmc" {
-						storeFirmware(username, r, "openbmc")
+						storeFirmware(username, r, "openbmc_"+recipe)
 					}
 				}
 			} else {
 				if r.Header.Get("Content-Type") == "text/plain" {
 					if command == "linuxboot" {
-						storeLog(username, r, "linuxboot")
+						storeLog(username, r, "linuxboot_"+recipe)
 					} else {
 						if command == "openbmc" {
-							storeLog(username, r, "openbmc")
+							storeLog(username, r, "openbmc_"+recipe)
 						}
 					}
 				} else {
