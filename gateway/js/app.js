@@ -358,12 +358,13 @@ function run_ci(servername, RemainingSecond) {
 
         loadHTML("html/main.html");
 
+	var recipe = servername + 'poc';
 	$("#DownloadOpenBMC").on("click", function(){
                 $("#modalDownloadBody").html("Downloading your openbmc image ...");
                 $('#p-downloadbmc').css("display", "");
                 $('#progress-downloadbmc').css("width","0%");
                 $('#p-downloadlinuxboot').css("display", "none");
-                Url_rel = '/user/'+mylocalStorage['username']+'/getOpenBMC';
+                Url_rel = '/user/'+mylocalStorage['username']+'/getOpenBMC/'+recipe;
                 BuildSignedAuth(Url_rel, 'GET' , "application/octet-stream", function(authString) {
                 $.ajax({
                          url: window.location.origin + Url_rel,
@@ -394,12 +395,21 @@ function run_ci(servername, RemainingSecond) {
                        });
                });
         });
+	var board;
+        switch(servername) {
+                case "dl360":
+                        board = servername + 'gen10';
+                        break;
+		case "dl325":
+                        board = servername + 'gen10plus';
+                        break;
+        }
         $("#DownloadLinuxboot").on("click", function(){
 		$("#modalDownloadBody").html("Downloading your linuxboot image ...");
                 $('#p-downloadbmc').css("display", "none");
                 $('#progress-downloadlinuxboot').css("width","0%");
                 $('#p-downloadlinuxboot').css("display", "");
-                Url_rel = '/user/'+mylocalStorage['username']+'/getLinuxBoot';
+                Url_rel = '/user/'+mylocalStorage['username']+'/getLinuxBoot/'+board;
                 BuildSignedAuth(Url_rel, 'GET' , "application/octet-stream", function(authString) {
                 $.ajax({
                          url: window.location.origin + Url_rel,
@@ -662,7 +672,7 @@ function run_ci(servername, RemainingSecond) {
 		 }
 		 else
 		 {
-			 Data = input+' hpe/dl360gen10 1';
+			 Data = input+' hpe/' + board + ' 1';
 			 Url_rel = '/ci/buildbiosfirmware/'+mylocalStorage['username'];
 			 BuildSignedAuth(Url_rel, 'PUT' , "text/plain", function(authString) {
 			 $.ajax({
@@ -705,7 +715,7 @@ function run_ci(servername, RemainingSecond) {
                  }
                  else
                  {
-	                 Data = input+' dl360poc 1';
+	                 Data = input+' '+recipe+' 1';
        	         	 Url_rel = '/ci/buildbmcfirmware/'+mylocalStorage['username'];
 	                 BuildSignedAuth(Url_rel, 'PUT' , "text/plain", function(authString) {
        		         $.ajax({

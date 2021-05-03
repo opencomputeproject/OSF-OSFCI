@@ -268,7 +268,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 						for scanner.Scan() {
 							localLog = append(localLog, scanner.Bytes()...)
 						}
-						base.HTTPPutRequest("http://"+storageURI+storageTCPPort+"/user/"+username+"/openbmc/", []byte(localLog), "text/plain")
+						base.HTTPPutRequest("http://"+storageURI+storageTCPPort+"/user/"+username+"/openbmc/"+recipes+"/", []byte(localLog), "text/plain")
 					}()
 					// we have to push the log to the storage area
 				}
@@ -365,8 +365,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 							line := scanner.Text()
 							linuxbootLog.WriteString(line + "\n")
 						}
+						recipe := strings.Split(board, "/")
+						brecipe := recipe[1]
 
-						base.HTTPPutRequest("http://"+storageURI+storageTCPPort+"/user/"+username+"/linuxboot/", []byte(linuxbootLog.String()), "text/plain")
+						base.HTTPPutRequest("http://"+storageURI+storageTCPPort+"/user/"+username+"/linuxboot/"+brecipe+"/", []byte(linuxbootLog.String()), "text/plain")
 					}()
 				}
 

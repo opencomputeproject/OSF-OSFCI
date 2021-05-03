@@ -377,40 +377,40 @@ func getSessionID(username string) string {
 
 }
 
-func getOpenBMC(username string, w http.ResponseWriter) {
+func getOpenBMC(username string, w http.ResponseWriter, recipe string) {
 	client := &http.Client{}
 	var req *http.Request
-	req, _ = http.NewRequest("GET", "http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/getBMCFirmware", nil)
+	req, _ = http.NewRequest("GET", "http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/getBMCFirmware/"+recipe, nil)
 	response, _ := client.Do(req)
 	buf, _ := ioutil.ReadAll(response.Body)
 	w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
 	w.Write(buf)
 }
 
-func getOpenBMCBuildLog(username string, w http.ResponseWriter) {
+func getOpenBMCBuildLog(username string, w http.ResponseWriter, recipe string) {
 	client := &http.Client{}
 	var req *http.Request
-	req, _ = http.NewRequest("GET", "http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/getBMCFirmwareBuildLog", nil)
+	req, _ = http.NewRequest("GET", "http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/getBMCFirmwareBuildLog/"+recipe, nil)
 	response, _ := client.Do(req)
 	buf, _ := ioutil.ReadAll(response.Body)
 	w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
 	w.Write(buf)
 }
 
-func getLinuxBoot(username string, w http.ResponseWriter) {
+func getLinuxBoot(username string, w http.ResponseWriter, recipe string) {
 	client := &http.Client{}
 	var req *http.Request
-	req, _ = http.NewRequest("GET", "http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/getFirmware", nil)
+	req, _ = http.NewRequest("GET", "http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/getFirmware/"+recipe, nil)
 	response, _ := client.Do(req)
 	buf, _ := ioutil.ReadAll(response.Body)
 	w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
 	w.Write(buf)
 }
 
-func getLinuxBootBuildLog(username string, w http.ResponseWriter) {
+func getLinuxBootBuildLog(username string, w http.ResponseWriter, recipe string) {
 	client := &http.Client{}
 	var req *http.Request
-	req, _ = http.NewRequest("GET", "http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/getFirmwareBuildLog", nil)
+	req, _ = http.NewRequest("GET", "http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/getFirmwareBuildLog/"+recipe, nil)
 	response, _ := client.Do(req)
 	buf, _ := ioutil.ReadAll(response.Body)
 	w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
@@ -419,6 +419,7 @@ func getLinuxBootBuildLog(username string, w http.ResponseWriter) {
 
 func userCallback(w http.ResponseWriter, r *http.Request) {
 	var username, command string
+	var recipe string
 
 	path := strings.Split(r.URL.Path, "/")
 	if len(path) < 3 {
@@ -480,13 +481,17 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 		case "getAvatar":
 			getAvatar(username, &w)
 		case "getOpenBMC":
-			getOpenBMC(username, w)
+			recipe = path[4]
+			getOpenBMC(username, w, recipe)
 		case "getLinuxBoot":
-			getLinuxBoot(username, w)
+			recipe = path[4]
+			getLinuxBoot(username, w, recipe)
 		case "getOpenBMCLog":
-			getOpenBMCBuildLog(username, w)
+			recipe = path[4]
+			getOpenBMCBuildLog(username, w, recipe)
 		case "getLinuxBootLog":
-			getLinuxBootBuildLog(username, w)
+			recipe = path[4]
+			getLinuxBootBuildLog(username, w, recipe)
 		default:
 		}
 	case http.MethodPut:
