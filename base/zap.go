@@ -61,7 +61,7 @@ func newZapLogger(config Configuration) (Logger, error) {
 			Filename:   config.FileLocation,
 			MaxSize:    100,
 			Compress:   true,
-			MaxAge:     1,
+			MaxAge:     30,
 			MaxBackups: 10,
 		})
 		core := zapcore.NewCore(getEncoder(config.FileJSONFormat), writer, level)
