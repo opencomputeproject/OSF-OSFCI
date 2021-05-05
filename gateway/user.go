@@ -584,14 +584,14 @@ func main() {
 	base.Zlog.Infof("Starting user...")
 	// http to https redirection
 	print("=============================== \n")
-	print("| Starting user credentials  |\n")
+	print("| Starting user credentials   |\n")
 	print("| Development version -       |\n")
 	print("| Private use only            |\n")
 	print("=============================== \n")
 
 	err := initUserconfig()
 	if err != nil {
-		base.Zlog.Fatalf("Initialization error %s", err)
+		base.Zlog.Fatalf("Initialization error: %s", err.Error())
 	}
 
 	mux := http.NewServeMux()
