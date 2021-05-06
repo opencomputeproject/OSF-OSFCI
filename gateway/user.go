@@ -598,5 +598,5 @@ func main() {
 	print("Attaching to " + CredentialURI + "\n")
 	// Serve one page site dynamic pages
 	mux.HandleFunc("/user/", userCallback)
-	log.Fatal(http.ListenAndServe(CredentialURI, mux))
+	base.Zlog.Fatalf(http.ListenAndServe(CredentialURI, mux))
 }
