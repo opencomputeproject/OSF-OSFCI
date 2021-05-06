@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/viper"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -598,5 +597,7 @@ func main() {
 	print("Attaching to " + CredentialURI + "\n")
 	// Serve one page site dynamic pages
 	mux.HandleFunc("/user/", userCallback)
-	base.Zlog.Fatalf(http.ListenAndServe(CredentialURI, mux))
+	if err := http.ListenAndServe(CredentialURI, mux); err != http.ErrServerClosed {
+		base.Zlog.Fatalf("User service error: %s", err.Error())
+	}
 }
