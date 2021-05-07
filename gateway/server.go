@@ -15,7 +15,6 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 	"html/template"
 	"io/ioutil"
-	"log"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -303,7 +302,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		}
 		returnData, err := json.Marshal(activeProducts)
 		if err != nil {
-			log.Fatal(err)
+			base.Zlog.Fatalf("JSON encoding error: %s", err.Error())
 		}
 		w.Write([]byte(returnData))
 	case "getServer":
@@ -842,7 +841,7 @@ func init() {
 		ConsoleJSONFormat: false,                                   //Console log in JSON format, false will print in raw format on console
 		EnableFile:        true,                                    // Logging in File
 		FileLevel:         base.Info,                               // File log level
-		FileJSONFormat:    false,                                   // File JSON Format, False will print in file in raw Format
+		FileJSONFormat:    true,                                    // File JSON Format, False will print in file in raw Format
 		FileLocation:      "/usr/local/production/logs/server.log", //File location where log needs to be appended
 	}
 
@@ -865,7 +864,7 @@ func main() {
 	err := initServerconfig()
 	//If there is error reading the config file log error and exit
 	if err != nil {
-		log.Fatal(err)
+		base.Zlog.Fatalf("Initialization error: %s", err.Error())
 	}
 
 	mux := http.NewServeMux()
@@ -958,13 +957,17 @@ func main() {
 
 		go func() {
 			h := certManager.HTTPHandler(nil)
-			log.Fatal(http.ListenAndServe(":http", h))
+			if err := http.ListenAndServe(":http", h); err != http.ErrServerClosed {
+				base.Zlog.Fatalf("Server service error: %s", err.Error())
+			}
 		}()
 
 		server.ListenAndServeTLS("", "")
 	} else {
 		go http.ListenAndServe(":80", http.HandlerFunc(httpsRedirect))
 		// Launch TLS server
-		log.Fatal(http.ListenAndServeTLS(":443", tlsCertPath, tlsKeyPath, mux))
+		if err := http.ListenAndServeTLS(":443", tlsCertPath, tlsKeyPath, mux); err != nil {
+			base.Zlog.Fatalf("Server TLS error: %s", err.Error())
+		}
 	}
 }

@@ -9,7 +9,6 @@ import (
 	"github.com/spf13/viper"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -569,7 +568,7 @@ func init() {
 		ConsoleJSONFormat: false,                                 //Console log in JSON format, false will print in raw format on console
 		EnableFile:        true,                                  // Logging in File
 		FileLevel:         base.Info,                             // File log level
-		FileJSONFormat:    false,                                 // File JSON Format, False will print in file in raw Format
+		FileJSONFormat:    true,                                  // File JSON Format, False will print in file in raw Format
 		FileLocation:      "/usr/local/production/logs/user.log", //File location where log needs to be appended
 	}
 
@@ -584,19 +583,21 @@ func main() {
 	base.Zlog.Infof("Starting user...")
 	// http to https redirection
 	print("=============================== \n")
-	print("| Starting user credentials  |\n")
+	print("| Starting user credentials   |\n")
 	print("| Development version -       |\n")
 	print("| Private use only            |\n")
 	print("=============================== \n")
 
 	err := initUserconfig()
 	if err != nil {
-		log.Fatal(err)
+		base.Zlog.Fatalf("Initialization error: %s", err.Error())
 	}
 
 	mux := http.NewServeMux()
 	print("Attaching to " + CredentialURI + "\n")
 	// Serve one page site dynamic pages
 	mux.HandleFunc("/user/", userCallback)
-	log.Fatal(http.ListenAndServe(CredentialURI, mux))
+	if err := http.ListenAndServe(CredentialURI, mux); err != http.ErrServerClosed {
+		base.Zlog.Fatalf("User service error: %s", err.Error())
+	}
 }
