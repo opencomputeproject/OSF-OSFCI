@@ -841,7 +841,7 @@ func init() {
 		ConsoleJSONFormat: false,                                   //Console log in JSON format, false will print in raw format on console
 		EnableFile:        true,                                    // Logging in File
 		FileLevel:         base.Info,                               // File log level
-		FileJSONFormat:    false,                                   // File JSON Format, False will print in file in raw Format
+		FileJSONFormat:    true,                                    // File JSON Format, False will print in file in raw Format
 		FileLocation:      "/usr/local/production/logs/server.log", //File location where log needs to be appended
 	}
 
