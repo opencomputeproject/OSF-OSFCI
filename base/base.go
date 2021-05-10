@@ -120,7 +120,7 @@ func SendEmail(email string, subject string, validationString string) {
 	var auth smtp.Auth
 	err := initSmtpconfig()
 	if err != nil {
-		log.Println("SMTP Config Error", err)
+		Zlog.Errorf("SMTP Config Error %s", err.Error())
 	}
 	servername := smtpServer
 	host, _, _ := net.SplitHostPort(servername)
