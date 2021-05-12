@@ -8,7 +8,6 @@ import (
 	"github.com/spf13/viper"
 	"golang.org/x/sys/unix"
 	"io"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -304,7 +303,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		// We have to retrieve the BIOS from the compile server
 
 		_ = base.HTTPGetRequest("http://" + compileURI + compileTCPPort + "/cleanUp/rom")
-		myfirmware := base.HTTPGetRequest("http://" + storageURI + storageTCPPort + "/user/" + login + "/getFirmware/" + biosrecipe +"/")
+		myfirmware := base.HTTPGetRequest("http://" + storageURI + storageTCPPort + "/user/" + login + "/getFirmware/" + biosrecipe + "/")
 		// f, err := os.Create("firmwares/linuxboot_"+login+".rom", os.O_WRONLY|os.O_CREATE, 0666)
 		f, err := os.Create(firmwaresPath + "/linuxboot_" + login + ".rom")
 		defer f.Close()
@@ -588,7 +587,7 @@ func main() {
 
 	err := initCtrlconfig()
 	if err != nil {
-		log.Fatal(err)
+		base.Zlog.Fatalf("Controller config initialization error: %s", err.Error())
 	}
 	var ctrlTCPPort = viper.GetString("CTRL_TCPPORT")
 	mux := http.NewServeMux()
@@ -596,5 +595,7 @@ func main() {
 	// Highest priority must be set to the signed request
 	mux.HandleFunc("/", home)
 
-	log.Fatal(http.ListenAndServe(ctrlTCPPort, mux))
+	if err := http.ListenAndServe(ctrlTCPPort, mux); err != nil {
+		base.Zlog.Fatalf("Controller service error: %s", err.Error())
+	}
 }
