@@ -14,7 +14,6 @@ import (
 	"github.com/spf13/viper"
 	"golang.org/x/sys/unix"
 	"io"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -409,7 +408,7 @@ func main() {
 
 	err := initCompilerconfig()
 	if err != nil {
-		log.Fatal(err)
+		base.Zlog.Fatalf("Compiler config initialization error: %s", err.Error())
 	}
 
 	dockerClient, _ = client.NewEnvClient()
@@ -420,6 +419,7 @@ func main() {
 
 	// Highest priority must be set to the signed request
 	mux.HandleFunc("/", home)
-
-	log.Fatal(http.ListenAndServe(compileTCPPort, mux))
+	if err := http.ListenAndServe(compileTCPPort, mux); err != nil {
+		base.Zlog.Fatalf("Compiler service error: %s", err.Error())
+	}
 }
