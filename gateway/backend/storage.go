@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -307,7 +306,7 @@ func main() {
 
 	err := initStorageconfig()
 	if err != nil {
-		log.Fatal(err)
+		base.Zlog.Fatalf("Storage config initialization error: %s", err.Error())
 	}
 
 	mux := http.NewServeMux()
@@ -319,5 +318,7 @@ func main() {
 	mux.HandleFunc("/user/", userCallback)
 	mux.HandleFunc("/distros/", distrosCallback)
 
-	log.Fatal(http.ListenAndServe(StorageURI+StorageTCPPORT, mux))
+	if err := http.ListenAndServe(StorageURI+StorageTCPPORT, mux); err != nil {
+		base.Zlog.Fatalf("Storage service error: %s", err.Error())
+	}
 }
