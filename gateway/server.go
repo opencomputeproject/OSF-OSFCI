@@ -240,6 +240,8 @@ func user(w http.ResponseWriter, r *http.Request) {
 
 	r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 
+	base.Zlog.Infof("Access: %s - %s %s %s", r.RemoteAddr, r.Proto, r.Method, r.URL.RequestURI())
+
 	// Note that ServeHttp is non blocking and uses a go routine under the hood
 	proxy.ServeHTTP(w, r)
 }
