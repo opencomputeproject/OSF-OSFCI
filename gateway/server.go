@@ -225,6 +225,7 @@ func user(w http.ResponseWriter, r *http.Request) {
 
 	if !checkAccess(w, r, login, command) {
 		w.Write([]byte("Access denied"))
+		base.Zlog.Infof("Access denied: %s - %s %s %s", r.RemoteAddr, r.Proto, r.Method, r.URL.RequestURI())
 		return
 	}
 
