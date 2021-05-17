@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"strconv"
@@ -286,7 +285,7 @@ func init() {
 		ConsoleJSONFormat: false,                                    //Console log in JSON format, false will print in raw format on console
 		EnableFile:        true,                                     // Logging in File
 		FileLevel:         base.Info,                                // File log level
-		FileJSONFormat:    false,                                    // File JSON Format, False will print in file in raw Format
+		FileJSONFormat:    true,                                     // File JSON Format, False will print in file in raw Format
 		FileLocation:      "/usr/local/production/logs/storage.log", //File location where log needs to be appended
 	}
 
@@ -307,7 +306,7 @@ func main() {
 
 	err := initStorageconfig()
 	if err != nil {
-		log.Fatal(err)
+		base.Zlog.Fatalf("Storage config initialization error: %s", err.Error())
 	}
 
 	mux := http.NewServeMux()
@@ -319,5 +318,7 @@ func main() {
 	mux.HandleFunc("/user/", userCallback)
 	mux.HandleFunc("/distros/", distrosCallback)
 
-	log.Fatal(http.ListenAndServe(StorageURI+StorageTCPPORT, mux))
+	if err := http.ListenAndServe(StorageURI+StorageTCPPORT, mux); err != nil {
+		base.Zlog.Fatalf("Storage service error: %s", err.Error())
+	}
 }

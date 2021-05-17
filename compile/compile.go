@@ -14,7 +14,6 @@ import (
 	"github.com/spf13/viper"
 	"golang.org/x/sys/unix"
 	"io"
-	"log"
 	"net"
 	"net/http"
 	"os"
@@ -389,7 +388,7 @@ func init() {
 		ConsoleJSONFormat: false,                                    //Console log in JSON format, false will print in raw format on console
 		EnableFile:        true,                                     // Logging in File
 		FileLevel:         base.Info,                                // File log level
-		FileJSONFormat:    false,                                    // File JSON Format, False will print in file in raw Format
+		FileJSONFormat:    true,                                     // File JSON Format, False will print in file in raw Format
 		FileLocation:      "/usr/local/production/logs/compile.log", //File location where log needs to be appended
 	}
 
@@ -409,7 +408,7 @@ func main() {
 
 	err := initCompilerconfig()
 	if err != nil {
-		log.Fatal(err)
+		base.Zlog.Fatalf("Compiler config initialization error: %s", err.Error())
 	}
 
 	dockerClient, _ = client.NewEnvClient()
@@ -420,6 +419,7 @@ func main() {
 
 	// Highest priority must be set to the signed request
 	mux.HandleFunc("/", home)
-
-	log.Fatal(http.ListenAndServe(compileTCPPort, mux))
+	if err := http.ListenAndServe(compileTCPPort, mux); err != nil {
+		base.Zlog.Fatalf("Compiler service error: %s", err.Error())
+	}
 }

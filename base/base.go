@@ -10,7 +10,6 @@ import (
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
-	"log"
 	"math/rand"
 	"net"
 	"net/http"
@@ -120,7 +119,7 @@ func SendEmail(email string, subject string, validationString string) {
 	var auth smtp.Auth
 	err := initSmtpconfig()
 	if err != nil {
-		log.Println("SMTP Config Error", err)
+		Zlog.Errorf("SMTP Config Error %s", err.Error())
 	}
 	servername := smtpServer
 	host, _, _ := net.SplitHostPort(servername)
@@ -167,7 +166,7 @@ func SendEmail(email string, subject string, validationString string) {
 	//conn, err := tls.Dial("tcp", servername, tlsconfig)
 	conn, err := smtp.Dial(servername)
 	if err != nil {
-		log.Panic(err)
+		Zlog.Panicf("SMTP server connection Error %s", err.Error())
 	}
 
 	// comment that line to use SSL connection
@@ -178,33 +177,33 @@ func SendEmail(email string, subject string, validationString string) {
 	// Auth
 	if len(smtpPassword) > 1 {
 		if err = conn.Auth(auth); err != nil {
-			log.Panic(err)
+			Zlog.Panicf("Authentication Error %s", err.Error())
 		}
 	}
 
 	// To && From
 	if err = conn.Mail(from.Address); err != nil {
-		log.Panic(err)
+		Zlog.Panicf("SMTP Server MAIL command Error %s", err.Error())
 	}
 
 	if err = conn.Rcpt(to.Address); err != nil {
-		log.Panic(err)
+		Zlog.Panicf("SMTP Server RCPT command Error %s", err.Error())
 	}
 
 	// Data
 	w, err := conn.Data()
 	if err != nil {
-		log.Panic(err)
+		Zlog.Panicf("SMTP Server DATA command Error %s", err.Error())
 	}
 
 	_, err = w.Write([]byte(message))
 	if err != nil {
-		log.Panic(err)
+		Zlog.Panicf("Data writer Error %s", err.Error())
 	}
 
 	err = w.Close()
 	if err != nil {
-		log.Panic(err)
+		Zlog.Panicf("Writer close Error %s", err.Error())
 	}
 
 	conn.Quit()
@@ -221,7 +220,7 @@ func SendEmail(email string, subject string, validationString string) {
 
 		conn, err := smtp.Dial(servername)
 		if err != nil {
-			log.Panic(err)
+			Zlog.Panicf("SMTP server connection Error %s", err.Error())
 		}
 
 		// comment that line to use SSL connection
@@ -232,33 +231,33 @@ func SendEmail(email string, subject string, validationString string) {
 		// Auth
 		if len(smtpPassword) > 1 {
 			if err = conn.Auth(auth); err != nil {
-				log.Panic(err)
+				Zlog.Panicf("Authentication Error %s", err.Error())
 			}
 		}
 
 		// To && From
 		if err = conn.Mail(from.Address); err != nil {
-			log.Panic(err)
+			Zlog.Panicf("SMTP Server MAIL command Error %s", err.Error())
 		}
 
 		if err = conn.Rcpt(to.Address); err != nil {
-			log.Panic(err)
+			Zlog.Panicf("SMTP Server RCPT command Error %s", err.Error())
 		}
 
 		// Data
 		w, err := conn.Data()
 		if err != nil {
-			log.Panic(err)
+			Zlog.Panicf("SMTP Server DATA command Error %s", err.Error())
 		}
 
 		_, err = w.Write([]byte(message))
 		if err != nil {
-			log.Panic(err)
+			Zlog.Panicf("Data writer Error %s", err.Error())
 		}
 
 		err = w.Close()
 		if err != nil {
-			log.Panic(err)
+			Zlog.Panicf("Writer close Error %s", err.Error())
 		}
 
 		conn.Quit()
@@ -266,7 +265,7 @@ func SendEmail(email string, subject string, validationString string) {
 	}
 
 	if err != nil {
-		log.Printf("smtp error: %s", err)
+		Zlog.Errorf("SMTP Error %s", err.Error())
 	}
 
 }
@@ -314,12 +313,12 @@ func Request(method string, resURI string, Path string, Data string, content []b
 func HTTPGetRequest(request string) string {
 	resp, err := http.Get(request)
 	if err != nil {
-		log.Fatalln(err)
+		Zlog.Fatalf("HTTP GET Error %s", err.Error())
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
-		log.Fatalln(err)
+		Zlog.Fatalf("HTTP GET response read Error %s", err.Error())
 	}
 	return (string(body))
 }
@@ -332,12 +331,12 @@ func HTTPDeleteRequest(request string) {
 	httprequest.ContentLength = 0
 	response, err := client.Do(httprequest)
 	if err != nil {
-		log.Fatal(err)
+		Zlog.Fatalf("HTTP DELETE Error %s", err.Error())
 	} else {
 		defer response.Body.Close()
 		_, err := ioutil.ReadAll(response.Body)
 		if err != nil {
-			log.Fatal(err)
+			Zlog.Fatalf("HTTP DELETE response read Error %s", err.Error())
 		}
 	}
 }
@@ -350,12 +349,12 @@ func HTTPPutRequest(request string, content []byte, contentType string) string {
 	httprequest.ContentLength = int64(len(content))
 	response, err := client.Do(httprequest)
 	if err != nil {
-		log.Fatal(err)
+		Zlog.Fatalf("HTTP PUT Error %s", err.Error())
 	} else {
 		defer response.Body.Close()
 		contents, err := ioutil.ReadAll(response.Body)
 		if err != nil {
-			log.Fatal(err)
+			Zlog.Fatalf("HTTP PUT response read Error %s", err.Error())
 		}
 		return string(contents)
 	}

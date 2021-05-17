@@ -225,6 +225,7 @@ func user(w http.ResponseWriter, r *http.Request) {
 
 	if !checkAccess(w, r, login, command) {
 		w.Write([]byte("Access denied"))
+		base.Zlog.Infof("Access denied: %s - %s %s %s", r.RemoteAddr, r.Proto, r.Method, r.URL.RequestURI())
 		return
 	}
 
@@ -238,6 +239,8 @@ func user(w http.ResponseWriter, r *http.Request) {
 	r.URL.Host = "http://" + r.Host + ":9100"
 
 	r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
+
+	base.Zlog.Infof("Access: %s - %s %s %s", r.RemoteAddr, r.Proto, r.Method, r.URL.RequestURI())
 
 	// Note that ServeHttp is non blocking and uses a go routine under the hood
 	proxy.ServeHTTP(w, r)
