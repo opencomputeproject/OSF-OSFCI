@@ -517,6 +517,7 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 			result = userGetInternalInfo(username)
 			if !base.CheckPasswordHash(password, result.Password) {
 				http.Error(w, "401 Password error", 401)
+				base.Zlog.Infof("Password error: %s - %s %s %s", r.RemoteAddr, r.Proto, r.Method, r.URL.RequestURI())
 				return
 			}
 			if result.Active == 0 {

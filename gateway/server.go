@@ -247,7 +247,6 @@ func user(w http.ResponseWriter, r *http.Request) {
 }
 
 func home(w http.ResponseWriter, r *http.Request) {
-
 	// The cookie allow us to track the current
 	// user on the node
 	cookie, cookieErr := r.Cookie("osfci_cookie")
