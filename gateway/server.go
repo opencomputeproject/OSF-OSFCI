@@ -11,6 +11,7 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/handlers"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/acme/autocert"
 	"html/template"
@@ -19,6 +20,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"os"
 	"path"
 	"strings"
 	"sync"
@@ -308,6 +310,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Write([]byte(returnData))
 	case "getServer":
+		base.Zlog.Infof("getServer: %s - %s %s %s", r.RemoteAddr, r.Proto, r.Method, r.URL.RequestURI())
 		var serverTypeIndex int
 		serverTypeIndex = -1
 		_, tail := ShiftPath(tail)
@@ -959,7 +962,7 @@ func main() {
 
 		go func() {
 			h := certManager.HTTPHandler(nil)
-			if err := http.ListenAndServe(":http", h); err != http.ErrServerClosed {
+			if err := http.ListenAndServe(":http", handlers.LoggingHandler(os.Stdout, h)); err != http.ErrServerClosed {
 				base.Zlog.Fatalf("Server service error: %s", err.Error())
 			}
 		}()
