@@ -78,6 +78,10 @@ func newZapLogger(config Configuration) (Logger, error) {
 		zap.AddStacktrace(zapcore.DebugLevel),
 	).Sugar()
 
+	dlogger := logger.Desugar()
+
+	zap.RedirectStdLog(dlogger)
+
 	return &zapLogger{
 		sugaredLogger: logger,
 	}, nil
