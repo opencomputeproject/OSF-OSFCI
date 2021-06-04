@@ -11,7 +11,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/gorilla/handlers"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/acme/autocert"
 	"html/template"
@@ -20,7 +19,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"os"
 	"path"
 	"strings"
 	"sync"
@@ -962,7 +960,7 @@ func main() {
 
 		go func() {
 			h := certManager.HTTPHandler(nil)
-			if err := http.ListenAndServe(":http", handlers.LoggingHandler(os.Stdout, h)); err != http.ErrServerClosed {
+			if err := http.ListenAndServe(":http", h); err != http.ErrServerClosed {
 				base.Zlog.Fatalf("Server service error: %s", err.Error())
 			}
 		}()
