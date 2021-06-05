@@ -512,6 +512,7 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 			// if the user doesn't have any API Token
 			// we have to generate it !
 			// if the user doesn't exist we need to deny the request
+			base.Zlog.Infof("GetToken: %s - %s %s %s", r.RemoteAddr, r.Proto, r.Method, r.URL.RequestURI())
 			password := r.FormValue("password")
 			var result *base.User
 			result = userGetInternalInfo(username)

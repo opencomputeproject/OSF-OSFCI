@@ -308,6 +308,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Write([]byte(returnData))
 	case "getServer":
+		base.Zlog.Infof("getServer: %s - %s %s %s", r.RemoteAddr, r.Proto, r.Method, r.URL.RequestURI())
 		var serverTypeIndex int
 		serverTypeIndex = -1
 		_, tail := ShiftPath(tail)
