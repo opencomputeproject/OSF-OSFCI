@@ -296,8 +296,8 @@ func home(w http.ResponseWriter, r *http.Request) {
                         } else {
                                 username = keys[1]
                         }
-                        base.Zlog.Infof("%s %s\n", username, keys)
-                        base.Zlog.Infof("GitToken: %s\n", gitToken)
+                        base.Zlog.Infof("%s %s", username, keys)
+                        base.Zlog.Infof("GitToken: %s", gitToken)
 
 			data := base.HTTPGetBody(r)
 			keywords := strings.Fields(string(data))
