@@ -280,6 +280,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	case "buildbiosfirmware":
 		switch r.Method {
 		case http.MethodPut:
+			var gitToken string
 			if LinuxBOOTCommand != nil {
 				unix.Kill(LinuxBOOTCommand.Process.Pid, unix.SIGINT)
 				_ = <-LinuxBOOTBuildChannel
@@ -288,11 +289,15 @@ func home(w http.ResponseWriter, r *http.Request) {
 			// We must retrieve the Token
 			keys := strings.Split(tail, "/")
 
-			username = keys[1]
-			gitToken := keys[2]
-			if len(gitToken) == 0 {
-				gitToken = "OSFCIemptyOSFCI"
-			}
+			gitToken = "OSFCIemptyOSFCI"
+                        if len(keys) > 2 {
+                                username = keys[1]
+                                gitToken = keys[2]
+                        } else {
+                                username = keys[1]
+                        }
+                        base.Zlog.Infof("%s %s", username, keys)
+                        base.Zlog.Infof("GitToken: %s", gitToken)
 
 			data := base.HTTPGetBody(r)
 			keywords := strings.Fields(string(data))
