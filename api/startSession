@@ -86,7 +86,7 @@ do
 # We must request a server
 
 dateFormatted=`TZ=GMT date -R`
-relativePath="/ci/getServer"
+relativePath="/ci/get_server"
 contentType="application/json"
 stringToSign="GET\n\n${contentType}\n${dateFormatted}\n${relativePath}"
 signature=`echo -en ${stringToSign} | openssl sha1 -hmac ${secretKey} -binary | base64`
@@ -95,7 +95,7 @@ curl -s -o $HOME/.osfci/credential.txt -b $HOME/.osfci/$username.jar -X GET \
 -H "mydate: ${dateFormatted}" \
 -H "Content-Type: ${contentType}" \
 -H "Authorization: OSF ${accessKey}:${signature}" \
-"https://osfci.tech/ci/getServer"
+"https://osfci.tech/ci/get_server"
 
 chmod -Rf 700 $HOME/.osfci/credential.txt
 
