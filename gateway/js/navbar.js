@@ -106,7 +106,7 @@ $('#features').on("click", function(event) {
 $.ajax({
 	type: "GET",
 	contentType: 'application/json',
-	url: window.location.origin + '/ci/getServermodels/',
+	url: window.location.origin + '/ci/get_server_models/',
 	success: function(response){
 			var obj = JSON.parse(response);
 			var htmlcode = "";
