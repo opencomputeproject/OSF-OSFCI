@@ -84,7 +84,7 @@ func ShiftPath(p string) (head, tail string) {
 func home(w http.ResponseWriter, r *http.Request) {
 	head, _ := ShiftPath(r.URL.Path)
 	switch head {
-	case "getosinstallers":
+	case "get_os_installers":
 		_, tail := ShiftPath(r.URL.Path)
 		file := strings.Split(tail, "/")
 		// file[1] does contain the name of the server which is needed
@@ -539,7 +539,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 			done <- cmd.Wait()
 		}()
 
-	case "bmcup":
+	case "bmc_up":
 
 	case "poweroff":
 		// We need to cleanup the em100
