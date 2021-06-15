@@ -42,6 +42,6 @@ done
 # We do not need to stop the power as this script doesn't turn it on
 username=`cat $HOME/.osfci/auth | awk '{ print $1}'`
 serverName=`cat $HOME/.osfci/credential.txt | sed 's/{//' | sed 's/}//' | awk -F"," '{ print $1 }' | awk -F":" '{ print $2 }' | sed 's/"//g'`
-curl  -o $TMPDIR/test.txt -b $HOME/.osfci/$username.jar -X GET "https://osfci.tech/ci/stopServer/$serverName"
+curl  -o $TMPDIR/test.txt -b $HOME/.osfci/$username.jar -X GET "https://osfci.tech/ci/stop_server/$serverName"
 rm $TMPDIR/test.txt
 rm $HOME/.osfci/*
