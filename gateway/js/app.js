@@ -124,7 +124,7 @@ function start_ci(machine) {
         $.ajax({
                   type: "GET",
                   contentType: 'application/json',
-                  url: window.location.origin + '/ci/'+ 'getServer/' + machine,
+                  url: window.location.origin + '/ci/'+ 'get_server/' + machine,
                   success: function(response){
 			var answer = JSON.parse(response);
 			if ( answer.Waittime == "0" ) {
@@ -240,7 +240,7 @@ function run_ci(servername, RemainingSecond) {
 			$.ajax({
                                 type: "GET",
                                 contentType: 'application/json',
-                                url: window.location.origin + '/ci/bmcup',
+                                url: window.location.origin + '/ci/bmc_up',
                                 success: function(response){
 					if ( response == "\"1\"" ) {
 						$('#bmcbutton').css("display","");
@@ -282,7 +282,7 @@ function run_ci(servername, RemainingSecond) {
 	                                $.ajax({
 	                                          type: "PUT",
 	                                          contentType: 'application/json',
-	                                          url: window.location.origin + '/ci/'+ 'stopServer/'+servername,
+	                                          url: window.location.origin + '/ci/'+ 'stop_server/'+servername,
 	                                          success: function(response){
 	                                                // we move back to the main page
 	                                                clearInterval(x);
@@ -340,7 +340,7 @@ function run_ci(servername, RemainingSecond) {
                                 $.ajax({
                                           type: "PUT",
                                           contentType: 'application/json',
-                                          url: window.location.origin + '/ci/'+ 'stopServer/'+servername,
+                                          url: window.location.origin + '/ci/'+ 'stop_server/'+servername,
                                           success: function(response){
                                                 // we move back to the main page
 						clearInterval(x);
@@ -453,7 +453,7 @@ function run_ci(servername, RemainingSecond) {
 	$.ajax({
                         type: "GET",
                         contentType: 'application/json',
-                        url: window.location.origin + '/ci/getosinstallers/',
+                        url: window.location.origin + '/ci/get_os_installers/',
                         success: function(response){
 				if ( response != "" ) {
 					console.log(response);
@@ -480,7 +480,7 @@ function run_ci(servername, RemainingSecond) {
 								$.ajax({
 									type: "GET",
 						                        contentType: 'application/json',
-						                        url: window.location.origin + '/ci/getosinstallers/'+value,
+						                        url: window.location.origin + '/ci/get_os_installers/'+value,
 						                        success: function(response){
 										    // The console shall be up now
 						                                    $('#osloader').attr("src", window.location+"/osloaderconsole");

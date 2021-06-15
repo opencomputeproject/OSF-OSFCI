@@ -290,12 +290,12 @@ func home(w http.ResponseWriter, r *http.Request) {
 	// we are getting a username as a head parameter and must get the
 	// remaining part
 
-	// If the request is different than a getServer
+	// If the request is different than a get_server
 	// We must be sure that the end user still has an active server
 	// If that is not the case we deny the request
 	// And need to re route the end user to an end of session
 	switch head {
-	case "getServermodels":
+	case "get_server_models":
 		var activeProducts []serverProduct
 		for i := range ciServersProducts {
 			if ciServersProducts[i].Active != 0 {
@@ -307,8 +307,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 			base.Zlog.Fatalf("JSON encoding error: %s", err.Error())
 		}
 		w.Write([]byte(returnData))
-	case "getServer":
-		base.Zlog.Infof("getServer: %s - %s %s %s", r.RemoteAddr, r.Proto, r.Method, r.URL.RequestURI())
+	case "get_server":
+		base.Zlog.Infof("get_server: %s - %s %s %s", r.RemoteAddr, r.Proto, r.Method, r.URL.RequestURI())
 		var serverTypeIndex int
 		serverTypeIndex = -1
 		_, tail := ShiftPath(tail)
@@ -405,7 +405,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 				w.Write([]byte(returnData))
 			}
 		}
-	case "stopServer":
+	case "stop_server":
 		// We must get the server name
 		_, tail := ShiftPath(tail)
 		servername, _ := ShiftPath(tail)
@@ -430,7 +430,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 			}
 			ciServers.mux.Unlock()
 		}
-	case "getosinstallers":
+	case "get_os_installers":
 		// Must get a directory content from the storage backend if there is no further option
 		// if their is an option (aka a file name), it means that we have to inform the
 		// current user controller to load that file
@@ -454,10 +454,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 			client := &http.Client{}
 			var req *http.Request
 
-			req, _ = http.NewRequest("GET", "http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+"/getosinstallers/"+path[3], nil)
+			req, _ = http.NewRequest("GET", "http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+"/get_os_installers/"+path[3], nil)
 			_, _ = client.Do(req)
 		}
-	case "bmcup":
+	case "bmc_up":
 		bmcIP := ""
 		var Up string
 		if cacheIndex != -1 {
@@ -479,7 +479,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(returnValue))
 	case "console":
 		if cacheIndex != -1 {
-			fmt.Printf("Console request\n")
+			//fmt.Printf("Console request\n")
+			base.Zlog.Infof("Console request")
 			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].ip + ciServers.servers[cacheIndex].tcpPort + TTYDHostConsole)
 			proxy := httputil.NewSingleHostReverseProxy(url)
 			r.URL.Host = "http://" + ciServers.servers[cacheIndex].ip + ciServers.servers[cacheIndex].tcpPort + TTYDHostConsole
@@ -496,7 +497,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIP + compileTCPPort)
 			proxy := httputil.NewSingleHostReverseProxy(url)
 			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIP + compileTCPPort
-			fmt.Printf("Tail %s\n", tail)
+			//fmt.Printf("Tail %s\n", tail)
+			base.Zlog.Infof("Tail %s", tail)
 			r.URL.Path = tail
 			r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 			proxy.ServeHTTP(w, r)
@@ -514,7 +516,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].ip + ciServers.servers[cacheIndex].tcpPort)
 			proxy := httputil.NewSingleHostReverseProxy(url)
 			r.URL.Path = tail
-			fmt.Printf(r.URL.Path)
+			//fmt.Printf(r.URL.Path)
+			base.Zlog.Infof("%s", r.URL.Path)
 			r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 			proxy.ServeHTTP(w, r)
 		}
@@ -572,7 +575,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 		}
 	case "poweron":
 		if cacheIndex != -1 {
-			fmt.Printf("Poweron request\n")
+			//fmt.Printf("Poweron request\n")
+			base.Zlog.Infof("Poweron request")
 			client := &http.Client{}
 			var req *http.Request
 			req, _ = http.NewRequest("GET", "http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+"/poweron", nil)
@@ -580,7 +584,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 		}
 	case "poweroff":
 		if cacheIndex != -1 {
-			fmt.Printf("Poweroff request\n")
+			//fmt.Printf("Poweroff request\n")
+			base.Zlog.Infof("Poweroff request")
 			client := &http.Client{}
 			var req *http.Request
 			req, _ = http.NewRequest("GET", "http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+"/poweroff", nil)
@@ -639,7 +644,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 	case "bmcfirmware":
 		if cacheIndex != -1 {
 			// We must forward the request
-			fmt.Printf("Forward bmcfirmware upload\n")
+			//fmt.Printf("Forward bmcfirmware upload\n")
+			base.Zlog.Infof("Forward bmcfirmware upload")
 			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].ip + ciServers.servers[cacheIndex].tcpPort)
 			proxy := httputil.NewSingleHostReverseProxy(url)
 			r.URL.Host = "http://" + ciServers.servers[cacheIndex].ip + ciServers.servers[cacheIndex].tcpPort
@@ -652,7 +658,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 	case "biosfirmware":
 		if cacheIndex != -1 {
 			// We must forward the request
-			fmt.Printf("Forward biosfirmware upload\n")
+			//fmt.Printf("Forward biosfirmware upload\n")
+			base.Zlog.Infof("Forward biosfirmware upload")
 			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].ip + ciServers.servers[cacheIndex].tcpPort)
 			proxy := httputil.NewSingleHostReverseProxy(url)
 			r.URL.Host = "http://" + ciServers.servers[cacheIndex].ip + ciServers.servers[cacheIndex].tcpPort
@@ -674,7 +681,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 			}
 			data := base.HTTPGetBody(r)
 			ciServers.servers[cacheIndex].gitToken = string(data)
-			fmt.Printf("Active token: %s\n", ciServers.servers[cacheIndex].gitToken)
+			//fmt.Printf("Active token: %s\n", ciServers.servers[cacheIndex].gitToken)
+			base.Zlog.Infof("Active token: %s", ciServers.servers[cacheIndex].gitToken)
+
 		}
 	case "buildbiosfirmware":
 		if cacheIndex != -1 {
@@ -689,7 +698,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 			// We have to forward the request to the compile server
 			// which will start the compilation process and return
 			// the code to connect to the ttyd daemon
-			fmt.Printf("Forward biosfirmware build\n")
+			//fmt.Printf("Forward biosfirmware build\n")
+			base.Zlog.Infof("Forward biosfirmware build")
 			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIP + compileTCPPort)
 			proxy := httputil.NewSingleHostReverseProxy(url)
 			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIP + compileTCPPort
@@ -711,7 +721,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 			// We have to forward the request to the compile server
 			// which will start the compilation process and return
 			// the code to connect to the ttyd daemon
-			fmt.Printf("Forward bmcfirmware build\n")
+			//fmt.Printf("Forward bmcfirmware build\n")
+			base.Zlog.Infof("Forward bmcfirmware build")
 			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIP + compileTCPPort)
 			proxy := httputil.NewSingleHostReverseProxy(url)
 			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIP + compileTCPPort
