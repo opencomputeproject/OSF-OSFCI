@@ -54,7 +54,7 @@ accessKey=`cat $HOME/.osfci/auth | awk '{ print $2 }'`
 secretKey=`cat $HOME/.osfci/auth | awk '{ print $3 }'`
 
 dateFormatted=`TZ=GMT date -R`
-relativePath="/ci/gitToken/$username"
+relativePath="/ci/git_token/$username"
 contentType="text/plain"
 stringToSign="PUT\n\n${contentType}\n${dateFormatted}\n${relativePath}"
 signature=`echo -en ${stringToSign} | openssl sha1 -hmac ${secretKey} -binary | base64`
@@ -64,7 +64,7 @@ curl -b $HOME/.osfci/$username.jar -d"$gitToken" -X PUT \
 -H "Authorization: OSF ${accessKey}:${signature}" \
 -H "Content-Type: ${contentType}" \
 -H "mydate: ${dateFormatted}" \
-"https://osfci.tech/ci/gitToken/$username"
+"https://osfci.tech/ci/git_token/$username"
 
 echo "token sent"
 echo ""
