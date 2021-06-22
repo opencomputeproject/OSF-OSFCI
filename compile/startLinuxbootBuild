@@ -15,6 +15,7 @@ $USERNAME
 EOF`
 SUM=`echo $SUM | awk '{ print $1 }'`
 RECIPE=`echo $BOARDS | awk -F '/' '{print $2}'`
+echo $RECIPE >& /tmp/out.txt
 if [ ! -d /tmp/volume/linuxboot_$USERNAME ]
 then
 mkdir /tmp/volume/linuxboot_$USERNAME
@@ -34,10 +35,10 @@ docker wait linuxboot_$SUM
 if [ -f /tmp/volume/linuxboot_$USERNAME/linuxboot.rom ]
 then
 \rm $FIRMWARES_PATH/test_$USERNAME.rom
-cp /tmp/volume/linuxboot_$USERNAME/linuxboot.rom $FIRMWARES_PATH/test_$RECIPE_$USERNAME.rom
+cp /tmp/volume/linuxboot_$USERNAME/linuxboot.rom $FIRMWARES_PATH/test_${RECIPE}_${USERNAME}.rom
 echo "Image successfully generated ..." 
-echo "shadow test_$RECIPE_$USERNAME.rom" 
-$BINARIES_PATH/shadow $FIRMWARES_PATH/test_$RECIPE_$USERNAME.rom
+echo "shadow test_${RECIPE}_${USERNAME}.rom" 
+$BINARIES_PATH/shadow $FIRMWARES_PATH/test_${RECIPE}_${USERNAME}.rom
 echo "DONE !" 
 if [ "$http_proxy" != "" ]
 then
@@ -47,7 +48,7 @@ if [ "$https_proxy" != "" ]
 then
 unset https_proxy
 fi
-curl -H "Content-Type:application/octet-stream" -T $FIRMWARES_PATH/test_$RECIPE_$USERNAME.rom http://$STORAGE_URI$STORAGE_TCPPORT/user/$USERNAME/linuxboot/$RECIPE/test_$USERNAME.rom
+curl -H "Content-Type:application/octet-stream" -T $FIRMWARES_PATH/test_${RECIPE}_${USERNAME}.rom http://$STORAGE_URI$STORAGE_TCPPORT/user/$USERNAME/linuxboot/$RECIPE/test_$USERNAME.rom
 fi
 if [ "$INTERACTIVE" == 1 ]
 then
