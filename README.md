@@ -11,13 +11,17 @@ That proof of concept has been developed by the Advanced Technology team and is 
 
 # Running in standalone mode
 
-This is an ongoing effort to debug and allow the platform to be developed without having access to real hardware. We are working on getting the system working in a standalone way by simulating I/O from a real "working" machine. The build.sh script present into the root tree of the repo can be used to test such behaviour. It must be executed outside the github repo to avoid problems.
+This is an ongoing effort to debug and allow the platform to be developed without having access to real hardware. We are working on getting the system working in a standalone way by simulating I/O from a real "working" machine. The build scripts present into the root tree of the repo can be used to test such behaviour. They must be executed outside the github repo to avoid problems.
 
-The proper way to execute it is by issuing the following command when you have created an out of tree build directory
+The proper way to execute is by issuing one of the following command(s) when you have created an out of tree build directory. If your requirement is building the whole infrastructure, choose build_all.sh . If it is just the go modules, use build_go.sh .
 
-edit the build.sh script first and adapt the environment variable to your environment
+Edit the build_all.sh or build_go.sh scripts first and adapt the environment variable to your environment
 
-./build.sh <PATH to the OSFCI Tree>
+./build_all.sh <PATH to the OSFCI Tree> 
+
+OR
+
+./build_go.sh <PATH to the OSFCI Tree>
 
 # Authors
 
