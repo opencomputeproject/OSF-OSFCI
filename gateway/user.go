@@ -379,7 +379,7 @@ func getSessionID(username string) string {
 func getOpenBMC(username string, w http.ResponseWriter, recipe string) {
 	client := &http.Client{}
 	var req *http.Request
-	req, _ = http.NewRequest("GET", "http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/getBMCFirmware/"+recipe, nil)
+	req, _ = http.NewRequest("GET", "http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/get_bmc_firmware/"+recipe, nil)
 	response, _ := client.Do(req)
 	buf, _ := ioutil.ReadAll(response.Body)
 	w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
@@ -389,7 +389,7 @@ func getOpenBMC(username string, w http.ResponseWriter, recipe string) {
 func getOpenBMCBuildLog(username string, w http.ResponseWriter, recipe string) {
 	client := &http.Client{}
 	var req *http.Request
-	req, _ = http.NewRequest("GET", "http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/getBMCFirmwareBuildLog/"+recipe, nil)
+	req, _ = http.NewRequest("GET", "http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/get_bmc_firmware_build_log/"+recipe, nil)
 	response, _ := client.Do(req)
 	buf, _ := ioutil.ReadAll(response.Body)
 	w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
@@ -399,7 +399,7 @@ func getOpenBMCBuildLog(username string, w http.ResponseWriter, recipe string) {
 func getLinuxBoot(username string, w http.ResponseWriter, recipe string) {
 	client := &http.Client{}
 	var req *http.Request
-	req, _ = http.NewRequest("GET", "http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/getFirmware/"+recipe, nil)
+	req, _ = http.NewRequest("GET", "http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/get_firmware/"+recipe, nil)
 	response, _ := client.Do(req)
 	buf, _ := ioutil.ReadAll(response.Body)
 	w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
@@ -409,7 +409,7 @@ func getLinuxBoot(username string, w http.ResponseWriter, recipe string) {
 func getLinuxBootBuildLog(username string, w http.ResponseWriter, recipe string) {
 	client := &http.Client{}
 	var req *http.Request
-	req, _ = http.NewRequest("GET", "http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/getFirmwareBuildLog/"+recipe, nil)
+	req, _ = http.NewRequest("GET", "http://"+StorageURI+StorageTCPPORT+"/user/"+username+"/get_firmware_build_log/"+recipe, nil)
 	response, _ := client.Do(req)
 	buf, _ := ioutil.ReadAll(response.Body)
 	w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
