@@ -112,7 +112,7 @@ func isRunning(prefix string) bool {
 func home(w http.ResponseWriter, r *http.Request) {
 	head, tail := ShiftPath(r.URL.Path)
 	switch head {
-	case "cleanUp":
+	case "clean_up":
 		device := tail[1:]
 		if len(device) > 1 {
 			fmt.Printf("Device: %d\n", device)
@@ -143,14 +143,14 @@ func home(w http.ResponseWriter, r *http.Request) {
 			_ = <-LinuxBOOTBuildChannel
 			LinuxBOOTCommand = nil
 		}
-	case "isRunning":
+	case "is_running":
 		command := tail[1:]
 		if isRunning(command) {
 			w.Write([]byte("{ \"status\" : \"1\" }"))
 		} else {
 			w.Write([]byte("{ \"status\" : \"0\" }"))
 		}
-	case "getFirmware":
+	case "get_firmware":
 		login := tail[1:]
 		// We must retrieve the username BIOS and return it as the response body
 		if LinuxBOOTCommand != nil {
@@ -163,7 +163,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		firmware := make([]byte, 64*1024*1024)
 		_, _ = f.Read(firmware)
 		w.Write(firmware)
-	case "getBMCFirmware":
+	case "get_bmc_firmware":
 		login := tail[1:]
 		// We must retrieve the username BIOS and return it as the response body
 		if OpenBMCCommand != nil {
@@ -176,7 +176,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		firmware := make([]byte, 32*1024*1024)
 		_, _ = f.Read(firmware)
 		w.Write(firmware)
-	case "buildbmcfirmware":
+	case "build_bmc_firmware":
 		switch r.Method {
 		case http.MethodPut:
 			var gitToken string
@@ -277,7 +277,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 			}
 
 		}
-	case "buildbiosfirmware":
+	case "build_bios_firmware":
 		switch r.Method {
 		case http.MethodPut:
 			var gitToken string
@@ -290,14 +290,14 @@ func home(w http.ResponseWriter, r *http.Request) {
 			keys := strings.Split(tail, "/")
 
 			gitToken = "OSFCIemptyOSFCI"
-                        if len(keys) > 2 {
-                                username = keys[1]
-                                gitToken = keys[2]
-                        } else {
-                                username = keys[1]
-                        }
-                        base.Zlog.Infof("%s %s", username, keys)
-                        base.Zlog.Infof("GitToken: %s", gitToken)
+			if len(keys) > 2 {
+				username = keys[1]
+				gitToken = keys[2]
+			} else {
+				username = keys[1]
+			}
+			base.Zlog.Infof("%s %s", username, keys)
+			base.Zlog.Infof("GitToken: %s", gitToken)
 
 			data := base.HTTPGetBody(r)
 			keywords := strings.Fields(string(data))
