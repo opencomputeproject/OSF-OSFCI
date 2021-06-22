@@ -48,7 +48,7 @@ function homebutton(){
 		$.ajax({
     			type: "GET",
 	                contentType: 'application/json',
-    			url: window.location.origin + '/ci/startbmc/',
+    			url: window.location.origin + '/ci/start_bmc/',
 			success: function(response){
 				console.log("Bmc em100 started");
 				$('#bmcem100console').contents().find("head").remove();
@@ -62,12 +62,12 @@ function homebutton(){
                 $.ajax({
                         type: "GET",
                         contentType: 'application/json',
-                        url: window.location.origin + '/ci/startsmbios/',
+                        url: window.location.origin + '/ci/start_smbios/',
                         success: function(response){
 				$('#smbiosem100console').contents().find("head").remove();
                                 $('#smbiosem100console').contents().find("body").remove();
                                 $('#smbiosem100console').removeAttr("src");
-                                $('#smbiosem100console').attr("src", window.location+"/smbiosconsole");
+                                $('#smbiosem100console').attr("src", window.location+"/smbios_console");
                         }
                 });
         });
@@ -75,10 +75,10 @@ function homebutton(){
                 $.ajax({
                         type: "GET",
                         contentType: 'application/json',
-                        url: window.location.origin + '/ci/poweron/',
+                        url: window.location.origin + '/ci/power_on/',
                         success: function(response){
                                 console.log("Bmc console started");
-                                $('#bmcconsole').attr("src", window.location+"/bmcconsole");
+                                $('#bmcconsole').attr("src", window.location+"/bmc_console");
                         }
                 });
         });
@@ -97,7 +97,7 @@ function homebutton(){
                 $.ajax({
                         type: "GET",
                         contentType: 'application/json',
-                        url: window.location.origin + '/ci/poweroff/',
+                        url: window.location.origin + '/ci/power_off/',
                         success: function(response){
                                 console.log("System stopped");
                         }
@@ -179,7 +179,7 @@ function run_ci(servername, RemainingSecond) {
 	$("#gitToken").css("display","");
 	$("#Token").on("change", function() {
                 var Data = $("#Token").val();
-                Url_rel = '/ci/gitToken/'+mylocalStorage['username'];
+                Url_rel = '/ci/git_token/'+mylocalStorage['username'];
                 BuildSignedAuth(Url_rel, 'PUT' , "text/plain", function(authString) {
 	                $.ajax({
 				url: window.location.origin + Url_rel,
@@ -209,7 +209,7 @@ function run_ci(servername, RemainingSecond) {
 	$.ajax({
 		type: "GET",
 		contentType: 'application/json',
-		url: window.location.origin + '/ci/isEmulatorsPool',
+		url: window.location.origin + '/ci/is_emulators_pool',
 		success: function(response){
 				console.log('Emulator Pool:'+response);
 				var obj = jQuery.parseJSON(response);
@@ -277,7 +277,7 @@ function run_ci(servername, RemainingSecond) {
 	                $.ajax({
 	                        type: "GET",
 	                        contentType: 'application/json',
-	                        url: window.location.origin + '/ci/poweroff/',
+	                        url: window.location.origin + '/ci/power_off/',
 	                        success: function(response){
 	                                $.ajax({
 	                                          type: "PUT",
@@ -335,7 +335,7 @@ function run_ci(servername, RemainingSecond) {
                 $.ajax({
                         type: "GET",
                         contentType: 'application/json',
-                        url: window.location.origin + '/ci/poweroff/',
+                        url: window.location.origin + '/ci/power_off/',
                         success: function(response){
                                 $.ajax({
                                           type: "PUT",
@@ -483,7 +483,7 @@ function run_ci(servername, RemainingSecond) {
 						                        url: window.location.origin + '/ci/get_os_installers/'+value,
 						                        success: function(response){
 										    // The console shall be up now
-						                                    $('#osloader').attr("src", window.location+"/osloaderconsole");
+						                                    $('#osloader').attr("src", window.location+"/os_loader_console");
 										}
 									});
 							})
@@ -503,7 +503,7 @@ function run_ci(servername, RemainingSecond) {
                     formData.append('fichier', file);
                 }
                 var xhr = new XMLHttpRequest();
-                xhr.open('POST', window.location+'bmcfirmware/'+mylocalStorage['username'], true);
+                xhr.open('POST', window.location+'bmc_firmware/'+mylocalStorage['username'], true);
 
                 xhr.onload = function () {
                                   if (xhr.status === 200) {
@@ -551,7 +551,7 @@ function run_ci(servername, RemainingSecond) {
 			$.ajax({
 		                type: "GET",
 		                contentType: 'application/json',
-		                url: window.location.origin + '/ci/resetEmulator/bmc',
+		                url: window.location.origin + '/ci/reset_emulator/bmc',
 		                success: function(response){
 					console.log('BMC emulator has been reset');
                                 }
@@ -585,7 +585,7 @@ function run_ci(servername, RemainingSecond) {
                     formData.append('fichier', file);
                 }
                 var xhr = new XMLHttpRequest();
-                xhr.open('POST', window.location+'biosfirmware/'+mylocalStorage['username'], true);
+                xhr.open('POST', window.location+'bios_firmware/'+mylocalStorage['username'], true);
 
                 xhr.onload = function () {
                                   if (xhr.status === 200) {
@@ -595,7 +595,7 @@ function run_ci(servername, RemainingSecond) {
 				    $('#smbiosem100console').contents().find("head").remove();
                                     $('#smbiosem100console').contents().find("body").remove();
                                     $('#smbiosem100console').removeAttr("src");
-                                    $('#smbiosem100console').attr("src", window.location+"/smbiosconsole");
+                                    $('#smbiosem100console').attr("src", window.location+"/smbios_console");
                                   } else {
                                     alert('Something went wrong uploading the file.');
                                   }
@@ -673,7 +673,7 @@ function run_ci(servername, RemainingSecond) {
 		 else
 		 {
 			 Data = input+' hpe/' + board + ' 1';
-			 Url_rel = '/ci/buildbiosfirmware/'+mylocalStorage['username'];
+			 Url_rel = '/ci/build_bios_firmware/'+mylocalStorage['username'];
 			 BuildSignedAuth(Url_rel, 'PUT' , "text/plain", function(authString) {
 			 $.ajax({
 		         	 url: window.location.origin + Url_rel,
@@ -692,7 +692,7 @@ function run_ci(servername, RemainingSecond) {
 		                        $('#smbiosem100console').contents().find("head").remove();
        			                $('#smbiosem100console').contents().find("body").remove();
                                         $('#smbiosem100console').removeAttr("src");
-       	                         	$('#smbiosem100console').attr("src", window.location+"/smbiosbuildconsole");
+       	                         	$('#smbiosem100console').attr("src", window.location+"/smbios_build_console");
 		        	 }
 		        	 });
 		          });
@@ -716,7 +716,7 @@ function run_ci(servername, RemainingSecond) {
                  else
                  {
 	                 Data = input+' '+recipe+' 1';
-       	         	 Url_rel = '/ci/buildbmcfirmware/'+mylocalStorage['username'];
+       	         	 Url_rel = '/ci/build_bmc_firmware/'+mylocalStorage['username'];
 	                 BuildSignedAuth(Url_rel, 'PUT' , "text/plain", function(authString) {
        		         $.ajax({
                 	         url: window.location.origin + Url_rel,
@@ -735,7 +735,7 @@ function run_ci(servername, RemainingSecond) {
 	                                $('#bmcem100console').contents().find("head").remove();
 	                                $('#bmcem100console').contents().find("body").remove();
                                         $('#bmcem100console').removeAttr("src");
-	                                $('#bmcem100console').attr("src", window.location+"/bmcbuildconsole");
+	                                $('#bmcem100console').attr("src", window.location+"/bmc_build_console");
 	                         }
 	                         });
                         });
@@ -743,7 +743,7 @@ function run_ci(servername, RemainingSecond) {
         });
 
 	$('#btnLoadbuiltsmbios').on('click', function(e) {
-		Url_rel = '/ci/loadbuiltsmbios/'+mylocalStorage['username'];
+		Url_rel = '/ci/load_built_smbios/'+mylocalStorage['username'];
 		BuildSignedAuth(Url_rel, 'PUT' , "text/plain", function(authString) {
 		$.ajax({
 			url: window.location.origin + Url_rel,
@@ -761,13 +761,13 @@ function run_ci(servername, RemainingSecond) {
                                 $('#smbiosem100console').contents().find("head").remove();
                                 $('#smbiosem100console').contents().find("body").remove();
                                 $('#smbiosem100console').removeAttr("src");
-                                $('#smbiosem100console').attr("src", window.location+"/smbiosconsole");
+                                $('#smbiosem100console').attr("src", window.location+"/smbios_console");
                          }
                          });
                         });	
 	});
         $('#btnLoadbuiltopenbmc').on('click', function(e) {
-                Url_rel = '/ci/loadbuiltopenbmc/'+mylocalStorage['username'];
+                Url_rel = '/ci/load_built_openbmc/'+mylocalStorage['username'];
                 BuildSignedAuth(Url_rel, 'PUT' , "text/plain", function(authString) {
                 $.ajax({
                         url: window.location.origin + Url_rel,
