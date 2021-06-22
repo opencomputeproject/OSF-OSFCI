@@ -78,12 +78,12 @@ serverName=`cat $HOME/.osfci/credential.txt | sed 's/{//' | sed 's/}//' | awk -F
 # We have to build now that we got a server
 if [ "$firmware" == "linuxboot" ]
 then
-	command="buildbiosfirmware"
+	command="build_bios_firmware"
 	machine="hpe/dl360gen10"
 else
 	if [ "$firmware" == "openbmc" ]
 	then
-		command="buildbmcfirmware"
+		command="build_bmc_firmware"
 		machine="dl360poc"
 	fi
 fi
