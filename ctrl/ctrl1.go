@@ -104,9 +104,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 		go func() {
 			done <- cmd.Wait()
 		}()
-	case "isEmulatorsPool":
+	case "is_emulators_pool":
 		w.Write([]byte("{ \"isPool\":\"" + isEmulatorsPool + "\" }"))
-	case "resetEmulator":
+	case "reset_emulator":
 		_, tail := ShiftPath(r.URL.Path)
 		path := strings.Split(tail, "/")
 		emulator := path[1]
@@ -147,7 +147,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 				w.Write([]byte(emulator))
 			}
 		}
-	case "bmcfirmware":
+	case "bmc_firmware":
 		switch r.Method {
 		case http.MethodPost:
 			_, tail := ShiftPath(r.URL.Path)
@@ -231,7 +231,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 			conn.Close()
 		}
 
-	case "biosfirmware":
+	case "bios_firmware":
 		switch r.Method {
 		case http.MethodPost:
 			_, tail := ShiftPath(r.URL.Path)
@@ -296,14 +296,14 @@ func home(w http.ResponseWriter, r *http.Request) {
 			conn.Close()
 		}
 
-	case "loadfromstoragesmbios":
+	case "load_from_storage_smbios":
 		// We must get the username from the request
 		_, tail := ShiftPath(r.URL.Path)
 		login := tail[1:]
 		// We have to retrieve the BIOS from the compile server
 
-		_ = base.HTTPGetRequest("http://" + compileURI + compileTCPPort + "/cleanUp/rom")
-		myfirmware := base.HTTPGetRequest("http://" + storageURI + storageTCPPort + "/user/" + login + "/getFirmware/" + biosrecipe + "/")
+		_ = base.HTTPGetRequest("http://" + compileURI + compileTCPPort + "/clean_up/rom")
+		myfirmware := base.HTTPGetRequest("http://" + storageURI + storageTCPPort + "/user/" + login + "/get_firmware/" + biosrecipe + "/")
 		// f, err := os.Create("firmwares/linuxboot_"+login+".rom", os.O_WRONLY|os.O_CREATE, 0666)
 		f, err := os.Create(firmwaresPath + "/linuxboot_" + login + ".rom")
 		defer f.Close()
@@ -353,14 +353,14 @@ func home(w http.ResponseWriter, r *http.Request) {
 		}
 		conn.Close()
 
-	case "loadfromstoragebmc":
+	case "load_from_storage_bmc":
 		// We must get the username from the request
 		_, tail := ShiftPath(r.URL.Path)
 		login := tail[1:]
 		// We have to retrieve the BIOS from the storage server
 
-		_ = base.HTTPGetRequest("http://" + compileURI + compileTCPPort + "/cleanUp/bmc")
-		myfirmware := base.HTTPGetRequest("http://" + storageURI + storageTCPPort + "/user/" + login + "/getBMCFirmware/" + bmcrecipe + "/")
+		_ = base.HTTPGetRequest("http://" + compileURI + compileTCPPort + "/clean_up/bmc")
+		myfirmware := base.HTTPGetRequest("http://" + storageURI + storageTCPPort + "/user/" + login + "/get_bmc_firmware/" + bmcrecipe + "/")
 		// f, err := os.Create("firmwares/openbmc_"+login+".rom", os.O_WRONLY|os.O_CREATE, 0666)
 		f, err := os.Create(firmwaresPath + "/openbmc_" + login + ".rom")
 		defer f.Close()
@@ -425,7 +425,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		}
 		conn.Close()
 
-	case "startbmc":
+	case "start_bmc":
 		fmt.Printf("BMC start received\n")
 		var args []string
 		args = append(args, "-p")
@@ -486,7 +486,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		}
 		conn.Close()
 
-	case "startsmbios":
+	case "start_smbios":
 		// we must forward the request to the relevant test server
 		fmt.Printf("System BIOS start received\n")
 		var args []string
@@ -529,7 +529,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		}
 		conn.Close()
 
-	case "poweron":
+	case "power_on":
 		fmt.Printf("start power\n")
 		args := []string{"on"}
 		cmd := exec.Command(binariesPath+"/iPDUpower", args...)
@@ -541,7 +541,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 	case "bmc_up":
 
-	case "poweroff":
+	case "power_off":
 		// We need to cleanup the em100
 		// We also need to clean up the screen command
 		// and free the USB->Serial

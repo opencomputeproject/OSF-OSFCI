@@ -53,6 +53,6 @@ accessKey=`cat $HOME/.osfci/auth | awk '{ print $2 }'`
 secretKey=`cat $HOME/.osfci/auth | awk '{ print $3 }'`
 serverName=`cat $HOME/.osfci/credential.txt | sed 's/{//' | sed 's/}//' | awk -F"," '{ print $1 }' | awk -F":" '{ print $2 }' | sed 's/"//g'`
 
-curl -s -b $HOME/.osfci/$username.jar -X GET "https://osfci.tech/ci/isRunning/$firmware"
+curl -s -b $HOME/.osfci/$username.jar -X GET "https://osfci.tech/ci/is_running/$firmware"
 
 

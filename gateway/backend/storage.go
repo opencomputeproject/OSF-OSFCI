@@ -226,13 +226,13 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 		switch command {
 		case "avatar":
 			w.Write([]byte(getImage(username)))
-		case "getFirmware":
+		case "get_firmware":
 			getSystemBIOS(username, w, recipe)
-		case "getBMCFirmware":
+		case "get_bmc_firmware":
 			getOpenBMC(username, w, recipe)
-		case "getFirmwareBuildLog":
+		case "get_firmware_build_log":
 			getSystemBIOSBuildLog(username, w, recipe)
-		case "getBMCFirmwareBuildLog":
+		case "get_bmc_firmware_build_log":
 			getOpenBMCBuildLog(username, w, recipe)
 		default:
 			filecontent, returnValue = getEntry(username)
