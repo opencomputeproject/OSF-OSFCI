@@ -507,7 +507,7 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 	case http.MethodPost:
 		// Ok I am getting there the various parameters to log a user
 		switch command {
-		case "getToken":
+		case "get_token":
 			// We must get the user info and validate the password sent
 			// if the user doesn't have any API Token
 			// we have to generate it !
