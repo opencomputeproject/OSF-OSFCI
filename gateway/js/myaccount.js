@@ -280,7 +280,7 @@ function myAccountCol1createControl()
 				// We have to update localstorage data with relevant info
 				// This is done through a Post with some parameters
 				Parameters = 'username=' + mylocalStorage['username'] + '&password=' + mylocalStorage['NewPassword0'];
-				var Url = '/user/'+mylocalStorage['username']+'/getToken' + '?' + Parameters;
+				var Url = '/user/'+mylocalStorage['username']+'/get_token' + '?' + Parameters;
 				BuildSignedAuth(Url, 'POST' , "application/json", function(authString) {
                 		$.ajax({
 					url: Url,

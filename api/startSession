@@ -65,7 +65,7 @@ then
 fi
 chmod -Rf 700 $HOME/.osfci
 
-user_s3_api=`curl -s -X "POST" -c $HOME/.osfci/$username.new.jar  -d"password=$upassword" -H "Content-Type: application/x-www-form-urlencoded"  "https://osfci.tech/user/$username/getToken"`
+user_s3_api=`curl -s -X "POST" -c $HOME/.osfci/$username.new.jar  -d"password=$upassword" -H "Content-Type: application/x-www-form-urlencoded"  "https://osfci.tech/user/$username/get_token"`
 echo $user_s3_api
 accessKey=`echo $user_s3_api | jq -r '.accessKey'`
 secretKey=`echo $user_s3_api | jq -r '.secretKey'`

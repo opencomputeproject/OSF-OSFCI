@@ -910,7 +910,7 @@ function main(){
 		loadJS("js/login.js");
 		managePasswordForgotten();
 		loadJS("js/forms.js");
-		formSubmission('#login','getToken','','Password missmatch');
+		formSubmission('#login','get_token','','Password missmatch');
 		loadHTML("html/footer.html");
 	}
 	else

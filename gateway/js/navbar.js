@@ -63,7 +63,7 @@ function loginBtn() {
 		       		loadJS("js/login.js");
 		        	managePasswordForgotten();
 		        	loadJS("js/forms.js");
-		        	formSubmission('#login','getToken','','Password missmatch');
+		        	formSubmission('#login','get_token','','Password missmatch');
 		        	loadHTML("footer.html");
 		}
 	});
