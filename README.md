@@ -7,7 +7,7 @@ This code is a proof of concept of what a continuous integration platform could 
 
 # Who uses it ?
 
-That proof of concept has been developed by the Advanced Technology team and is currently running live on https://osfci.tech website as to validate its behaviour.
+That proof of concept has been developed by the Advanced Technology team and is currently running on https://osfci.tech website as to validate its behaviour (08-02-21 update: the public facing server is offline for maintanence).
 
 # Running in standalone mode
 
