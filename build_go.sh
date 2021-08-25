@@ -22,6 +22,7 @@ pwd
 go get -u go.uber.org/zap
 go get gopkg.in/natefinch/lumberjack.v2
 go mod init base/base
+go mod tidy
 cd /home/ciadmin/build/
 pwd
 go get golang.org/x/crypto/acme/autocert
@@ -31,6 +32,10 @@ go mod init github.com/spf13
 go mod edit -replace base/base=$1/base
 go mod tidy
 echo "Building Server.go ...\n"
+go get base/base
+go get github.com/spf13/viper
+go get golang.org/x/crypto/acme/autocert
+go get github.com/fsnotify/fsnotify@v1.4.9
 go build $1/gateway/server.go
 echo "Building ctrl1.go ...\n"
 go build $1/ctrl/ctrl1.go
