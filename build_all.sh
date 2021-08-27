@@ -29,6 +29,9 @@ go mod init github/spf13
 go mod edit -replace base/base=$1/base
 go mod tidy
 echo "Building Server.go ...\n"
+go get base/base
+go get github.com/spf13/viper
+go get golang.org/x/crypto/acme/autocert
 go build $1/gateway/server.go
 echo "Building ctrl1.go ...\n"
 go build $1/ctrl/ctrl1.go
