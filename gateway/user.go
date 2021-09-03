@@ -190,7 +190,7 @@ func updateAccount(username string, w http.ResponseWriter, r *http.Request) bool
 		base.HTTPPutRequest("http://"+StorageURI+StorageTCPPORT+"/user/"+updatedData.Nickname, b, "application/json")
 		base.SendEmail(updatedData.Email, "Account activation - Action required",
 			"Please click the following link as to validate your account https://"+
-				r.Host+"/user/"+updatedData.Nickname+"/validateUser/"+updatedData.ValidationString)
+				r.Host+"/user/"+updatedData.Nickname+"/validate_user/"+updatedData.ValidationString)
 		updatedData = nil
 		serverReturn = serverReturn + "email"
 	}
@@ -226,7 +226,7 @@ func createUser(username string, w http.ResponseWriter, r *http.Request) bool {
 	base.HTTPPutRequest("http://"+StorageURI+StorageTCPPORT+"/user/"+updatedData.Nickname, b, "application/json")
 	base.SendEmail(updatedData.Email, "Account activation - Action required",
 		"Please click the following link as to validate your account https://"+
-			r.Host+"/user/"+updatedData.Nickname+"/validateUser/"+updatedData.ValidationString)
+			r.Host+"/user/"+updatedData.Nickname+"/validate_user/"+updatedData.ValidationString)
 	updatedData = nil
 	return true
 
@@ -267,7 +267,7 @@ func sendPasswordResetLink(username string, w http.ResponseWriter, r *http.Reque
 	base.HTTPPutRequest("http://"+StorageURI+StorageTCPPORT+"/user/"+updatedData.Nickname, b, "application/json")
 	base.SendEmail(updatedData.Email, "Account password reset - Action required",
 		"Please click the following link as to update  your password https://"+
-			r.Host+"/user/"+updatedData.Nickname+"/resetPassword/"+updatedData.ValidationString)
+			r.Host+"/user/"+updatedData.Nickname+"/reset_password/"+updatedData.ValidationString)
 	updatedData = nil
 	return true
 
@@ -432,7 +432,7 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodGet:
 		switch command {
-		case "validateUser":
+		case "validate_user":
 			// got a validation link ....
 			// we have to accept user activation
 			// First check if the account exist
@@ -451,7 +451,7 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 					http.StatusMovedPermanently,
 				)
 			}
-		case "resetPassword":
+		case "reset_password":
 			// We have to validate the user, then display the right return page
 			if !validateUser(username, path[4]) {
 				http.Error(w, "401 Validation string error", 401)
@@ -459,7 +459,7 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 				print("REDIRECTION")
 				http.Redirect(
 					w, r,
-					"https://"+r.Host+"/ci/?resetPassword=1&username="+username+"&validation="+path[4],
+					"https://"+r.Host+"/ci/?reset_password=1&username="+username+"&validation="+path[4],
 					http.StatusMovedPermanently,
 				)
 			}
@@ -543,11 +543,11 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 			cookie := http.Cookie{Name: "osfci_cookie", Value: sessionid, Path: "/", HttpOnly: true, MaxAge: int(base.MaxAge)}
 			http.SetCookie(w, &cookie)
 			fmt.Fprintf(w, string(returnValue))
-		case "createUser":
+		case "create_user":
 			createUser(username, w, r)
-		case "generatePasswordLnkRst":
+		case "generate_password_lnk_rst":
 			sendPasswordResetLink(username, w, r)
-		case "resetPassword":
+		case "reset_password":
 			resetPassword(username, w, r)
 		default:
 			http.Error(w, "401 Unknown user command\n", 401)
