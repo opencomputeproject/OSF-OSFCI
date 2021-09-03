@@ -155,13 +155,13 @@ func checkAccess(w http.ResponseWriter, r *http.Request, login string, command s
 	switch command {
 	case "get_token":
 		return r.Method == http.MethodGet || r.Method == http.MethodPost
-	case "validateUser":
+	case "validate_user":
 		return true
-	case "resetPassword":
+	case "reset_password":
 		return true
-	case "generatePasswordLnkRst":
+	case "generate_password_lnk_rst":
 		return true
-	case "createUser":
+	case "create_user":
 		return true
 	}
 	if r.Header.Get("Authorization") != "" {

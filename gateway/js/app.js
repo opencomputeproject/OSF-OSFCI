@@ -893,7 +893,7 @@ function mainpage(){
 	loadJS("js/forms.js");
 	loadJS("js/base.js");
 	loadHTML("footer.html");
-	formSubmission('#signup','createUser','User created - Please check your email','User exist');
+	formSubmission('#signup','create_user','User created - Please check your email','User exist');
 }
 
 function main(){
@@ -915,7 +915,7 @@ function main(){
 	}
 	else
 	{
-		if ( getUrlParameter('resetPassword') == "1" )
+		if ( getUrlParameter('reset_password') == "1" )
                 {
 			clearDocument();
                         loadHTML("html/navbar.html");
@@ -931,7 +931,7 @@ function main(){
                         $('#validation').val(getUrlParameter('validation'));
                         $('#validation').prop('disabled', true);
                         loadJS("js/forms.js");
-                        formSubmission('#resetPassword','resetPassword','Password successfully reset','Reset link expired');
+                        formSubmission('#reset_password','reset_password','Password successfully reset','Reset link expired');
                         loadHTML("html/footer.html");
 
                 }
@@ -955,7 +955,7 @@ function main(){
 			loadJS("js/forms.js");
 			loadJS("js/base.js");
 			loadHTML("html/footer.html");
-			formSubmission('#signup','createUser','User created - Please check your email','User exist');
+			formSubmission('#signup','create_user','User created - Please check your email','User exist');
 		}
 	}
 }
