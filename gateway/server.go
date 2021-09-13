@@ -58,6 +58,9 @@ var StorageURI string
 //StorageTCPPORT is read from config
 var StorageTCPPORT string
 
+//MaxServerAge is read from config
+var MaxServerAge int
+
 type serverProduct struct {
 	Product string
 	Brand   string
@@ -129,6 +132,9 @@ func initServerconfig() error {
 
 	//StorageTCPPORT set from config file
 	StorageTCPPORT = viper.GetString("STORAGE_TCPPORT")
+
+	//MaxServerAge set from config file: currently 3600 -> 60 minutes
+	MaxServerAge = viper.GetInt("MAX_SERVER_AGE")
 	return nil
 }
 
@@ -338,13 +344,13 @@ func home(w http.ResponseWriter, r *http.Request) {
 					if time.Now().After(ciServers.servers[i].expiration) {
 						if ciServers.servers[i].ProductIndex == serverTypeIndex {
 							// the server is available we can allocate it
-							ciServers.servers[i].expiration = time.Now().Add(time.Second * time.Duration(base.MaxServerAge))
+							ciServers.servers[i].expiration = time.Now().Add(time.Second * time.Duration(MaxServerAge))
 							ciServers.servers[i].currentOwner = cookie.Value
 							ciServers.mux.Unlock()
 
 							myoutput.Servername = ciServers.servers[i].servername
 							myoutput.Waittime = "0"
-							myoutput.RemainingTime = fmt.Sprintf("%d", base.MaxServerAge)
+							myoutput.RemainingTime = fmt.Sprintf("%d", MaxServerAge)
 							returnData, _ := json.Marshal(myoutput)
 							if ciServers.servers[i].queue > 0 {
 								ciServers.servers[i].queue = ciServers.servers[i].queue - 1

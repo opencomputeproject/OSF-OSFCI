@@ -42,9 +42,6 @@ var randInit = 0
 //MaxAge defines cookie expiration
 var MaxAge = 3600 * 24
 
-//MaxServerAge  defines server allocation length : currently 60 seconds * 30 == 30 minutes
-var MaxServerAge = 60 * 30
-
 func randAlphaSlashPlus(n int) string {
 	if randInit == 0 {
 		rand.Seed(time.Now().UnixNano())
