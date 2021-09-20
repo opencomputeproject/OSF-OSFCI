@@ -48,18 +48,17 @@ cat $1/docker/Dockerfile.openbmc | sed "s,# https,ENV https_proxy $https_proxy\n
 cp $1/docker/Docker.temp $1/docker/Dockerfile.openbmc
 rm $1/docker/Docker.temp
 fi
-#docker image rm linuxboot
-#docker build -t linuxboot -f $1/docker/Dockerfile.linuxboot $1/docker/
+docker image rm linuxboot
+docker build -t linuxboot -f $1/docker/Dockerfile.linuxboot $1/docker/
 docker image rm openbmc
 docker build -t openbmc -f $1/docker/Dockerfile.openbmc $1/docker/
-exit 1
 basePath=`realpath ..`
 export GOPATH=$GOPATH:$basePath
-go get golang.org/x/crypto/bcrypt
-go get golang.org/x/sys/unix
-go get github.com/docker/docker/api/types
-go get github.com/docker/docker/client
-go build compile.go
+#go get golang.org/x/crypto/bcrypt
+#go get golang.org/x/sys/unix
+#go get github.com/docker/docker/api/types
+#go get github.com/docker/docker/client
+#go build compile.go
 cp compile $1/bin
 # We need UTK from fiano project
 git clone https://github.com/linuxboot/fiano
@@ -80,4 +79,3 @@ cd build
 cmake ..
 make
 cp ttyd $1/bin
-

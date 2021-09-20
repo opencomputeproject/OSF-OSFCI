@@ -43,10 +43,10 @@ tar cvf gateway.tar $1/gateway/html $1/gateway/css/ $1/gateway/images/ $1/gatewa
 go get github.com/docker/docker/api/types
 go get github.com/docker/docker/client
 go build $1/compile/compile.go
+cp compile $1/compile
 if [ -f "$1/base/go.mod" ] ; then
         rm -f "$1/base/go.mod"
 fi
-exit 1
 \rm -rf tmp
 \rm -rf /usr/local/old/*
 mkdir tmp
