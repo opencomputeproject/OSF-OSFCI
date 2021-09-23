@@ -26,16 +26,20 @@ RUN apt-get update && apt-get install --no-install-recommends -y ca-certificates
 RUN cat /etc/apt/sources.list
 RUN DEBIAN_FRONTEND=noninteractive apt-get update && DEBIAN_FRONTEND=noninteractive  apt install -qq -y build-essential libssl-dev libcurl4-gnutls-dev libexpat1-dev gettext unzip wget snapd squashfuse fuse snap-confine sudo python2.7-dev chrpath cpio diffstat gawk texinfo python3.8 python3.8-venv python3.8-distutils python3.8-dev python3.8-gdbm python3.8-tk python3.8-lib2to3 idle-python3.8 flex bison libncurses-dev vim openssl libssl-dev dkms libelf-dev libudev-dev libpci-dev libiberty-dev autoconf bc sudo
 RUN apt-get -y install git
-RUN wget https://dl.google.com/go/go1.14.3.linux-amd64.tar.gz
-RUN gunzip go1.14.3.linux-amd64.tar
-RUN tar xf go1.14.3.linux-amd64.tar
+RUN wget https://dl.google.com/go/go1.16.linux-amd64.tar.gz
+RUN gunzip go1.16.linux-amd64.tar.gz
+RUN tar xf go1.16.linux-amd64.tar
 RUN mv  go /usr/local
 RUN rm -Rf go*
 ENV PATH /usr/local/go/bin:$PATH
-ENV GOPATH=/app
+RUN mkdir /app/go
+ENV GOPATH=/app/go
+RUN echo $GOPATH
 RUN go get github.com/linuxboot/fiano/pkg/utk
 RUN git clone https://github.com/linuxboot/fiano
-RUN go build fiano/cmds/utk/utk.go
+RUN go get github.com/ulikunitz/xz/lzma
+WORKDIR fiano/cmds/utk
+RUN go build utk.go
 RUN cp utk /usr/bin
 RUN useradd -ms /bin/bash linuxboot
 RUN usermod -aG sudo linuxboot
@@ -53,4 +57,3 @@ EXPOSE 443
 # Command to run the executable
 # CMD /app/start_container
 CMD [ "/home/linuxboot/build_linuxboot" ]
-

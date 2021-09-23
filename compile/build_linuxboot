@@ -2,7 +2,7 @@
 # This script is executed within a Docker container
 
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/go/bin
-export GOPATH=:/go/src/base:/home/linuxboot/mainboards/$BOARDS
+export GOPATH=/home/linuxboot/mainboards/$BOARDS
 if [ "$PROXY" != "" ]
 then
 git config --global https.proxy $PROXY
@@ -18,9 +18,11 @@ git clone $GITHUBREPO
 cd mainboards
 git checkout -b $BRANCH origin/$BRANCH
 cd $BOARDS
+export GO111MODULE=off
 make fetch
 go build github.com/u-root/u-root
-export PATH=$PATH:.
+export PATH=$PATH:.:./bin
+export PATH=/home/linuxboot/mainboards/hpe/dl360gen10/bin/u-root:$PATH
 cp /volume/default.rom ROM.bin
 # export KEYPATH=""
 # if [ -f "/volume/id_rsa.pub" ]
