@@ -249,7 +249,11 @@ func getAvatar(username string, w *http.ResponseWriter) {
 		fmt.Fprint(*w, "Error")
 		return
 	}
-	(*w).Write([]byte(base.HTTPGetRequest("http://" + StorageURI + StorageTCPPORT + "/user/" + username + "/avatar")))
+	base.Zlog.Infof("Checking User Avatar")
+	if base.CheckUrlExists("http://" + StorageURI + StorageTCPPORT + "/user/" + username + "/avatar"){
+		(*w).Write([]byte(base.HTTPGetRequest("http://" + StorageURI + StorageTCPPORT + "/user/" + username + "/avatar")))
+	}
+	base.Zlog.Infof("Checking User Avatar End")
 }
 
 func sendPasswordResetLink(username string, w http.ResponseWriter, r *http.Request) bool {

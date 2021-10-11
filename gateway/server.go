@@ -234,6 +234,7 @@ func user(w http.ResponseWriter, r *http.Request) {
 		base.Zlog.Infof("Access denied: %s - %s %s %s", r.RemoteAddr, r.Proto, r.Method, r.URL.RequestURI())
 		return
 	}
+	base.Zlog.Infof("User: %s has access", login)
 
 	// parse the url
 	url, _ := url.Parse("http://" + credentialURI + credentialPort)
