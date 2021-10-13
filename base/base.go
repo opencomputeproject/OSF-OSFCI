@@ -311,6 +311,7 @@ func HTTPGetRequest(request string) string {
 	resp, err := http.Get(request)
 	if err != nil {
 		Zlog.Fatalf("HTTP GET Error %s", err.Error())
+		return ""
 	}
 
 	body, err := ioutil.ReadAll(resp.Body)
@@ -367,4 +368,14 @@ func HTTPGetBody(r *http.Request) []byte {
 	b.ReadFrom(rdr1)
 	r.Body = rdr2
 	return (b.Bytes())
+}
+
+// isUrlExists  handles checks ia URL exists
+func CheckUrlExists(request string) bool {
+	_ , err := http.Get(request)
+	if err != nil {
+		Zlog.Warnf("HTTP GET Error %s", err.Error())
+		return false
+	}
+	return true
 }
