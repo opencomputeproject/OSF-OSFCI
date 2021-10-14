@@ -23,12 +23,12 @@ OR
 
 ./build_go.sh <PATH to the OSFCI Tree>
 
-# Authors
+# Maintainers
 
 Jean-Marie Verdun (Founder & Lead)
 
-Pradeep Reddy
-
 Gregg Shick
 
+Susmith Poochali
+  
 Arun Darlie Koshy
