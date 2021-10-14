@@ -370,9 +370,9 @@ func HTTPGetBody(r *http.Request) []byte {
 	return (b.Bytes())
 }
 
-// isUrlExists  handles checks ia URL exists
-func CheckUrlExists(request string) bool {
-	_ , err := http.Get(request)
+// CheckURLExists handles checks ia URL exists
+func CheckURLExists(request string) bool {
+	_, err := http.Get(request)
 	if err != nil {
 		Zlog.Warnf("HTTP GET Error %s", err.Error())
 		return false

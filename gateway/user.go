@@ -249,7 +249,7 @@ func getAvatar(username string, w *http.ResponseWriter) {
 		fmt.Fprint(*w, "Error")
 		return
 	}
-	if base.CheckUrlExists("http://" + StorageURI + StorageTCPPORT + "/user/" + username + "/avatar"){
+	if base.CheckURLExists("http://" + StorageURI + StorageTCPPORT + "/user/" + username + "/avatar") {
 		(*w).Write([]byte(base.HTTPGetRequest("http://" + StorageURI + StorageTCPPORT + "/user/" + username + "/avatar")))
 	}
 }
