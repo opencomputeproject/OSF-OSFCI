@@ -22,13 +22,3 @@ Edit the build_all.sh or build_go.sh scripts first and adapt the environment var
 OR
 
 ./build_go.sh <PATH to the OSFCI Tree>
-
-# Maintainers
-
-Jean-Marie Verdun (Founder & Lead)
-
-Gregg Shick
-
-Susmith Poochali
-  
-Arun Darlie Koshy
