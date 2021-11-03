@@ -1,10 +1,10 @@
 # Contributing to osfci
 
-We need help with this project. Contributions are very welcome. See open [issues](https://github.com/HewlettPackard/osfci/issues).
+We need help with this project. Contributions are very welcome. See open [issues](https://github.com/opencomputeproject/OSF-OSFCI/issues).
 
 ## Bugs and Ideas
 
-Please submit to https://github.com/HewlettPackard/osfci/issues
+Please submit to https://github.com/opencomputeproject/OSF-OSFCI/issues
 
 ## Discussions and get in touch with us!
 
@@ -35,10 +35,12 @@ against https://github.com/HewlettPackard/osfci.
 
 Every commit in your pull request needs to be able to build and pass our CI tests.
 
+Also, we are DCO compiliant so please ensure sign-off is done [appropriately.](https://github.com/apps/dco)
+
 ## Code Reviews
 
 Look at the area of code you're modifying, its history, and consider
-tagging some of the [maintainers](https://github.com/HewlettPackard/osfci/graphs/contributors) when doing a
+tagging some of the [maintainers](https://github.com/opencomputeproject/OSF-OSFCI/graphs/contributors) when doing a
 pull request in order to instigate some code review.
 
 ## Quality Controls
