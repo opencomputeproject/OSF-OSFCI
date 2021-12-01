@@ -513,6 +513,27 @@ function myAccountCol2() {
         loadJS("js/avatar.js");
 }
 
+function insertTextAtCursor(text) {
+    var sel, range, textNode;
+    if (window.getSelection) {
+        sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+            range = sel.getRangeAt(0).cloneRange();
+            range.deleteContents();
+            textNode = document.createTextNode(text);
+            range.insertNode(textNode);
+            range.setStart(textNode, textNode.length);
+            range.setEnd(textNode, textNode.length);
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+    } else if (document.selection && document.selection.createRange) {
+        range = document.selection.createRange();
+        range.pasteHTML(text);
+    }
+}
+
+
 myAccountCol0();
 myAccountCol1();
 myAccountCol2(); // Let's display the Avatar
