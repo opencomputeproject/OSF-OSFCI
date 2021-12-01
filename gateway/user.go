@@ -329,10 +329,14 @@ func deleteUser(username string, w http.ResponseWriter, r *http.Request) bool {
 	var newData accountDelete
 	var getJSON = base.HTTPGetBody(r)
 	_ = json.Unmarshal(getJSON, &newData)
+	base.Zlog.Infof("Deleteing the user: %s", username)
+	base.Zlog.Infof(newData.CurrentPassword)
+	base.Zlog.Infof("Deleteing the user Data: %s", newData.DeleteData)
 	if newData.DeleteData == "true" {
 	} else {
 	}
 	updatedData = userGetInternalInfo(username)
+	base.Zlog.Infof(updatedData.Password)
 	// if the received password is not the one of the end user we can't erase it's account
 	// might be a browser hack
 	if !base.CheckPasswordHash(newData.CurrentPassword, updatedData.Password) {
@@ -340,12 +344,16 @@ func deleteUser(username string, w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 
+	base.Zlog.Infof("Confirm Deleteing the user: %s", updatedData.Nickname)
 	// Just need to disable the account by unactivating it
 	// It could be recovered by resetting the password
 	updatedData.Active = 0
-	c, _ := json.Marshal(updatedData)
-	base.HTTPPutRequest("http://"+StorageURI+StorageTCPPORT+"/user/"+updatedData.Nickname, c, "application/json")
-
+	//c, _ := json.Marshal(updatedData)
+	//base.HTTPPutRequest("http://"+StorageURI+StorageTCPPORT+"/user/"+updatedData.Nickname, c, "application/json")
+	base.HTTPDeleteRequest("http://"+StorageURI+StorageTCPPORT+"/user/"+updatedData.Nickname)
+	if newData.DeleteData == "true" {
+		base.HTTPDeleteRequest("http://"+StorageURI+StorageTCPPORT+"/user/"+updatedData.Nickname+"/delete_user_data")
+	}
 	// And return positively
 	return true
 }
