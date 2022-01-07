@@ -70,9 +70,9 @@ then
 	# We must install the development environment
 mkdir compileiUSB
 cd compileiUSB
-wget https://acroname.com/system/files/software/brainstem_dev_kit_ubuntu_lts_18.04_x86_64_7.tgz
-gunzip brainstem_dev_kit_ubuntu_lts_18.04_x86_64_7.tgz
-tar xf brainstem_dev_kit_ubuntu_lts_18.04_x86_64_7.tar
+wget https://acroname.com/system/files/software/brainstem_dev_kit_ubuntu_lts_18.04_x86_64_24.tgz
+gunzip brainstem_dev_kit_ubuntu_lts_18.04_x86_64_24.tgz
+tar xf brainstem_dev_kit_ubuntu_lts_18.04_x86_64_24.tar
 export ACROSDK=`realpath .`
 cd development/reflex_examples
 cp ../../bin/reflex/* .
