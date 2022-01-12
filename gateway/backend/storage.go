@@ -139,7 +139,6 @@ func getOpenBMCBuildLog(username string, w http.ResponseWriter, recipe string) {
 
 func getImage(username string) string {
 	_, err := os.Stat(storageRoot + "/" + string(username[0]))
-	base.Zlog.Infof("Get the image: %s: %s", err, username)
 	file.Lock()
 	defer file.Unlock()
 	if os.IsNotExist(err) {
@@ -156,7 +155,6 @@ func getImage(username string) string {
 		encodedContent := base64.StdEncoding.EncodeToString(content)
 		return encodedContent
 	}
-	base.Zlog.Infof("storageRoot: %s:", storageRoot)
 	content, _ := ioutil.ReadFile(storageRoot + "/" + string(username[0]) + "/" + username + ".jpg")
 	encodedContent := base64.StdEncoding.EncodeToString(content)
 	return encodedContent
