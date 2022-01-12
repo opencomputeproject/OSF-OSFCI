@@ -224,9 +224,10 @@ func user(w http.ResponseWriter, r *http.Request) {
 	var login string
 
 	// The login is always accessible
+	base.Zlog.Infof("Length of entries: %d", len(entries))
+	login = entries[1]
 	if len(entries) > 2 {
 		command = entries[2]
-		login = entries[1]
 	}
 
 	if !checkAccess(w, r, login, command) {
