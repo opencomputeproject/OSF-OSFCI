@@ -329,7 +329,7 @@ func deleteUser(username string, w http.ResponseWriter, r *http.Request) bool {
 	var newData accountDelete
 	var getJSON = base.HTTPGetBody(r)
 	_ = json.Unmarshal(getJSON, &newData)
-	base.Zlog.Infof("Deleteing the user: %s", username)
+	base.Zlog.Infof("Deleting the user: %s", username)
 	if newData.DeleteData == "true" {
 	} else {
 	}
@@ -341,7 +341,7 @@ func deleteUser(username string, w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 
-	base.Zlog.Infof("Confirm Deleteing the user: %s", updatedData.Nickname)
+	base.Zlog.Infof("Confirm Deleting the user: %s", updatedData.Nickname)
 	// Just need to disable the account by unactivating it
 	// It could be recovered by resetting the password
 	updatedData.Active = 0
