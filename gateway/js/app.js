@@ -914,7 +914,7 @@ function main(){
 		loadHTML("html/footer.html");
 		$(document).ready(function () {
                         var uri = window.location.toString();
-                        if (uri.indexOf("?") > 0){
+                        if (uri.indexOf("?") != -1){
                                 var newuri = uri.substring(0, uri.indexOf("?"));
                                 window.history.replaceState({}, document.title, newuri);
                         }
@@ -943,7 +943,7 @@ function main(){
                         loadHTML("html/footer.html");
 			$(document).ready(function () {
 				var uri = window.location.toString();
-				if (uri.indexOf("?") > 0){
+				if (uri.indexOf("?") != 1){
 					var newuri = uri.substring(0, uri.indexOf("?"));
 					window.history.replaceState({}, document.title, newuri);
 				}
