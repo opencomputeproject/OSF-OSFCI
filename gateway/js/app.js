@@ -912,6 +912,14 @@ function main(){
 		loadJS("js/forms.js");
 		formSubmission('#login','get_token','','Password missmatch');
 		loadHTML("html/footer.html");
+		$(document).ready(function () {
+                        var uri = window.location.toString();
+                        if (uri.indexOf("?") > 0){
+                                var newuri = uri.substring(0, uri.indexOf("?"));
+                                window.history.replaceState({}, document.title, newuri);
+                        }
+                });
+
 	}
 	else
 	{
@@ -933,6 +941,13 @@ function main(){
                         loadJS("js/forms.js");
                         formSubmission('#reset_password','reset_password','Password successfully reset','Reset link expired');
                         loadHTML("html/footer.html");
+			$(document).ready(function () {
+				var uri = window.location.toString();
+				if (uri.indexOf("?") > 0){
+					var newuri = uri.substring(0, uri.indexOf("?"));
+					window.history.replaceState({}, document.title, newuri);
+				}
+			});
 
                 }
 		else
