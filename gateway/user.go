@@ -657,7 +657,7 @@ func main() {
 
 	err = initBlacklistedDomains()
 	if err != nil {
-		base.Zlog.Fatalf("Falied to Initialise the Blacklisted domain data: %s", err.Error())
+		base.Zlog.Errorf("Falied to Initialise the Blacklisted domain data: %s", err.Error())
 	}
 
 	mux := http.NewServeMux()
