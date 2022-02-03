@@ -608,6 +608,7 @@ func validateDomain(userEmail string) bool{
         for _, bdomain:= range blacklisted{
 		domain := strings.ReplaceAll(bdomain, ".", `\.`)
                 domain = strings.ReplaceAll(domain, "*", ".*")
+		base.Zlog.Debugf("Domains:[%s]:[%s]",bdomain, domain)
                 emailRegex := regexp.MustCompile(domain)
                 match := emailRegex.FindString(userDomain)
                 if match != ""{
