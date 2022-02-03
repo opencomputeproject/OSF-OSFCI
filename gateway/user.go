@@ -54,6 +54,12 @@ type userPublic struct {
 	EmailLABEL       string
 }
 
+// Blacklisted Domains
+var blacklistedDomains string
+
+// Blacklisted IPs
+var blacklistedIPs string
+
 //Initialize User config
 func initUserconfig() error {
 	viper.SetConfigName("gatewayconf")
@@ -71,6 +77,22 @@ func initUserconfig() error {
 	//StorageTCPPORT set from config file
 	StorageTCPPORT = viper.GetString("STORAGE_TCPPORT")
 	CredentialURI = viper.GetString("CREDENTIALS_TCPPORT")
+	return nil
+}
+
+//Initialize Blacklisted Domain info
+func initBlacklistedDomains() error {
+	viper.SetConfigName("blacklisted")
+	viper.SetConfigType("yaml")
+	viper.AddConfigPath("/usr/local/production/config/")
+	viper.AutomaticEnv()
+
+	err := viper.ReadInConfig()
+	if err != nil {
+		return err
+	}
+	blacklistedDomains = viper.GetString("BLACKLISTED_DOMAINS")
+	blacklistedIPs = viper.GetString("BLACKLISTED_IP")
 	return nil
 }
 
@@ -212,6 +234,10 @@ func createUser(username string, w http.ResponseWriter, r *http.Request) bool {
 	updatedData = new(base.User)
 	updatedData.Nickname = username
 	updatedData.Email = r.FormValue("email")
+	if validateDomain(updatedData.Email) == false {
+		fmt.Fprint(w, "Error")
+		return false
+	}
 
 	// this is a creation
 	updatedData.TokenAuth = base.GenerateAccountACKLink(20)
@@ -568,6 +594,32 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func validateDomain(userEmail string) bool{
+	if len(blacklistedDomains) == 0{
+		base.Zlog.Infof("Blacklisted domains are not defined")
+		return true
+	}
+        blacklistedDomains = strings.ReplaceAll(blacklistedDomains, " ", "")
+        blacklisted := strings.Split(blacklistedDomains, ",")
+        at := strings.LastIndex(userEmail, "@")
+        userDomain := userEmail[at+1:]
+        base.Zlog.Infof("Verifying if email Domain[%s] belongs to the blacklisted domains.", userDomain)
+        for _, domain:= range blacklisted{
+                domain = strings.ReplaceAll(domain, ".", `\.`)
+                domain = strings.ReplaceAll(domain, "*", ".*")
+                emailRegex := regexp.MustCompile(domain)
+                match := emailRegex.FindString(userDomain)
+                if match != ""{
+                        base.Zlog.Infof("Blacklisted domain found:%s", domain)
+        		base.Zlog.Infof("User email Domain[%s] belongs to the blacklisted domains [%s]", userDomain, domain)
+                        return false
+                }
+        }
+        base.Zlog.Infof("User email Domain [%s] is safe to procced", userDomain)
+        return true
+}
+
+
 //Default Intialize
 func init() {
 
@@ -600,6 +652,11 @@ func main() {
 	err := initUserconfig()
 	if err != nil {
 		base.Zlog.Fatalf("Initialization error: %s", err.Error())
+	}
+
+	err = initBlacklistedDomains()
+	if err != nil {
+		base.Zlog.Fatalf("Falied to Initialise the Blacklisted domain data: %s", err.Error())
 	}
 
 	mux := http.NewServeMux()
