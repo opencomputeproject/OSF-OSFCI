@@ -605,14 +605,14 @@ func validateDomain(userEmail string) bool{
         at := strings.LastIndex(userEmail, "@")
         userDomain := userEmail[at+1:]
         base.Zlog.Infof("Verifying if email Domain[%s] belongs to the blacklisted domains.", userDomain)
-        for _, domain:= range blacklisted{
-                domain = strings.ReplaceAll(domain, ".", `\.`)
+        for _, bdomain:= range blacklisted{
+		domain := strings.ReplaceAll(bdomain, ".", `\.`)
                 domain = strings.ReplaceAll(domain, "*", ".*")
                 emailRegex := regexp.MustCompile(domain)
                 match := emailRegex.FindString(userDomain)
                 if match != ""{
-                        base.Zlog.Infof("Blacklisted domain found:%s", domain)
-        		base.Zlog.Infof("User email Domain[%s] belongs to the blacklisted domains [%s]", userDomain, domain)
+                        base.Zlog.Infof("Blacklisted domain found:%s", bdomain)
+        		base.Zlog.Infof("User email Domain[%s] belongs to the blacklisted domains [%s]", userDomain, bdomain)
                         return false
                 }
         }
