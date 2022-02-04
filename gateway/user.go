@@ -14,6 +14,8 @@ import (
 	"strings"
 	"time"
 	"regexp"
+	"net"
+	"bytes"
 )
 
 //StorageURI is read from config
@@ -225,6 +227,10 @@ func updateAccount(username string, w http.ResponseWriter, r *http.Request) bool
 }
 
 func createUser(username string, w http.ResponseWriter, r *http.Request) bool {
+	err = initBlacklistedDomains()
+	if err != nil {
+		base.Zlog.Errorf("Falied to Initialise the Blacklisted domain data: %s", err.Error())
+	}
 	var updatedData *base.User
 	exist := userExist(username)
 	if exist {
@@ -236,6 +242,10 @@ func createUser(username string, w http.ResponseWriter, r *http.Request) bool {
 	updatedData.Nickname = username
 	updatedData.Email = r.FormValue("email")
 	if validateDomain(updatedData.Email) == false {
+		fmt.Fprint(w, "Error")
+		return false
+	}
+	if validateUserIP(r.RemoteAddr) == false {
 		fmt.Fprint(w, "Error")
 		return false
 	}
@@ -621,6 +631,51 @@ func validateDomain(userEmail string) bool{
         return true
 }
 
+func validateUserIP(userIP string) bool{
+	base.Zlog.Infof("Blacklisted IPs:%s", blacklistedIPs)
+	networkCheckpoints :=  strings.Split(strings.ReplaceAll(blacklistedIPs, " ", ""), ",")
+	for _, checkpoint := range networkCheckpoints{
+		fmt.Println(checkpoint)
+		if strings.Index(checkpoint, "-" ) != -1{ 
+			base.Zlog.Debugf("Inside Matching - [%s]", checkpoint)
+			ipRange := strings.Split(checkpoint, "-")
+			fmt.Println(ipRange)
+			if len(ipRange) < 2 || len(ipRange) > 2 {
+				continue
+			}
+			userIPByte := net.ParseIP(userIP)
+			startIP := net.ParseIP(ipRange[0])
+			endIP   := net.ParseIP(ipRange[1])
+			if bytes.Compare(userIPByte, startIP) >= 0  && bytes.Compare(userIPByte, endIP) <= 0 {
+				base.Zlog.Infof("IP address [%s] belongs to IP Range [%s]", userIP, checkpoint)
+				return true
+			}
+
+		}else if strings.Index(checkpoint, "/" ) != -1{ 
+			base.Zlog.Debugf("Inside Matching / [%s]", checkpoint)
+			_, network, err :=  net.ParseCIDR(checkpoint)
+			if err != nil{
+				base.Zlog.Debugf("Invalid subnet [%s]", checkpoint)
+				continue
+			}
+			ip := net.ParseIP(userIP)
+			if network.Contains(ip){
+				base.Zlog.Infof("IP address [%s] belongs to Subnet [%s]", userIP, checkpoint)
+				return false
+			}
+		} else {
+			fmt.Println(checkpoint)
+			userIPByte := net.ParseIP(userIP)
+			checkpointIPByte := net.ParseIP(checkpoint)
+			if bytes.Equal(checkpointIPByte, userIPByte) {
+				base.Zlog.Infof("IP address [%s] matches blacklisted IP [%s]", userIP, checkpoint)
+				return true
+			}
+		}
+	}
+	base.Zlog.Infof("IP address [%s] is safe to procced", userIP)
+	return true
+}
 
 //Default Intialize
 func init() {
@@ -656,10 +711,6 @@ func main() {
 		base.Zlog.Fatalf("Initialization error: %s", err.Error())
 	}
 
-	err = initBlacklistedDomains()
-	if err != nil {
-		base.Zlog.Errorf("Falied to Initialise the Blacklisted domain data: %s", err.Error())
-	}
 
 	mux := http.NewServeMux()
 	print("Attaching to " + CredentialURI + "\n")
