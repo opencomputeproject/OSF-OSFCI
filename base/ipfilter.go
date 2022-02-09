@@ -35,7 +35,10 @@ func InitBlacklistedIPs(){
         if err != nil {
                 Zlog.Errorf("Falied to Initialise the Blacklisted domain data: %s", err.Error())
         }
-        blacklistedIPs := viper.Get("BLACKLISTED_IP").(string)
+        blacklistedIPs, ok := viper.Get("BLACKLISTED_IP").(string)
+	if ok == false {
+		blacklistedIPs = ""
+	}
         UpdateBlacklistedIPs(blacklistedIPs)
         viper.OnConfigChange(func(e fsnotify.Event){
                 Zlog.Infof("Config file chnaged")
