@@ -259,7 +259,6 @@ func home(w http.ResponseWriter, r *http.Request) {
 	cookie, cookieErr := r.Cookie("osfci_cookie")
 	cacheIndex := -1
 	base.Zlog.Infof("Inside Home")
-	base.Zlog.Infof(cookie.Value)
 	// We have to find the entry into the cache
 	// if the cookie exist and return a Value
 
