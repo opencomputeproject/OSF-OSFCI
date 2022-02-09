@@ -33,7 +33,7 @@ func InitBlacklistedIPs(){
 
         err := viper.ReadInConfig()
         if err != nil {
-                fmt.Println(err)
+                Zlog.Errorf(err)
         }
         blacklistedIPs := viper.Get("BLACKLISTED_IP").(string)
         UpdateBlacklistedIPs(blacklistedIPs)
@@ -55,7 +55,6 @@ func UpdateBlacklistedIPs(blacklistedIPs string){
                 if strings.Index(checkpoint, "-" ) != -1{
                         Zlog.Infof("Matching -", checkpoint)
                         ipRange := strings.Split(checkpoint, "-")
-                        Zlog.Infof(ipRange)
                         if len(ipRange) < 2 || len(ipRange) > 2 {
                                 continue
                         }

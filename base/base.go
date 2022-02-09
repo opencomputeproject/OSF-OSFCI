@@ -380,7 +380,7 @@ func CheckURLExists(request string) bool {
 	return true
 }
 
-func GetClientIP(r *http.Request){
+func GetClientIP(r *http.Request)(string){
         ip := r.Header.Get("X-REAL-IP")
         netip := net.ParseIP(ip)
         if netip != nil {
