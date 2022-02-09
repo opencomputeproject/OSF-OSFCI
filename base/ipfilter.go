@@ -2,7 +2,7 @@ package base
 
 import (
 	"strings"
-	"net/http"
+	"net"
 	"github.com/spf13/viper"
 	"github.com/fsnotify/fsnotify"
 )
@@ -33,7 +33,7 @@ func InitBlacklistedIPs(){
 
         err := viper.ReadInConfig()
         if err != nil {
-                Zlog.Errorf(err)
+                Zlog.Errorf("Falied to Initialise the Blacklisted domain data: %s", err.Error()))
         }
         blacklistedIPs := viper.Get("BLACKLISTED_IP").(string)
         UpdateBlacklistedIPs(blacklistedIPs)
@@ -51,7 +51,7 @@ func UpdateBlacklistedIPs(blacklistedIPs string){
         var ranges  []*iprange
         networkCheckpoints :=  strings.Split(strings.ReplaceAll(blacklistedIPs, " ", ""), ",")
         for _, checkpoint := range networkCheckpoints{
-                fmt.Println(checkpoint)
+                Zlog.Infof(checkpoint)
                 if strings.Index(checkpoint, "-" ) != -1{
                         Zlog.Infof("Matching -", checkpoint)
                         ipRange := strings.Split(checkpoint, "-")
