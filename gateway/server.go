@@ -258,6 +258,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 	// user on the node
 	cookie, cookieErr := r.Cookie("osfci_cookie")
 	cacheIndex := -1
+	base.Zlog.Infof("Inside Home")
+	base.Zlog.Infof(cookie.Value)
 	// We have to find the entry into the cache
 	// if the cookie exist and return a Value
 
@@ -292,6 +294,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	if head == "ci" {
 		head, _ = ShiftPath(tail)
 	}
+	base.Zlog.Infof("HEAD:%s", head)
 	// Some commands are superseed by a username so we shall identify
 	// if that is the case. If the command is unknown then we can assume
 	// we are getting a username as a head parameter and must get the
@@ -303,6 +306,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	// And need to re route the end user to an end of session
 	switch head {
 	case "get_server_models":
+		base.Zlog.Infof("GET SERVER MODEL")
 		var activeProducts []serverProduct
 		for i := range ciServersProducts {
 			if ciServersProducts[i].Active != 0 {
