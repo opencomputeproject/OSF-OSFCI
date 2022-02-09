@@ -227,7 +227,7 @@ func updateAccount(username string, w http.ResponseWriter, r *http.Request) bool
 }
 
 func createUser(username string, w http.ResponseWriter, r *http.Request) bool {
-	err = initBlacklistedDomains()
+	err := initBlacklistedDomains()
 	if err != nil {
 		base.Zlog.Errorf("Falied to Initialise the Blacklisted domain data: %s", err.Error())
 	}
