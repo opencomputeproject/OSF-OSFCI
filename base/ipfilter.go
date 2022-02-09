@@ -15,7 +15,7 @@ type BlackListed struct {
 
 type subnet struct {
 	ip 	string
-	ipnet	string
+	ipnet	*net.IPNet
 }
 
 type iprange struct {
