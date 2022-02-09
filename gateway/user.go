@@ -245,10 +245,6 @@ func createUser(username string, w http.ResponseWriter, r *http.Request) bool {
 		fmt.Fprint(w, "Error")
 		return false
 	}
-	if validateUserIP(r.RemoteAddr) == false {
-		fmt.Fprint(w, "Error")
-		return false
-	}
 
 	// this is a creation
 	updatedData.TokenAuth = base.GenerateAccountACKLink(20)

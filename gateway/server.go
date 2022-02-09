@@ -884,6 +884,7 @@ func main() {
 	if err != nil {
 		base.Zlog.Fatalf("Initialization error: %s", err.Error())
 	}
+	base.InitBlacklistedIPs()
 
 	mux := http.NewServeMux()
 
@@ -956,6 +957,7 @@ func main() {
 	if DNSDomain != "" {
 		// if DNS_DOMAIN is set then we run in a production environment
 		// we must get the directory where the certificates will be stored
+		base.Zlog.Infof("Server If Block",)
 		certManager := autocert.Manager{
 			Prompt:     autocert.AcceptTOS,
 			Cache:      autocert.DirCache(certStorage),
@@ -964,7 +966,11 @@ func main() {
 
 		server := &http.Server{
 			Addr:         ":443",
-			Handler:      mux,
+			Handler:      http.HandlerFunc( func( w http.ResponseWriter, req *http.Request){
+				clientip :=  base.GetClientIP(req)
+				base.Zlog.Infof("Client Address: %s", clientip)
+				mux.ServeHTTP(w, req)
+			}),
 			ReadTimeout:  600 * time.Second,
 			WriteTimeout: 600 * time.Second,
 			IdleTimeout:  120 * time.Second,
@@ -982,9 +988,15 @@ func main() {
 
 		server.ListenAndServeTLS("", "")
 	} else {
+		base.Zlog.Infof("Server If Else Block",)
 		go http.ListenAndServe(":80", http.HandlerFunc(httpsRedirect))
 		// Launch TLS server
-		if err := http.ListenAndServeTLS(":443", tlsCertPath, tlsKeyPath, mux); err != nil {
+		err := http.ListenAndServeTLS(":443", tlsCertPath, tlsKeyPath, http.HandlerFunc( func( w http.ResponseWriter, req *http.Request){
+			clientip :=  base.GetClientIP(req)
+			base.Zlog.Infof("Client Address: %s", clientip)
+			mux.ServeHTTP(w, req)
+		}))
+		if err != nil {
 			base.Zlog.Fatalf("Server TLS error: %s", err.Error())
 		}
 	}
