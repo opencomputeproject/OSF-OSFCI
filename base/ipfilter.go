@@ -1,8 +1,9 @@
 package base
 
 import (
-	"strings"
 	"net"
+	"bytes"
+	"strings"
 	"github.com/spf13/viper"
 	"github.com/fsnotify/fsnotify"
 )
@@ -19,8 +20,8 @@ type subnet struct {
 }
 
 type iprange struct {
-	start	string
-	end	string
+	start	net.IP
+	end	net.IP
 }
 
 var BlackListedIPs BlackListed
@@ -52,22 +53,25 @@ func UpdateBlacklistedIPs(blacklistedIPs string){
         var ranges  []*iprange
         networkCheckpoints :=  strings.Split(strings.ReplaceAll(blacklistedIPs, " ", ""), ",")
         for _, checkpoint := range networkCheckpoints{
-                Zlog.Infof(checkpoint)
+		Zlog.Infof("Processing:%s", checkpoint)
                 if strings.Index(checkpoint, "-" ) != -1{
                         Zlog.Infof("Matching -", checkpoint)
                         ipRange := strings.Split(checkpoint, "-")
-                        if len(ipRange) < 2 || len(ipRange) > 2 {
-                                continue
-                        }
+                        startIPnet := net.ParseIP(ipRange[0])
+			endIPnet := net.ParseIP(ipRange[1])
+			if endIPnet == nil || startIPnet == nil {
+				Zlog.Errorf("Invalid IP Range [%s-%s]", ipRange[0], ipRange[1])
+				continue
+			}
                         ranges = append(ranges, &iprange{
-                                start:          ipRange[0],
-                                end:            ipRange[1],
+                                start:          startIPnet,
+                                end:            endIPnet,
                         })
                 }else if strings.Index(checkpoint, "/" ) != -1{
                         Zlog.Infof("Matching /", checkpoint)
                         _, network, err :=  net.ParseCIDR(checkpoint)
                         if err != nil{
-                                Zlog.Infof("Invalid subnet")
+                                Zlog.Errorf("Invalid Subnet [%s]", checkpoint)
                                 continue
                         }
                         subnets = append(subnets, &subnet{
@@ -77,7 +81,11 @@ func UpdateBlacklistedIPs(blacklistedIPs string){
                 } else if len(checkpoint) > 0 {
                         Zlog.Infof(checkpoint)
                         ip := net.ParseIP(checkpoint)
-                        ips[ip.String()] = true
+			if ip != nil{
+				ips[ip.String()] = true
+			}else{
+				Zlog.Errorf("Invalid IP [%s]", checkpoint)
+			}
                 }
         }
         BlackListedIPs.ips = ips
@@ -94,7 +102,13 @@ func ValidateClientIP(clientIP string) (bool){
 	}
 	for _, subnet := range BlackListedIPs.subnets {
 		if subnet.ipnet.Contains(clientIPnet){
-			Zlog.Infof("IP address [%s] belongs to Subnet [%s]", clientIP, subnet.ip) 
+			Zlog.Infof("IP address [%s] belongs to blacklisted Subnet [%s]", clientIP, subnet.ip) 
+			return false
+		}
+	}
+	for _, iprange := range BlackListedIPs.ranges{
+		if bytes.Compare(clientIPnet, iprange.start) >= 0 && bytes.Compare(clientIPnet, iprange.end) <= 0{
+			Zlog.Infof("IP address [%s] belongs to blacklisted IP Range [%s-%s]", clientIP, iprange.start.String(), iprange.end.String())
 			return false
 		}
 	}
