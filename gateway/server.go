@@ -313,6 +313,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		returnData, err := json.Marshal(activeProducts)
+		base.Zlog.Infof("JSON:%s", string(returnData))
 		if err != nil {
 			base.Zlog.Fatalf("JSON encoding error: %s", err.Error())
 		}
