@@ -27,25 +27,23 @@ var BlackListedIPs BlackListed
 
 func InitBlacklistedIPs(){
         BlackListedIPs.ips = make(map[string]bool)
-        viper.SetConfigName("blacklisted")
-        viper.SetConfigType("yaml")
-        viper.AddConfigPath("/usr/local/production/config/")
+	config := viper.New()
+        config.SetConfigName("blacklisted")
+        config.SetConfigType("yaml")
+        config.AddConfigPath("/usr/local/production/config/")
 
-        err := viper.ReadInConfig()
+        err := config.ReadInConfig()
         if err != nil {
                 Zlog.Errorf("Falied to Initialise the Blacklisted domain data: %s", err.Error())
         }
-        blacklistedIPs, ok := viper.Get("BLACKLISTED_IP").(string)
-	if ok == false {
-		blacklistedIPs = ""
-	}
+        blacklistedIPs = config.GetString("BLACKLISTED_IP")
         UpdateBlacklistedIPs(blacklistedIPs)
-        viper.OnConfigChange(func(e fsnotify.Event){
+        config.OnConfigChange(func(e fsnotify.Event){
                 Zlog.Infof("Config file chnaged")
-                blacklistedIPs := viper.Get("BLACKLISTED_IP").(string)
+                blacklistedIPs = config.GetString("BLACKLISTED_IP")
                 UpdateBlacklistedIPs(blacklistedIPs)
         })
-        viper.WatchConfig()
+        config.WatchConfig()
 }
 
 func UpdateBlacklistedIPs(blacklistedIPs string){
@@ -76,7 +74,7 @@ func UpdateBlacklistedIPs(blacklistedIPs string){
                                 ip:     checkpoint,
                                 ipnet:  network,
                         })
-                } else {
+                } else if len(checkpoint) > 0 {
                         Zlog.Infof(checkpoint)
                         ip := net.ParseIP(checkpoint)
                         ips[ip.String()] = true
@@ -86,3 +84,9 @@ func UpdateBlacklistedIPs(blacklistedIPs string){
         BlackListedIPs.subnets = subnets
         BlackListedIPs.ranges = ranges
 }
+
+func ValidateClientIP(clientIP string){
+	jsonidata, _ := json.Marshal(BlackListedIPs)
+	base.Zlog.Infof("BLACKLISTED:%s", string(jsonidata))
+}
+

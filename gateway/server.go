@@ -313,7 +313,6 @@ func home(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		returnData, err := json.Marshal(activeProducts)
-		base.Zlog.Infof("JSON:%s", string(returnData))
 		if err != nil {
 			base.Zlog.Fatalf("JSON encoding error: %s", err.Error())
 		}
@@ -888,7 +887,6 @@ func main() {
 	if err != nil {
 		base.Zlog.Fatalf("Initialization error: %s", err.Error())
 	}
-	base.InitBlacklistedIPs()
 
 	mux := http.NewServeMux()
 
@@ -958,6 +956,8 @@ func main() {
 		}
 	}
 
+	base.InitBlacklistedIPs()
+
 	if DNSDomain != "" {
 		// if DNS_DOMAIN is set then we run in a production environment
 		// we must get the directory where the certificates will be stored
@@ -997,6 +997,7 @@ func main() {
 		// Launch TLS server
 		err := http.ListenAndServeTLS(":443", tlsCertPath, tlsKeyPath, http.HandlerFunc( func( w http.ResponseWriter, req *http.Request){
 			clientip :=  base.GetClientIP(req)
+			base.ValidateClientIP(clientip)
 			base.Zlog.Infof("Client Address: %s", clientip)
 			mux.ServeHTTP(w, req)
 		}))
