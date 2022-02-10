@@ -3,7 +3,7 @@ package base
 import (
 	"strings"
 	"net"
-	"json/encoding"
+	"encoding/json"
 	"github.com/spf13/viper"
 	"github.com/fsnotify/fsnotify"
 )
