@@ -3,6 +3,7 @@ package base
 import (
 	"strings"
 	"net"
+	"json/encoding"
 	"github.com/spf13/viper"
 	"github.com/fsnotify/fsnotify"
 )
@@ -36,7 +37,7 @@ func InitBlacklistedIPs(){
         if err != nil {
                 Zlog.Errorf("Falied to Initialise the Blacklisted domain data: %s", err.Error())
         }
-        blacklistedIPs = config.GetString("BLACKLISTED_IP")
+	blacklistedIPs := config.GetString("BLACKLISTED_IP")
         UpdateBlacklistedIPs(blacklistedIPs)
         config.OnConfigChange(func(e fsnotify.Event){
                 Zlog.Infof("Config file chnaged")
@@ -87,6 +88,6 @@ func UpdateBlacklistedIPs(blacklistedIPs string){
 
 func ValidateClientIP(clientIP string){
 	jsonidata, _ := json.Marshal(BlackListedIPs)
-	base.Zlog.Infof("BLACKLISTED:%s", string(jsonidata))
+	Zlog.Infof("BLACKLISTED:%s", string(jsonidata))
 }
 
