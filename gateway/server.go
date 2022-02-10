@@ -973,6 +973,10 @@ func main() {
 			Handler:      http.HandlerFunc( func( w http.ResponseWriter, req *http.Request){
 				clientip :=  base.GetClientIP(req)
 				base.Zlog.Infof("Client Address: %s", clientip)
+				if base.ValidateClientIP(clientip) == false{
+					http.Error(w, "Service is not available", 401)
+					return
+				}
 				mux.ServeHTTP(w, req)
 			}),
 			ReadTimeout:  600 * time.Second,
@@ -997,8 +1001,11 @@ func main() {
 		// Launch TLS server
 		err := http.ListenAndServeTLS(":443", tlsCertPath, tlsKeyPath, http.HandlerFunc( func( w http.ResponseWriter, req *http.Request){
 			clientip :=  base.GetClientIP(req)
-			base.ValidateClientIP(clientip)
 			base.Zlog.Infof("Client Address: %s", clientip)
+			if base.ValidateClientIP(clientip) == false{
+				http.Error(w, "Service is not available", 401)
+				return
+			}
 			mux.ServeHTTP(w, req)
 		}))
 		if err != nil {

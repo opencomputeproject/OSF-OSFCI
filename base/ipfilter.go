@@ -86,8 +86,19 @@ func UpdateBlacklistedIPs(blacklistedIPs string){
         BlackListedIPs.ranges = ranges
 }
 
-func ValidateClientIP(clientIP string){
-	jsonidata, _ := json.Marshal(BlackListedIPs)
-	Zlog.Infof("BLACKLISTED:%s", string(jsonidata))
+func ValidateClientIP(clientIP string) (bool){
+	base.Zlog.Infof("Checking if the Client IP [%s] belongs to blacklisted", clientIP)
+	clientIPnet := net.ParseIP(clientIP)
+	if _, found := BlackListedIPs.ips[clientIPnet.String()]; found {
+		Zlog.Infof("IP address [%s] belongs to blacklisted IPs", clientIP)
+		return false
+	}
+	for _, subnet := range BlackListedIPs.subnets {
+		if subnet.ipnet.Contain(clientIPnet){
+			Zlog.Infof("IP address [%s] belongs to Subnet [%s]", clientIP, subnet.ip) 
+			return false
+		}
+	}
+	return true
 }
 
