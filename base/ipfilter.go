@@ -4,6 +4,7 @@ import (
 	"net"
 	"bytes"
 	"strings"
+	"net/http"
 	"github.com/spf13/viper"
 	"github.com/fsnotify/fsnotify"
 )
@@ -96,7 +97,8 @@ func UpdateProhibitedIPs(blockedIPs string){
         ProhibitedIPs.ranges = ranges
 }
 
-func ValidateClientIP(clientIP string) (bool){
+func ValidateClientIP(req *http.Request) (bool){
+	clientIP := GetClientIP(req)
 	Zlog.Infof("Checking if the Client IP [%s] belongs to blocked IP list", clientIP)
 	clientIPnet := net.ParseIP(clientIP)
 	if _, found := ProhibitedIPs.ips[clientIPnet.String()]; found {
@@ -120,7 +122,7 @@ func ValidateClientIP(clientIP string) (bool){
 
 func validateDomain(userEmail string) bool{
 	if len(ProhibitedDomains) == 0{
-		base.Zlog.Infof("Blacklisted domains are not defined")
+		Zlog.Infof("Blacklisted domains are not defined")
 		return true
 	}
 	blockedDomains := strings.ReplaceAll(ProhibitedDomains, " ", "")
@@ -135,11 +137,38 @@ func validateDomain(userEmail string) bool{
                 emailRegex := regexp.MustCompile(domain)
                 match := emailRegex.FindString(userDomain)
                 if match != ""{
-                        base.Zlog.Errorf("Banned domain found:%s", bdomain)
-			base.Zlog.Errorf("User email Domain [%s] belongs to the Banned domains [%s]", userDomain, bdomain)
+                        Zlog.Errorf("Banned domain found:%s", bdomain)
+			Zlog.Errorf("User email Domain [%s] belongs to the Banned domains [%s]", userDomain, bdomain)
                         return false
                 }
         }
-        base.Zlog.Infof("User email Domain [%s] is safe to procced", userDomain)
+        Zlog.Infof("User email Domain [%s] is safe to procced", userDomain)
         return true
+}
+
+func GetClientIP(r *http.Request)(string){
+        ip := r.Header.Get("X-REAL-IP")
+        netip := net.ParseIP(ip)
+        if netip != nil {
+                return ip
+        }
+
+        xfips := r.Header.Get("X-FORWARDED-FOR")
+        ips := strings.Split(xfips, ",")
+        for _, ip := range ips {
+                netip = net.ParseIP(ip)
+                if netip != nil {
+                        return ip
+                }
+        }
+        // Get the IP from remote Addr
+        ip, _,  err := net.SplitHostPort(r.RemoteAddr)
+        if err != nil{
+                return ""
+        }
+        netip = net.ParseIP(ip)
+        if netip != nil{
+                return ip
+        }
+        return ""
 }

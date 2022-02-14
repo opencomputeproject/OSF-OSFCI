@@ -379,30 +379,3 @@ func CheckURLExists(request string) bool {
 	}
 	return true
 }
-
-func GetClientIP(r *http.Request)(string){
-        ip := r.Header.Get("X-REAL-IP")
-        netip := net.ParseIP(ip)
-        if netip != nil {
-                return ip
-        }
-
-        xfips := r.Header.Get("X-FORWARDED-FOR")
-        ips := strings.Split(xfips, ",")
-        for _, ip := range ips {
-                netip = net.ParseIP(ip)
-                if netip != nil {
-                        return ip
-                }
-        }
-        // Get the IP from remote Addr
-        ip, _,  err := net.SplitHostPort(r.RemoteAddr)
-        if err != nil{
-                return ""
-        }
-        netip = net.ParseIP(ip)
-        if netip != nil{
-                return ip
-        }
-        return ""
-}

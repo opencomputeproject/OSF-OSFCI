@@ -161,6 +161,9 @@ func ShiftPath(p string) (head, tail string) {
 }
 
 func checkAccess(w http.ResponseWriter, r *http.Request, login string, command string) bool {
+	if base.ValidateClientIP(r) == false{
+		return false
+	}
 	switch command {
 	case "get_token":
 		return r.Method == http.MethodGet || r.Method == http.MethodPost
@@ -309,6 +312,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 	switch head {
 	case "get_server_models":
 		base.Zlog.Infof("GET SERVER MODEL")
+		if base.ValidateClientIP(r) == false{
+			http.Error(w, "Service is not available", 401)
+			return false
+		}
 		var activeProducts []serverProduct
 		for i := range ciServersProducts {
 			if ciServersProducts[i].Active != 0 {
@@ -959,7 +966,7 @@ func main() {
 		}
 	}
 
-	base.InitBlacklistedIPs()
+	base.InitProhibitedIPs()
 
 	if DNSDomain != "" {
 		// if DNS_DOMAIN is set then we run in a production environment
@@ -973,15 +980,7 @@ func main() {
 
 		server := &http.Server{
 			Addr:         ":443",
-			Handler:      http.HandlerFunc( func( w http.ResponseWriter, req *http.Request){
-				clientip :=  base.GetClientIP(req)
-				base.Zlog.Infof("Client Address: %s", clientip)
-				if base.ValidateClientIP(clientip) == false{
-					http.Error(w, "Service is not available", 401)
-					return
-				}
-				mux.ServeHTTP(w, req)
-			}),
+			Handler:      mux,
 			ReadTimeout:  600 * time.Second,
 			WriteTimeout: 600 * time.Second,
 			IdleTimeout:  120 * time.Second,
@@ -1002,15 +1001,7 @@ func main() {
 		base.Zlog.Infof("Server If Else Block",)
 		go http.ListenAndServe(":80", http.HandlerFunc(httpsRedirect))
 		// Launch TLS server
-		err := http.ListenAndServeTLS(":443", tlsCertPath, tlsKeyPath, http.HandlerFunc( func( w http.ResponseWriter, req *http.Request){
-			clientip :=  base.GetClientIP(req)
-			base.Zlog.Infof("Client Address: %s", clientip)
-			if base.ValidateClientIP(clientip) == false{
-				http.Error(w, "Service is not available", 401)
-				return
-			}
-			mux.ServeHTTP(w, req)
-		}))
+		err := http.ListenAndServeTLS(":443", tlsCertPath, tlsKeyPath, mux)
 		if err != nil {
 			base.Zlog.Fatalf("Server TLS error: %s", err.Error())
 		}

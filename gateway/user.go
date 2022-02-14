@@ -57,12 +57,6 @@ type userPublic struct {
 	EmailLABEL       string
 }
 
-// Blacklisted Domains
-var blacklistedDomains string
-
-// Blacklisted IPs
-var blacklistedIPs string
-
 //Initialize User config
 func initUserconfig() error {
 	viper.SetConfigName("gatewayconf")
@@ -80,22 +74,6 @@ func initUserconfig() error {
 	//StorageTCPPORT set from config file
 	StorageTCPPORT = viper.GetString("STORAGE_TCPPORT")
 	CredentialURI = viper.GetString("CREDENTIALS_TCPPORT")
-	return nil
-}
-
-//Initialize Blacklisted Domain info
-func initBlacklistedDomains() error {
-	viper.SetConfigName("blacklisted")
-	viper.SetConfigType("yaml")
-	viper.AddConfigPath("/usr/local/production/config/")
-	viper.AutomaticEnv()
-
-	err := viper.ReadInConfig()
-	if err != nil {
-		return err
-	}
-	blacklistedDomains = viper.GetString("BLACKLISTED_DOMAINS")
-	blacklistedIPs = viper.GetString("BLACKLISTED_IP")
 	return nil
 }
 
@@ -227,10 +205,6 @@ func updateAccount(username string, w http.ResponseWriter, r *http.Request) bool
 }
 
 func createUser(username string, w http.ResponseWriter, r *http.Request) bool {
-	err := initBlacklistedDomains()
-	if err != nil {
-		base.Zlog.Errorf("Falied to Initialise the Blacklisted domain data: %s", err.Error())
-	}
 	var updatedData *base.User
 	exist := userExist(username)
 	if exist {
@@ -636,6 +610,8 @@ func main() {
 		base.Zlog.Fatalf("Initialization error: %s", err.Error())
 	}
 
+	// Initializing the list of  blocked Domain and IP
+	base.InitProhibitedIPs()
 
 	mux := http.NewServeMux()
 	print("Attaching to " + CredentialURI + "\n")
