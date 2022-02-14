@@ -8,7 +8,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 )
 
-type BlackListed struct {
+type Prohibited struct {
 	ips	map[string]bool
 	subnets	[]*subnet
 	ranges	[]*iprange
@@ -24,38 +24,38 @@ type iprange struct {
 	end	net.IP
 }
 
-var BlackListedIPs BlackListed
+var ProhibitedIPs Prohibited 
 
-func InitBlacklistedIPs(){
-        BlackListedIPs.ips = make(map[string]bool)
+func InitProhibitedIPs(){
+        ProhibitedIPs.ips = make(map[string]bool)
 	config := viper.New()
-        config.SetConfigName("blacklisted")
+        config.SetConfigName("prohibited")
         config.SetConfigType("yaml")
         config.AddConfigPath("/usr/local/production/config/")
 
         err := config.ReadInConfig()
         if err != nil {
-                Zlog.Errorf("Falied to Initialise the Blacklisted domain data: %s", err.Error())
+                Zlog.Errorf("Falied to Initialise the Prohibited domain data: %s", err.Error())
         }
-	blacklistedIPs := config.GetString("BLACKLISTED_IP")
-        UpdateBlacklistedIPs(blacklistedIPs)
+	blockedIPs := config.GetString("BANNED_IP")
+        UpdateProhibitedIPs(blockedIPs)
         config.OnConfigChange(func(e fsnotify.Event){
                 Zlog.Infof("Config file chnaged")
-                blacklistedIPs = config.GetString("BLACKLISTED_IP")
-                UpdateBlacklistedIPs(blacklistedIPs)
+                blockedIPs = config.GetString("BANNED_IP")
+                UpdateProhibitedIPs(blockedIPs)
         })
         config.WatchConfig()
 }
 
-func UpdateBlacklistedIPs(blacklistedIPs string){
+func UpdateProhibitedIPs(blockedIPs string){
         ips := make(map[string]bool)
         var subnets []*subnet
         var ranges  []*iprange
-        networkCheckpoints :=  strings.Split(strings.ReplaceAll(blacklistedIPs, " ", ""), ",")
+        networkCheckpoints :=  strings.Split(strings.ReplaceAll(blockedIPs, " ", ""), ",")
         for _, checkpoint := range networkCheckpoints{
 		Zlog.Infof("Processing:%s", checkpoint)
                 if strings.Index(checkpoint, "-" ) != -1{
-                        Zlog.Infof("Matching -", checkpoint)
+			Zlog.Infof("Matching: %s", checkpoint)
                         ipRange := strings.Split(checkpoint, "-")
                         startIPnet := net.ParseIP(ipRange[0])
 			endIPnet := net.ParseIP(ipRange[1])
@@ -88,27 +88,27 @@ func UpdateBlacklistedIPs(blacklistedIPs string){
 			}
                 }
         }
-        BlackListedIPs.ips = ips
-        BlackListedIPs.subnets = subnets
-        BlackListedIPs.ranges = ranges
+        ProhibitedIPs.ips = ips
+        ProhibitedIPs.subnets = subnets
+        ProhibitedIPs.ranges = ranges
 }
 
 func ValidateClientIP(clientIP string) (bool){
-	Zlog.Infof("Checking if the Client IP [%s] belongs to blacklisted", clientIP)
+	Zlog.Infof("Checking if the Client IP [%s] belongs to blocked IP list", clientIP)
 	clientIPnet := net.ParseIP(clientIP)
-	if _, found := BlackListedIPs.ips[clientIPnet.String()]; found {
-		Zlog.Infof("IP address [%s] belongs to blacklisted IPs", clientIP)
+	if _, found := ProhibitedIPs.ips[clientIPnet.String()]; found {
+		Zlog.Errorf("IP address [%s] belongs to blocked IPs", clientIP)
 		return false
 	}
-	for _, subnet := range BlackListedIPs.subnets {
+	for _, subnet := range ProhibitedIPs.subnets {
 		if subnet.ipnet.Contains(clientIPnet){
-			Zlog.Infof("IP address [%s] belongs to blacklisted Subnet [%s]", clientIP, subnet.ip) 
+			Zlog.Errorf("IP address [%s] belongs to blocked Subnet [%s]", clientIP, subnet.ip) 
 			return false
 		}
 	}
-	for _, iprange := range BlackListedIPs.ranges{
+	for _, iprange := range ProhibitedIPs.ranges{
 		if bytes.Compare(clientIPnet, iprange.start) >= 0 && bytes.Compare(clientIPnet, iprange.end) <= 0{
-			Zlog.Infof("IP address [%s] belongs to blacklisted IP Range [%s-%s]", clientIP, iprange.start.String(), iprange.end.String())
+			Zlog.Errorf("IP address [%s] belongs to blocked IP Range [%s-%s]", clientIP, iprange.start.String(), iprange.end.String())
 			return false
 		}
 	}
