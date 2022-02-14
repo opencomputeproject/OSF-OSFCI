@@ -25,6 +25,7 @@ type iprange struct {
 }
 
 var ProhibitedIPs Prohibited 
+var ProhibitedDomains string
 
 func InitProhibitedIPs(){
         ProhibitedIPs.ips = make(map[string]bool)
@@ -38,10 +39,12 @@ func InitProhibitedIPs(){
                 Zlog.Errorf("Falied to Initialise the Prohibited domain data: %s", err.Error())
         }
 	blockedIPs := config.GetString("BANNED_IP")
+	ProhibitedDomains = config.GetString("BANNED_DOMAINS")
         UpdateProhibitedIPs(blockedIPs)
         config.OnConfigChange(func(e fsnotify.Event){
                 Zlog.Infof("Config file chnaged")
                 blockedIPs = config.GetString("BANNED_IP")
+		ProhibitedDomains = config.GetString("BANNED_DOMAINS")
                 UpdateProhibitedIPs(blockedIPs)
         })
         config.WatchConfig()
@@ -115,3 +118,28 @@ func ValidateClientIP(clientIP string) (bool){
 	return true
 }
 
+func validateDomain(userEmail string) bool{
+	if len(ProhibitedDomains) == 0{
+		base.Zlog.Infof("Blacklisted domains are not defined")
+		return true
+	}
+	blockedDomains := strings.ReplaceAll(ProhibitedDomains, " ", "")
+        blockedDomains = strings.Split(blockedDomains, ",")
+        at := strings.LastIndex(userEmail, "@")
+        userDomain := userEmail[at+1:]
+        base.Zlog.Infof("Verifying if email Domain[%s] belongs to the Banned domains.", userDomain)
+        for _, bdomain:= range blockedDomains{
+		domain := strings.ReplaceAll(bdomain, ".", `\.`)
+                domain = strings.ReplaceAll(domain, "*", ".*")
+		base.Zlog.Debugf("Domains:[%s]:[%s]",bdomain, domain)
+                emailRegex := regexp.MustCompile(domain)
+                match := emailRegex.FindString(userDomain)
+                if match != ""{
+                        base.Zlog.Errorf("Banned domain found:%s", bdomain)
+			base.Zlog.Errorf("User email Domain [%s] belongs to the Banned domains [%s]", userDomain, bdomain)
+                        return false
+                }
+        }
+        base.Zlog.Infof("User email Domain [%s] is safe to procced", userDomain)
+        return true
+}

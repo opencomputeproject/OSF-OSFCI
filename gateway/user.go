@@ -241,7 +241,7 @@ func createUser(username string, w http.ResponseWriter, r *http.Request) bool {
 	updatedData = new(base.User)
 	updatedData.Nickname = username
 	updatedData.Email = r.FormValue("email")
-	if validateDomain(updatedData.Email) == false {
+	if base.ValidateDomain(updatedData.Email) == false {
 		fmt.Fprint(w, "Error")
 		return false
 	}
@@ -601,77 +601,6 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func validateDomain(userEmail string) bool{
-	if len(blacklistedDomains) == 0{
-		base.Zlog.Infof("Blacklisted domains are not defined")
-		return true
-	}
-        blacklistedDomains = strings.ReplaceAll(blacklistedDomains, " ", "")
-        blacklisted := strings.Split(blacklistedDomains, ",")
-        at := strings.LastIndex(userEmail, "@")
-        userDomain := userEmail[at+1:]
-        base.Zlog.Infof("Verifying if email Domain[%s] belongs to the blacklisted domains.", userDomain)
-        for _, bdomain:= range blacklisted{
-		domain := strings.ReplaceAll(bdomain, ".", `\.`)
-                domain = strings.ReplaceAll(domain, "*", ".*")
-		base.Zlog.Debugf("Domains:[%s]:[%s]",bdomain, domain)
-                emailRegex := regexp.MustCompile(domain)
-                match := emailRegex.FindString(userDomain)
-                if match != ""{
-                        base.Zlog.Infof("Blacklisted domain found:%s", bdomain)
-        		base.Zlog.Infof("User email Domain[%s] belongs to the blacklisted domains [%s]", userDomain, bdomain)
-                        return false
-                }
-        }
-        base.Zlog.Infof("User email Domain [%s] is safe to procced", userDomain)
-        return true
-}
-
-func validateUserIP(userIP string) bool{
-	base.Zlog.Infof("Blacklisted IPs:%s", blacklistedIPs)
-	networkCheckpoints :=  strings.Split(strings.ReplaceAll(blacklistedIPs, " ", ""), ",")
-	for _, checkpoint := range networkCheckpoints{
-		fmt.Println(checkpoint)
-		if strings.Index(checkpoint, "-" ) != -1{ 
-			base.Zlog.Debugf("Inside Matching - [%s]", checkpoint)
-			ipRange := strings.Split(checkpoint, "-")
-			fmt.Println(ipRange)
-			if len(ipRange) < 2 || len(ipRange) > 2 {
-				continue
-			}
-			userIPByte := net.ParseIP(userIP)
-			startIP := net.ParseIP(ipRange[0])
-			endIP   := net.ParseIP(ipRange[1])
-			if bytes.Compare(userIPByte, startIP) >= 0  && bytes.Compare(userIPByte, endIP) <= 0 {
-				base.Zlog.Infof("IP address [%s] belongs to IP Range [%s]", userIP, checkpoint)
-				return true
-			}
-
-		}else if strings.Index(checkpoint, "/" ) != -1{ 
-			base.Zlog.Debugf("Inside Matching / [%s]", checkpoint)
-			_, network, err :=  net.ParseCIDR(checkpoint)
-			if err != nil{
-				base.Zlog.Debugf("Invalid subnet [%s]", checkpoint)
-				continue
-			}
-			ip := net.ParseIP(userIP)
-			if network.Contains(ip){
-				base.Zlog.Infof("IP address [%s] belongs to Subnet [%s]", userIP, checkpoint)
-				return false
-			}
-		} else {
-			fmt.Println(checkpoint)
-			userIPByte := net.ParseIP(userIP)
-			checkpointIPByte := net.ParseIP(checkpoint)
-			if bytes.Equal(checkpointIPByte, userIPByte) {
-				base.Zlog.Infof("IP address [%s] matches blacklisted IP [%s]", userIP, checkpoint)
-				return true
-			}
-		}
-	}
-	base.Zlog.Infof("IP address [%s] is safe to procced", userIP)
-	return true
-}
 
 //Default Intialize
 func init() {
