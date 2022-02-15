@@ -158,7 +158,7 @@ func ShiftPath(p string) (head, tail string) {
 }
 
 func checkAccess(w http.ResponseWriter, r *http.Request, login string, command string) bool {
-	if base.ValidateClientIP(r) == false{
+	if base.ValidateClientIP(r) == false {
 		return false
 	}
 	switch command {
@@ -261,7 +261,6 @@ func home(w http.ResponseWriter, r *http.Request) {
 	// user on the node
 	cookie, cookieErr := r.Cookie("osfci_cookie")
 	cacheIndex := -1
-	base.Zlog.Infof("Inside Home")
 	// We have to find the entry into the cache
 	// if the cookie exist and return a Value
 
@@ -296,7 +295,6 @@ func home(w http.ResponseWriter, r *http.Request) {
 	if head == "ci" {
 		head, _ = ShiftPath(tail)
 	}
-	base.Zlog.Infof("HEAD:%s", head)
 	// Some commands are superseed by a username so we shall identify
 	// if that is the case. If the command is unknown then we can assume
 	// we are getting a username as a head parameter and must get the
@@ -309,7 +307,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	switch head {
 	case "get_server_models":
 		base.Zlog.Infof("GET SERVER MODEL")
-		if base.ValidateClientIP(r) == false{
+		if base.ValidateClientIP(r) == false {
 			http.Error(w, "Service is not available", 401)
 			return
 		}
@@ -968,7 +966,6 @@ func main() {
 	if DNSDomain != "" {
 		// if DNS_DOMAIN is set then we run in a production environment
 		// we must get the directory where the certificates will be stored
-		base.Zlog.Infof("Server If Block",)
 		certManager := autocert.Manager{
 			Prompt:     autocert.AcceptTOS,
 			Cache:      autocert.DirCache(certStorage),
@@ -995,7 +992,6 @@ func main() {
 
 		server.ListenAndServeTLS("", "")
 	} else {
-		base.Zlog.Infof("Server If Else Block",)
 		go http.ListenAndServe(":80", http.HandlerFunc(httpsRedirect))
 		// Launch TLS server
 		err := http.ListenAndServeTLS(":443", tlsCertPath, tlsKeyPath, mux)

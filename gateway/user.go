@@ -351,9 +351,9 @@ func deleteUser(username string, w http.ResponseWriter, r *http.Request) bool {
 	updatedData.Active = 0
 	//c, _ := json.Marshal(updatedData)
 	//base.HTTPPutRequest("http://"+StorageURI+StorageTCPPORT+"/user/"+updatedData.Nickname, c, "application/json")
-	base.HTTPDeleteRequest("http://"+StorageURI+StorageTCPPORT+"/user/"+updatedData.Nickname)
+	base.HTTPDeleteRequest("http://" + StorageURI + StorageTCPPORT + "/user/" + updatedData.Nickname)
 	if newData.DeleteData == "true" {
-		base.HTTPDeleteRequest("http://"+StorageURI+StorageTCPPORT+"/user/"+updatedData.Nickname+"/delete_user_data")
+		base.HTTPDeleteRequest("http://" + StorageURI + StorageTCPPORT + "/user/" + updatedData.Nickname + "/delete_user_data")
 	}
 	// And return positively
 	return true
@@ -571,7 +571,6 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "401 Unknown request\n", 401)
 	}
 }
-
 
 //Default Intialize
 func init() {
