@@ -13,9 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"regexp"
-	"net"
-	"bytes"
 )
 
 //StorageURI is read from config

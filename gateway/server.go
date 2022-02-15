@@ -89,9 +89,6 @@ type serversList struct {
 
 var ciServers serversList
 
-// API Call to filtered based on IPs
-FilterAPI := [...]string{"get_token", "get_server_models"}
-
 //Initialize the config variables
 func initServerconfig() error {
 	viper.SetConfigName("gatewayconf")
