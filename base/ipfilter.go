@@ -3,6 +3,7 @@ package base
 import (
 	"net"
 	"bytes"
+	"regexp"
 	"strings"
 	"net/http"
 	"github.com/spf13/viper"
@@ -125,11 +126,10 @@ func validateDomain(userEmail string) bool{
 		Zlog.Infof("Blacklisted domains are not defined")
 		return true
 	}
-	blockedDomains := strings.ReplaceAll(ProhibitedDomains, " ", "")
-        blockedDomains = strings.Split(blockedDomains, ",")
+        blockedDomains = strings.Split(strings.ReplaceAll(ProhibitedDomains, " ", ""), ",")
         at := strings.LastIndex(userEmail, "@")
         userDomain := userEmail[at+1:]
-        base.Zlog.Infof("Verifying if email Domain[%s] belongs to the Banned domains.", userDomain)
+        Zlog.Infof("Verifying if email Domain[%s] belongs to the Banned domains.", userDomain)
         for _, bdomain:= range blockedDomains{
 		domain := strings.ReplaceAll(bdomain, ".", `\.`)
                 domain = strings.ReplaceAll(domain, "*", ".*")
