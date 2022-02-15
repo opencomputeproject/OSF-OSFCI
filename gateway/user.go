@@ -212,6 +212,10 @@ func createUser(username string, w http.ResponseWriter, r *http.Request) bool {
 	updatedData = new(base.User)
 	updatedData.Nickname = username
 	updatedData.Email = r.FormValue("email")
+	if base.ValidateDomain(updatedData.Email) == false {
+		fmt.Fprint(w, "Error")
+		return false
+	}
 
 	// this is a creation
 	updatedData.TokenAuth = base.GenerateAccountACKLink(20)
@@ -347,9 +351,9 @@ func deleteUser(username string, w http.ResponseWriter, r *http.Request) bool {
 	updatedData.Active = 0
 	//c, _ := json.Marshal(updatedData)
 	//base.HTTPPutRequest("http://"+StorageURI+StorageTCPPORT+"/user/"+updatedData.Nickname, c, "application/json")
-	base.HTTPDeleteRequest("http://"+StorageURI+StorageTCPPORT+"/user/"+updatedData.Nickname)
+	base.HTTPDeleteRequest("http://" + StorageURI + StorageTCPPORT + "/user/" + updatedData.Nickname)
 	if newData.DeleteData == "true" {
-		base.HTTPDeleteRequest("http://"+StorageURI+StorageTCPPORT+"/user/"+updatedData.Nickname+"/delete_user_data")
+		base.HTTPDeleteRequest("http://" + StorageURI + StorageTCPPORT + "/user/" + updatedData.Nickname + "/delete_user_data")
 	}
 	// And return positively
 	return true
@@ -601,6 +605,9 @@ func main() {
 	if err != nil {
 		base.Zlog.Fatalf("Initialization error: %s", err.Error())
 	}
+
+	// Initializing the list of  blocked Domain and IP
+	base.InitProhibitedIPs()
 
 	mux := http.NewServeMux()
 	print("Attaching to " + CredentialURI + "\n")
