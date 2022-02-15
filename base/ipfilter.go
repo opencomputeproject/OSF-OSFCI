@@ -126,7 +126,7 @@ func validateDomain(userEmail string) bool{
 		Zlog.Infof("Blacklisted domains are not defined")
 		return true
 	}
-        blockedDomains = strings.Split(strings.ReplaceAll(ProhibitedDomains, " ", ""), ",")
+	blockedDomains := strings.Split(strings.ReplaceAll(ProhibitedDomains, " ", ""), ",")
         at := strings.LastIndex(userEmail, "@")
         userDomain := userEmail[at+1:]
         Zlog.Infof("Verifying if email Domain[%s] belongs to the Banned domains.", userDomain)
