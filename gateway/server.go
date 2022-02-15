@@ -311,7 +311,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		base.Zlog.Infof("GET SERVER MODEL")
 		if base.ValidateClientIP(r) == false{
 			http.Error(w, "Service is not available", 401)
-			return false
+			return
 		}
 		var activeProducts []serverProduct
 		for i := range ciServersProducts {

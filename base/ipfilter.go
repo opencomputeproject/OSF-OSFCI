@@ -121,7 +121,7 @@ func ValidateClientIP(req *http.Request) (bool){
 	return true
 }
 
-func validateDomain(userEmail string) bool{
+func ValidateDomain(userEmail string) bool{
 	if len(ProhibitedDomains) == 0{
 		Zlog.Infof("Blacklisted domains are not defined")
 		return true
