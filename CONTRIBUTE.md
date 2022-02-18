@@ -8,7 +8,7 @@ Please submit to https://github.com/opencomputeproject/OSF-OSFCI/issues
 
 ## Discussions and get in touch with us!
 
-Please get in touch via https://github.com/HewlettPackard/osfci/discussions
+Please get in touch via https://github.com/opencomputeproject/OSF-OSFCI/discussions
 
 ## Coding Style
 
@@ -31,7 +31,7 @@ We accept GitHub pull requests.
 
 Fork the project on GitHub, work in your fork and in branches, push
 these to your GitHub fork, and when ready, do a GitHub pull requests
-against https://github.com/HewlettPackard/osfci.
+against https://github.com/opencomputeproject/OSF-OSFCI.
 
 Every commit in your pull request needs to be able to build and pass our CI tests.
 
