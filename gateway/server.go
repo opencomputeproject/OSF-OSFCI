@@ -158,6 +158,9 @@ func ShiftPath(p string) (head, tail string) {
 }
 
 func checkAccess(w http.ResponseWriter, r *http.Request, login string, command string) bool {
+	if base.ValidateClientIP(r) == false {
+		return false
+	}
 	switch command {
 	case "get_token":
 		return r.Method == http.MethodGet || r.Method == http.MethodPost
@@ -303,6 +306,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 	// And need to re route the end user to an end of session
 	switch head {
 	case "get_server_models":
+		if base.ValidateClientIP(r) == false {
+			http.Error(w, "Service is not available", 401)
+			return
+		}
 		var activeProducts []serverProduct
 		for i := range ciServersProducts {
 			if ciServersProducts[i].Active != 0 {
@@ -953,6 +960,11 @@ func main() {
 		}
 	}
 
+	err = base.InitProhibitedIPs()
+	if err != nil {
+		base.Zlog.Warnf("IP filter initialization error: %s", err.Error())
+	}
+
 	if DNSDomain != "" {
 		// if DNS_DOMAIN is set then we run in a production environment
 		// we must get the directory where the certificates will be stored
@@ -984,7 +996,8 @@ func main() {
 	} else {
 		go http.ListenAndServe(":80", http.HandlerFunc(httpsRedirect))
 		// Launch TLS server
-		if err := http.ListenAndServeTLS(":443", tlsCertPath, tlsKeyPath, mux); err != nil {
+		err := http.ListenAndServeTLS(":443", tlsCertPath, tlsKeyPath, mux)
+		if err != nil {
 			base.Zlog.Fatalf("Server TLS error: %s", err.Error())
 		}
 	}
