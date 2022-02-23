@@ -607,7 +607,10 @@ func main() {
 	}
 
 	// Initializing the list of  blocked Domain and IP
-	base.InitProhibitedIPs()
+	err = base.InitProhibitedIPs()
+	if err != nil {
+		base.Zlog.Warnf("IP filter initialization error: %s", err.Error())
+	}
 
 	mux := http.NewServeMux()
 	print("Attaching to " + CredentialURI + "\n")

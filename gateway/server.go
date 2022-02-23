@@ -306,7 +306,6 @@ func home(w http.ResponseWriter, r *http.Request) {
 	// And need to re route the end user to an end of session
 	switch head {
 	case "get_server_models":
-		base.Zlog.Infof("GET SERVER MODEL")
 		if base.ValidateClientIP(r) == false {
 			http.Error(w, "Service is not available", 401)
 			return
@@ -961,7 +960,10 @@ func main() {
 		}
 	}
 
-	base.InitProhibitedIPs()
+	err = base.InitProhibitedIPs()
+	if err != nil {
+		base.Zlog.Warnf("IP filter initialization error: %s", err.Error())
+	}
 
 	if DNSDomain != "" {
 		// if DNS_DOMAIN is set then we run in a production environment

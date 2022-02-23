@@ -5,6 +5,7 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	"net"
+	"os"
 	"net/http"
 	"regexp"
 	"strings"
@@ -29,27 +30,29 @@ type iprange struct {
 var ProhibitedIPs Prohibited
 var ProhibitedDomains string
 
-func InitProhibitedIPs() {
+func InitProhibitedIPs() error {
 	ProhibitedIPs.ips = make(map[string]bool)
 	config := viper.New()
 	config.SetConfigName("prohibited")
 	config.SetConfigType("yaml")
-	config.AddConfigPath("/usr/local/production/config/")
+	config.AddConfigPath(os.Getenv("CONFIG_PATH"))
 
 	err := config.ReadInConfig()
 	if err != nil {
-		Zlog.Errorf("Falied to Initialise the Prohibited domain data: %s", err.Error())
+		Zlog.Errorf("Failed to initialise the prohibited domain data: %s", err.Error())
+		return err
 	}
 	blockedIPs := config.GetString("BANNED_IP")
 	ProhibitedDomains = config.GetString("BANNED_DOMAINS")
 	UpdateProhibitedIPs(blockedIPs)
 	config.OnConfigChange(func(e fsnotify.Event) {
-		Zlog.Infof("Config file chnaged")
+		Zlog.Infof("Config file changed")
 		blockedIPs = config.GetString("BANNED_IP")
 		ProhibitedDomains = config.GetString("BANNED_DOMAINS")
 		UpdateProhibitedIPs(blockedIPs)
 	})
 	config.WatchConfig()
+	return nil
 }
 
 func UpdateProhibitedIPs(blockedIPs string) {
@@ -65,7 +68,7 @@ func UpdateProhibitedIPs(blockedIPs string) {
 			startIPnet := net.ParseIP(ipRange[0])
 			endIPnet := net.ParseIP(ipRange[1])
 			if endIPnet == nil || startIPnet == nil {
-				Zlog.Errorf("Invalid IP Range [%s-%s]", ipRange[0], ipRange[1])
+				Zlog.Errorf("Invalid IP range [%s-%s]", ipRange[0], ipRange[1])
 				continue
 			}
 			ranges = append(ranges, &iprange{
@@ -76,7 +79,7 @@ func UpdateProhibitedIPs(blockedIPs string) {
 			Zlog.Infof("Matching /", checkpoint)
 			_, network, err := net.ParseCIDR(checkpoint)
 			if err != nil {
-				Zlog.Errorf("Invalid Subnet [%s]", checkpoint)
+				Zlog.Errorf("Invalid subnet [%s]", checkpoint)
 				continue
 			}
 			subnets = append(subnets, &subnet{
@@ -100,7 +103,7 @@ func UpdateProhibitedIPs(blockedIPs string) {
 
 func ValidateClientIP(req *http.Request) bool {
 	clientIP := GetClientIP(req)
-	Zlog.Infof("Checking if the Client IP [%s] belongs to blocked IP list", clientIP)
+	Zlog.Infof("Checking if the client IP [%s] belongs to blocked IP list", clientIP)
 	clientIPnet := net.ParseIP(clientIP)
 	if _, found := ProhibitedIPs.ips[clientIPnet.String()]; found {
 		Zlog.Errorf("IP address [%s] belongs to blocked IPs", clientIP)
@@ -108,13 +111,13 @@ func ValidateClientIP(req *http.Request) bool {
 	}
 	for _, subnet := range ProhibitedIPs.subnets {
 		if subnet.ipnet.Contains(clientIPnet) {
-			Zlog.Errorf("IP address [%s] belongs to blocked Subnet [%s]", clientIP, subnet.ip)
+			Zlog.Errorf("IP address [%s] belongs to blocked subnet [%s]", clientIP, subnet.ip)
 			return false
 		}
 	}
 	for _, iprange := range ProhibitedIPs.ranges {
 		if bytes.Compare(clientIPnet, iprange.start) >= 0 && bytes.Compare(clientIPnet, iprange.end) <= 0 {
-			Zlog.Errorf("IP address [%s] belongs to blocked IP Range [%s-%s]", clientIP, iprange.start.String(), iprange.end.String())
+			Zlog.Errorf("IP address [%s] belongs to blocked IP range [%s-%s]", clientIP, iprange.start.String(), iprange.end.String())
 			return false
 		}
 	}
@@ -129,20 +132,18 @@ func ValidateDomain(userEmail string) bool {
 	blockedDomains := strings.Split(strings.ReplaceAll(ProhibitedDomains, " ", ""), ",")
 	at := strings.LastIndex(userEmail, "@")
 	userDomain := userEmail[at+1:]
-	Zlog.Infof("Verifying if email Domain[%s] belongs to the Banned domains.", userDomain)
+	Zlog.Infof("Verifying if email domain[%s] belongs to the banned domains.", userDomain)
 	for _, bdomain := range blockedDomains {
 		domain := strings.ReplaceAll(bdomain, ".", `\.`)
 		domain = strings.ReplaceAll(domain, "*", ".*")
-		Zlog.Debugf("Domains:[%s]:[%s]", bdomain, domain)
 		emailRegex := regexp.MustCompile(domain)
 		match := emailRegex.FindString(userDomain)
 		if match != "" {
-			Zlog.Errorf("Banned domain found:%s", bdomain)
-			Zlog.Errorf("User email Domain [%s] belongs to the Banned domains [%s]", userDomain, bdomain)
+			Zlog.Errorf("User email domain [%s] belongs to the banned domains [%s]", userDomain, bdomain)
 			return false
 		}
 	}
-	Zlog.Infof("User email Domain [%s] is safe to procced", userDomain)
+	Zlog.Infof("User email domain [%s] is safe to procced", userDomain)
 	return true
 }
 
