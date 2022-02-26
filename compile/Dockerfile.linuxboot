@@ -12,7 +12,6 @@ COPY . .
 # lets build
 RUN echo $http_proxy
 RUN cat /etc/resolv.conf 
-RUN cat /etc/apt/apt.conf.d/proxy.conf
 ENV GOPATH=$GOPATH:/go/src/base
 RUN apt-get --allow-unauthenticated update --allow-insecure-repositories
 RUN apt-get update && apt install -qq -y locales
