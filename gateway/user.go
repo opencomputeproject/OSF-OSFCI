@@ -493,15 +493,19 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 		case "getOpenBMC":
 			recipe = path[4]
 			getOpenBMC(username, w, recipe)
+			base.Zlog.Infof("%s Downloaded OpenBMC image via IP: %s", username, base.GetClientIP(r))
 		case "getLinuxBoot":
 			recipe = path[4]
 			getLinuxBoot(username, w, recipe)
+			base.Zlog.Infof("%s Downloaded LinuxBoot image via IP: %s", username, base.GetClientIP(r))
 		case "getOpenBMCLog":
 			recipe = path[4]
 			getOpenBMCBuildLog(username, w, recipe)
+			base.Zlog.Infof("%s Downloaded OpenBMC log via IP: %s", username, base.GetClientIP(r))
 		case "getLinuxBootLog":
 			recipe = path[4]
 			getLinuxBootBuildLog(username, w, recipe)
+			base.Zlog.Infof("%s Downloaded LinuxBoot log via IP: %s", username, base.GetClientIP(r))
 		default:
 		}
 	case http.MethodPut:
