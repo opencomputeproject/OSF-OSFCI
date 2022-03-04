@@ -22,7 +22,8 @@ then
         export GITHUBREPO=$newRepo
 fi
 git clone $GITHUBREPO
-cd openbmc
+OPENBMCDIR=$(basename -s .git $GITHUBREPO)
+cd $OPENBMCDIR
 git checkout -b $BRANCH origin/$BRANCH
 export SSTATE_DIR=/datas/SSTATE
 . ./setup $RECIPES

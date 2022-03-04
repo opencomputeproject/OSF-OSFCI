@@ -15,7 +15,8 @@ then
 	export GITHUBREPO=$newRepo
 fi
 git clone $GITHUBREPO
-cd mainboards
+LINUXBOOTDIR=$(basename -s .git $GITHUBREPO)
+cd $LINUXBOOTDIR
 git checkout -b $BRANCH origin/$BRANCH
 cd $BOARDS
 export GO111MODULE=off
