@@ -18,6 +18,7 @@ kill_named_process em100
 kill_named_process ttyd
 kill_named_process ttyd
 kill_named_process ttyd
+kill_named_process ttyd
 kill_named_process read_pipe
 kill_named_process read_pipe
 kill_named_process read_pipe_smbios
