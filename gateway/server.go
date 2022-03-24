@@ -32,6 +32,9 @@ var tlsKeyPath string
 var DNSDomain string
 var staticAssetsDir string
 
+//TTYDTestConsole is read from config
+var TTYDTestConsole string
+
 //TTYDHostConsole is read from config
 var TTYDHostConsole string
 
@@ -107,6 +110,9 @@ func initServerconfig() error {
 	//DNSDomain set from config file
 	DNSDomain = viper.GetString("DNS_DOMAIN")
 	staticAssetsDir = viper.GetString("STATIC_ASSETS_DIR")
+
+	//TTYDTestConsole set from config file
+	TTYDTestConsole = viper.GetString("TTYD_TEST_CONSOLE_PORT")
 
 	//TTYDHostConsole set from config file
 	TTYDHostConsole = viper.GetString("TTYD_HOST_CONSOLE_PORT")
@@ -290,8 +296,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-
 	head, tail := ShiftPath(r.URL.Path)
+	base.Zlog.Infof("Url Path, head, tail:%s,%s, %s", r.URL.Path, head, tail)
 	if head == "ci" {
 		head, _ = ShiftPath(tail)
 	}
@@ -503,6 +509,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 			if len(filePath) > 2 {
 				r.URL.Path = r.URL.Path + filePath[2]
 			}
+			base.Zlog.Infof("Url Path", r.URL.Path)
 			r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 			proxy.ServeHTTP(w, r)
 		}
@@ -857,6 +864,99 @@ func bmcweb(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func testweb(w http.ResponseWriter, r *http.Request) {
+	// The cookie allow us to track the current
+	// user on the node
+	cookie, cookieErr := r.Cookie("osfci_cookie")
+	cacheIndex := -1
+	// We have to find the entry into the cache
+	// if the cookie exist and return a Value
+
+	if cookieErr == nil {
+		if cookie.Value != "" {
+			for i := range ciServers.servers {
+				if ciServers.servers[i].currentOwner == cookie.Value {
+					// Before indexing we must validate that the server is still ours
+					if time.Now().After(ciServers.servers[i].expiration) {
+						ciServers.mux.Lock()
+						ciServers.servers[i].expiration = time.Now()
+						ciServers.servers[i].currentOwner = ""
+						ciServers.servers[i].gitToken = ""
+						ciServers.mux.Unlock()
+					}else {
+						cacheIndex = i
+					}
+				}
+			}
+		}
+	}
+
+	head, tail := ShiftPath(r.URL.Path)
+	if head == "test" {
+		head, _ = ShiftPath(tail)
+	}
+	base.Zlog.Infof("Head:%s, cookie:%s, cacheindex:%d", head, cookie, cacheIndex)
+	// Some commands are superseed by a username so we shall identify
+	// if that is the case. If the command is unknown then we can assume
+	// we are getting a username as a head parameter and must get the
+	// remaining part
+
+	switch head {
+	case "start":
+		if cacheIndex != -1 {
+			_, tail = ShiftPath(r.URL.Path)
+			path := strings.Split(tail, "/")
+			base.Zlog.Infof(tail)
+			base.Zlog.Infof(strings.Join(path, ","))
+			if len(path) >= 3 {
+				base.Zlog.Infof("Starting Test")
+				target, _ := url.Parse("http://" + ciServers.servers[cacheIndex].ip + ciServers.servers[cacheIndex].tcpPort)
+				r.URL.Host = "http://" + ciServers.servers[cacheIndex].ip + ciServers.servers[cacheIndex].tcpPort
+				r.URL.Path = "/test_start/" + path[2]
+				r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
+				base.Zlog.Infof("Target:%s, %s", target, r.URL.Path)
+				proxy := httputil.NewSingleHostReverseProxy(target)
+				proxy.ServeHTTP(w, r)
+			}
+		}
+	case "list":
+		if cacheIndex != -1 {
+			base.Zlog.Infof("Listing the tests")
+			target, _ := url.Parse("http://" + ciServers.servers[cacheIndex].ip + ciServers.servers[cacheIndex].tcpPort)
+			r.URL.Host = "http://" + ciServers.servers[cacheIndex].ip + ciServers.servers[cacheIndex].tcpPort
+			r.URL.Path = "/test_list/"
+			r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
+			base.Zlog.Infof("Target:%s, %s", target, r.URL.Path)
+			proxy := httputil.NewSingleHostReverseProxy(target)
+			proxy.ServeHTTP(w, r)
+		}
+	case "console":
+		if cacheIndex != -1 {
+			base.Zlog.Infof("Starting Test console")
+			target, _ := url.Parse("http://" + ciServers.servers[cacheIndex].ip + ciServers.servers[cacheIndex].tcpPort + TTYDTestConsole)
+			r.URL.Host = "http://" + ciServers.servers[cacheIndex].ip + ciServers.servers[cacheIndex].tcpPort + TTYDTestConsole
+			filePath := strings.Split(tail, "/")
+			r.URL.Path = "/"
+			if len(filePath) > 2 {
+				r.URL.Path = r.URL.Path + filePath[2]
+			}
+			base.Zlog.Infof("Target:%s, %s", target, r.URL.Path)
+			proxy := httputil.NewSingleHostReverseProxy(target)
+			proxy.ServeHTTP(w, r)
+		}
+	case "":
+		b, _ := ioutil.ReadFile(staticAssetsDir + "/html/contest.html") // just pass the file name
+		// this is a potential template file we need to replace the http field
+		// by the calling r.Host
+		t := template.New("my template")
+		buf := &bytes.Buffer{}
+		t.Parse(string(b))
+		t.Execute(buf, r.Host+"/test/")
+		fmt.Fprintf(w, buf.String())
+	default:
+	}
+}
+
 //Default Intialize
 func init() {
 
@@ -897,6 +997,7 @@ func main() {
 	// Highest priority must be set to the signed request
 	mux.HandleFunc("/ci/", home)
 	mux.HandleFunc("/user/", user)
+	mux.HandleFunc("/test/", testweb)
 	mux.HandleFunc("/", bmcweb)
 
 	// We must build our server pool for the moment
