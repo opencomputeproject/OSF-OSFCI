@@ -85,6 +85,7 @@ function homebutton(){
 	$('#btnpoweroff').on('click', function () {
 		BMCUP=0;		
                 $('#bmcbutton').css("display","none");
+                $('#bmctest').css("display","none");
 		$('#bmcem100console').contents().find("head").remove();
                 $('#bmcem100console').contents().find("body").remove();
 		$('#bmcem100console').removeAttr("src");
@@ -250,6 +251,14 @@ function run_ci(servername, RemainingSecond) {
 							win.focus();
 						});
 						BMCUP=1;
+						$('#bmctest').css("display","");
+						$('#bmctest').on("click", function() {
+							// we must redirect to the home page
+							localStorage.setItem("username",mylocalStorage['username']) 
+							var win = window.open(window.location.origin + '/test', '_blank');
+							win.focus();
+						});
+						
 					}
 				}
 			});	
@@ -864,6 +873,7 @@ function disconnect()
 	delete mylocalStorage['accessKey'];
 	delete mylocalStorage['secretKey'];
 	delete mylocalStorage['username'];
+	localStorage.clear()
 	// Wait 5s and redirect to mainpage
 	setTimeout(function () {
 		mainpage();

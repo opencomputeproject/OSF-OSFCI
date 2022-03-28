@@ -1,0 +1,91 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta property="og:image" content="https://osfci.tech/ci/images/ogimage.png"/>
+<link rel="stylesheet" href="css/generic.css">
+<title>OSF-CI Tests</title>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.6.2/css/bootstrap-slider.min.css" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/contest.css">
+<script>
+	if (!document.referrer || document.referrer.indexOf(window.location.origin + '/ci') != 0){
+                window.location.href = window.location.origin + '/ci'
+        }
+</script>
+</head>
+<body style="position:relative">
+
+<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.3/jquery-ui.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+
+<script src="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/js/bootstrap4-toggle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.6.2/bootstrap-slider.min.js"></script>
+
+<script src="https://use.fontawesome.com/9c715fd6df.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/hmac-sha1.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/enc-base64.js"></script>
+<script src="https://{{.}}/js/app.js"></script>
+<script src="http://{{.}}/js/contest.js"></script>
+<header class="sticky-top" style="z-index:10000">
+	<div style="background-color:#282828;height: 50px"></div>
+</header>
+
+<div class="container-fluid">
+	<div class="row" style="margin-top:10px; margin-bottom:10px">
+		<div class="container-fluid">
+			<div class="row" style="margin-top:10px; margin-bottom:10px">
+				<div class="col-sm">
+					<div class="form-inline" style="display: block;">
+						<div class="form-group" style="display: block;">
+							<button id="btnstandardtests" class="btn btn-success" type="start" style="margin-right:5px">Load standard tests</button>
+							Or
+							<input type="text" class="form-control" id="githubopenbmc" placeholder="Specify a github repo and a branch (space seperated)" style="flex-grow:1; margin-left:5px">
+							<button id="btncustomtests" class="btn btn-success" type="start" style="margin-left:5px">Load custom tests</button>
+						</div>
+						<div class="divcls" style="display: relative;" id="contesttestlist">
+						</div>
+						<div class="form-group" style="display: block;padding-top:10px;">
+							<button id="btnruntests" class="btn btn-success" type="start" style="margin-right:5px">Run</button>
+							<button type="button" class="btn btn-success" id='dltestreport' style="margin-left:5px;"
+								data-toggle="modal" data-target="#modalDownload" >Download results</button>
+						</div>
+					</div>
+				</div>
+					<div class="col-sm">
+						<div class="embed-responsive embed-responsive-16by9" style="margin-top:10px">
+			                          <iframe class="embed-responsive-item" id="testsem100console" allowfullscreen style="background-color:#444444;"></iframe>
+			                        </div>
+					</div>
+			</div>
+		</div>
+	</div>
+</div>
+<div class="modal fade" id="modalDownload" tabindex="-1" role="dialog" aria-labelledby="ModalDownloadCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header" id="modalDowndloadHeader">
+        <h5 class="modal-title" id="modalDownloadTitle">Downloading results..</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" id="modalDownloadBody">
+      </div>
+      <div class="progress" id="p-downloadtests" style="display:none;">
+      	<div id="progress-downloadtests" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+      		<span class="sr-only">0% Complete</span>
+      	</div>
+      </div>
+      <div class="modal-footer">
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
