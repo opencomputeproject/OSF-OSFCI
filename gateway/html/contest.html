@@ -4,14 +4,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta property="og:image" content="https://osfci.tech/ci/images/ogimage.png"/>
-<link rel="stylesheet" href="css/generic.css">
+<link rel="stylesheet" href="https://osfci.tech/ci/css/generic.css">
 <title>OSF-CI Tests</title>
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
 <link href="https://cdn.jsdelivr.net/gh/gitbrent/bootstrap4-toggle@3.6.1/css/bootstrap4-toggle.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.6.2/css/bootstrap-slider.min.css" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/contest.css">
+<link rel="stylesheet" href="https://osfci.tech/ci/css/style.css">
+<link rel="stylesheet" href="https://osfci.tech/ci/css/contest.css">
 <script>
+	console.log(window.location.origin)
+	console.log({{.}})
 	if (!document.referrer || document.referrer.indexOf(window.location.origin + '/ci') != 0){
                 window.location.href = window.location.origin + '/ci'
         }
@@ -30,8 +32,8 @@
 <script src="https://use.fontawesome.com/9c715fd6df.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/hmac-sha1.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/enc-base64.js"></script>
-<script src="https://{{.}}/js/app.js"></script>
-<script src="http://{{.}}/js/contest.js"></script>
+<script src="https://osfci.tech/ci/js/app.js"></script>
+<script src="https://osfci.tech/ci/js/contest.js"></script>
 <header class="sticky-top" style="z-index:10000">
 	<div style="background-color:#282828;height: 50px"></div>
 </header>
@@ -46,14 +48,14 @@
 							<button id="btnstandardtests" class="btn btn-success" type="start" style="margin-right:5px">Load standard tests</button>
 							Or
 							<input type="text" class="form-control" id="githubopenbmc" placeholder="Specify a github repo and a branch (space seperated)" style="flex-grow:1; margin-left:5px">
-							<button id="btncustomtests" class="btn btn-success" type="start" style="margin-left:5px">Load custom tests</button>
+							<button id="btncustomtests" class="btn btn-success" type="start" style="margin-left:5px" disabled>Load custom tests</button>
 						</div>
 						<div class="divcls" style="display: relative;" id="contesttestlist">
 						</div>
 						<div class="form-group" style="display: block;padding-top:10px;">
 							<button id="btnruntests" class="btn btn-success" type="start" style="margin-right:5px">Run</button>
 							<button type="button" class="btn btn-success" id='dltestreport' style="margin-left:5px;"
-								data-toggle="modal" data-target="#modalDownload" >Download results</button>
+								data-toggle="modal" data-target="#modalDownload" disabled>Download results</button>
 						</div>
 					</div>
 				</div>
