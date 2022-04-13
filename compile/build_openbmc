@@ -4,12 +4,12 @@
 export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
 echo "proxy in use: $PROXY"
 
+git config --global url."https://".insteadOf git://
 if [ "$PROXY" != "" ]
 then
 git config --global https.proxy $PROXY
 git config --global http.proxy $PROXY
 #git config --global url.https://github.com/.insteadOf git://github.com/
-git config --global url."https://".insteadOf git://
 npm config set proxy $PROXY
 npm config set https-proxy $PROXY
 export http_proxy=$PROXY
