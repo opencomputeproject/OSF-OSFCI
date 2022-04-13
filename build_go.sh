@@ -36,18 +36,18 @@ go get base/base
 go get github.com/spf13/viper
 go get golang.org/x/crypto/acme/autocert
 go get github.com/fsnotify/fsnotify@v1.4.9
-go build $1/gateway/server.go
+go build -ldflags="-s" $1/gateway/server.go
 echo "Building ctrl1.go ...\n"
-go build $1/ctrl/ctrl1.go
+go build -ldflags="-s" $1/ctrl/ctrl1.go
 echo "Building user.go ...\n"
-go build $1/gateway/user.go
+go build -ldflags="-s" $1/gateway/user.go
 echo "Building storage.go ...\n"
-go build $1/gateway/backend/storage.go
+go build -ldflags="-s" $1/gateway/backend/storage.go
 tar cvf gateway.tar $1/gateway/html $1/gateway/css/ $1/gateway/images/ $1/gateway/js
 go get github.com/docker/docker/api/types
 go get github.com/docker/docker/client
 echo "Building compile.go ...\n"
-go build $1/compile/compile.go
+go build -ldflags="-s" $1/compile/compile.go
 if [ -f "$1/base/go.mod" ] ; then
 	echo "Deleting go.mod in base after build"
         rm -f "$1/base/go.mod"
