@@ -883,7 +883,7 @@ func testweb(w http.ResponseWriter, r *http.Request) {
 						ciServers.servers[i].currentOwner = ""
 						ciServers.servers[i].gitToken = ""
 						ciServers.mux.Unlock()
-					}else {
+					} else {
 						cacheIndex = i
 					}
 				}
