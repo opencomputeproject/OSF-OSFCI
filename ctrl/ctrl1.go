@@ -4,10 +4,12 @@ package main
 
 import (
 	"base/base"
+	"encoding/json"
 	"fmt"
 	"github.com/spf13/viper"
 	"golang.org/x/sys/unix"
 	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"os"
@@ -15,8 +17,6 @@ import (
 	"path"
 	"strings"
 	"time"
-	"encoding/json"
-	"io/ioutil"
 )
 
 var binariesPath string
@@ -50,8 +50,8 @@ var contestStartCmd *exec.Cmd = nil
 
 // Testcases info
 type TestLists struct {
-	Name	string
-	Path	string
+	Name string
+	Path string
 }
 
 //Initialize controller1 config
@@ -573,14 +573,14 @@ func home(w http.ResponseWriter, r *http.Request) {
 		cmd.Wait()
 	case "test_list":
 		testlists, err := getStandardTests()
-                if err != nil {
-                        base.Zlog.Infof(err.Error())
+		if err != nil {
+			base.Zlog.Infof(err.Error())
 			return
-                }
+		}
 		returnData, err := json.Marshal(testlists)
-                if err != nil {
-                        base.Zlog.Infof(err.Error())
-                }
+		if err != nil {
+			base.Zlog.Infof(err.Error())
+		}
 		w.Write([]byte(returnData))
 	case "test_start":
 		base.Zlog.Infof("Starting OpenBMC Testing")
@@ -589,14 +589,14 @@ func home(w http.ResponseWriter, r *http.Request) {
 		username := path[1]
 		base.Zlog.Infof("Username:%s", username)
 		input := r.FormValue("testlist")
-		var  tests []string
+		var tests []string
 		json.Unmarshal([]byte(input), &tests)
-		if len(tests) < 1{
+		if len(tests) < 1 {
 			base.Zlog.Infof("Empty Tests")
 			w.Write([]byte("Empty test lists"))
 			return
 		}
-		testlist := strings.Join(tests, ",") 
+		testlist := strings.Join(tests, ",")
 		base.Zlog.Infof("Testlist:", testlist)
 
 		if contestStartCmd != nil {
@@ -610,14 +610,14 @@ func home(w http.ResponseWriter, r *http.Request) {
 		args = append(args, "9")
 		args = append(args, "-t")
 		args = append(args, "disableReconnect=true")
-		args = append(args, binariesPath + "/contestcli")
-		args = append(args, "-user=" + username)
-		args = append(args, "-tests=" + testlist)
-		args = append(args, "-log=" + testLog)
-		args = append(args, "-addr=" + contestServer)
-		contestStartCmd = exec.Command(binariesPath + "/ttyd", args...)
+		args = append(args, binariesPath+"/contestcli")
+		args = append(args, "-user="+username)
+		args = append(args, "-tests="+testlist)
+		args = append(args, "-log="+testLog)
+		args = append(args, "-addr="+contestServer)
+		contestStartCmd = exec.Command(binariesPath+"/ttyd", args...)
 		err := contestStartCmd.Start()
-		if err != nil{
+		if err != nil {
 			base.Zlog.Infof(err.Error())
 		}
 		go func() {
@@ -633,7 +633,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func getStandardTests()([]*TestLists, error){
+func getStandardTests() ([]*TestLists, error) {
 	var testlists []*TestLists
 	files, err := ioutil.ReadDir(testPath)
 	if err != nil {
@@ -645,28 +645,27 @@ func getStandardTests()([]*TestLists, error){
 			testpath := path.Join(testPath, file.Name())
 			testname, _ := getTestName(testpath)
 			testlists = append(testlists, &TestLists{
-				Name	: testname,
-				Path	: testpath,
+				Name: testname,
+				Path: testpath,
 			})
 		}
 	}
 	return testlists, nil
 }
 
-func getTestName(testpath string)(string, error){
-        jsoncontent, err := ioutil.ReadFile(testpath)
-        if err != nil {
-                base.Zlog.Infof(err.Error())
-                return "", err
-        }
-        var jsontest map[string]interface{}
-        json.Unmarshal([]byte(jsoncontent), &jsontest)
-        if _, ok := jsontest["JobName"]; ok {
-                return jsontest["JobName"].(string), nil
-        }
-        return path.Base(testpath), nil
+func getTestName(testpath string) (string, error) {
+	jsoncontent, err := ioutil.ReadFile(testpath)
+	if err != nil {
+		base.Zlog.Infof(err.Error())
+		return "", err
+	}
+	var jsontest map[string]interface{}
+	json.Unmarshal([]byte(jsoncontent), &jsontest)
+	if _, ok := jsontest["JobName"]; ok {
+		return jsontest["JobName"].(string), nil
+	}
+	return path.Base(testpath), nil
 }
-
 
 //Default Intialize
 func init() {

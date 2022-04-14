@@ -5,8 +5,8 @@ import (
 	"github.com/fsnotify/fsnotify"
 	"github.com/spf13/viper"
 	"net"
-	"os"
 	"net/http"
+	"os"
 	"regexp"
 	"strings"
 )

@@ -8,10 +8,10 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
-	"path/filepath"
 )
 
 var storageRoot string
@@ -201,7 +201,6 @@ func findDeleteUserData(pattern string) int {
 	return 1
 }
 
-
 func distrosCallback(w http.ResponseWriter, r *http.Request) {
 	// We must breakdown the words, because directory filename is the last word
 	path := strings.Split(r.URL.Path, "/")
@@ -247,7 +246,7 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 	var recipe string
 	base.Zlog.Infof("path: %s", r.URL.Path)
 	if len(path) > 3 {
-	        base.Zlog.Infof("path 3: %s", path[3])
+		base.Zlog.Infof("path 3: %s", path[3])
 		command = path[3]
 	}
 	if len(path) > 4 {
@@ -308,13 +307,13 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 		}
 	case http.MethodDelete:
 		switch command {
-			case "delete_user_data":
-				base.Zlog.Infof("Deleting the data of user: %s", username)
-				deleteUserData(username, string(base.HTTPGetBody(r)))
-			default:
-				base.Zlog.Infof("Deleting the user: %s", username)
-				deleteEntry(username, string(base.HTTPGetBody(r)))
-				base.Zlog.Infof("Deleted the user: %s", username)
+		case "delete_user_data":
+			base.Zlog.Infof("Deleting the data of user: %s", username)
+			deleteUserData(username, string(base.HTTPGetBody(r)))
+		default:
+			base.Zlog.Infof("Deleting the user: %s", username)
+			deleteEntry(username, string(base.HTTPGetBody(r)))
+			base.Zlog.Infof("Deleted the user: %s", username)
 		}
 	default:
 	}
