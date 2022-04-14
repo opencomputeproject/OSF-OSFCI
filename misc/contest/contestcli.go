@@ -1,17 +1,17 @@
 package main
 
 import (
-        "fmt"
-        "os"
-	"io"
-	"flag"
-	"log"
-	"strings"
 	"bytes"
-	"time"
-	"path"
 	"encoding/json"
+	"flag"
+	"fmt"
 	"github.com/linuxboot/contest/cmds/clients/contestcli/cli"
+	"io"
+	"log"
+	"os"
+	"path"
+	"strings"
+	"time"
 )
 
 func main() {
@@ -24,8 +24,8 @@ func main() {
 		fmt.Println("Invalid inputs")
 		return
 	}
-	logFile := path.Join(*logpath, "contest_" + *user + ".log")
-	loghandler, err := os.OpenFile(logFile, os.O_CREATE | os.O_APPEND | os.O_RDWR, 0666)
+	logFile := path.Join(*logpath, "contest_"+*user+".log")
+	loghandler, err := os.OpenFile(logFile, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
 	if err != nil {
 		panic(err)
 	}
@@ -35,16 +35,16 @@ func main() {
 	log.Println("Done")
 }
 
-func start(addr string, user string, testlist string){
+func start(addr string, user string, testlist string) {
 	tests := strings.Split(testlist, ",")
 	if len(tests) == 0 {
 		log.Println("Please provide the tests names")
-		return 
+		return
 	}
 	fmt.Printf("User:%s, Tests:%s\n", user, testlist)
-	for _, test := range(tests) {
-		if _, err := os.Stat(test); os.IsNotExist(err){
-			log.Printf("File [%s] does not exist\n", test);
+	for _, test := range tests {
+		if _, err := os.Stat(test); os.IsNotExist(err) {
+			log.Printf("File [%s] does not exist\n", test)
 			continue
 		}
 		log.Printf("Executing the test: %s\n", test)
@@ -62,13 +62,13 @@ func start(addr string, user string, testlist string){
 			log.Printf("\nWaiting for job to complete\n")
 			time.Sleep(5 * time.Second)
 			status(addr, user, jobID)
-		}else{
+		} else {
 			log.Println("Error: Unable to execute the testcase")
 		}
 	}
 }
 
-func status(addr string, user string, jobID string){
+func status(addr string, user string, jobID string) {
 	var out bytes.Buffer
 	input := []string{os.Args[0], "--addr", addr, "status", jobID}
 	if err := cli.CLIMain(input[0], input[1:], &out); err != nil {
@@ -78,4 +78,3 @@ func status(addr string, user string, jobID string){
 	json.Unmarshal(out.Bytes(), &jobData)
 	log.Println(out.String())
 }
-
