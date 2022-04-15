@@ -19,10 +19,16 @@ and [names](https://golang.org/doc/effective_go.html#names).
 
 `gofmt` and `golint` are required and will be checked during code-review.
 
-- Example:
+- Example(s):
     ```
+    a) for single file
+
     gofmt -s -w ctrl1.go
     golint ctrl1.go
+
+    b) for whole project folder - this will show changed files as well
+
+    gofmt -l -s -w .
     ```
 
 ## Pull Requests
