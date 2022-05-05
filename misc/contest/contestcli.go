@@ -28,7 +28,7 @@ func main() {
 	}
 	timestamp := time.Now().Format("20060102150405")
 	logFile := path.Join(*logpath, "contest_"+*user+"_"+timestamp+".log")
-	loghandler, err := os.OpenFile(logFile, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+	loghandler, err := os.OpenFile(logFile, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0644)
 	if err != nil {
 		panic(err)
 	}
@@ -57,7 +57,7 @@ func start(addr string, user string, testlist string, userDir string) {
 		log.Printf("Executing the test: %s\n", test)
 		testname := getTestName(test)
 		outfile := path.Join(userDir, "contest_"+testname+"_output.log")
-		outhandler, _ := os.OpenFile(outfile, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)
+		outhandler, _ := os.OpenFile(outfile, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0644)
 		defer outhandler.Close()
 		var out bytes.Buffer
 		input := []string{os.Args[0], "--addr", addr, "start", test}
