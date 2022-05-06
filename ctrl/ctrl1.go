@@ -15,6 +15,7 @@ import (
 	"os"
 	"os/exec"
 	"path"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -629,6 +630,28 @@ func home(w http.ResponseWriter, r *http.Request) {
 			conn, err = net.DialTimeout("tcp", "localhost:8081", 220*time.Millisecond)
 		}
 		conn.Close()
+	case "test_logs":
+		_, tail := ShiftPath(r.URL.Path)
+		path := strings.Split(tail, "/")
+		username := path[1]
+		base.Zlog.Infof("Fetching the Test logs for user:%s", username)
+		command := "ls -tp " + testLog + "/contest_" + username + "*.zip | head -1"
+		base.Zlog.Infof("Executing command: %s", command)
+		cmd := exec.Command("/bin/sh", "-c", command)
+		out, err := cmd.Output()
+		if err != nil {
+			base.Zlog.Infof(err.Error())
+			return
+		}
+		logfile := strings.TrimSpace(string(out[:]))
+		base.Zlog.Infof(logfile)
+		content, err := ioutil.ReadFile(logfile)
+		if err != nil {
+			base.Zlog.Infof(err.Error())
+			return
+		}
+		w.Header().Add("Content-Length", strconv.Itoa(len(content)))
+		w.Write(content)
 	default:
 	}
 }

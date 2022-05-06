@@ -20,6 +20,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"path"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -943,6 +944,23 @@ func testweb(w http.ResponseWriter, r *http.Request) {
 			base.Zlog.Infof("Target:%s, %s", target, r.URL.Path)
 			proxy := httputil.NewSingleHostReverseProxy(target)
 			proxy.ServeHTTP(w, r)
+		}
+	case "logs":
+		if cacheIndex != -1 {
+			_, tail = ShiftPath(r.URL.Path)
+			path := strings.Split(tail, "/")
+			base.Zlog.Infof(tail)
+			if len(path) >= 3 {
+				base.Zlog.Infof("Fetching  the test logs")
+				target := "http://" + ciServers.servers[cacheIndex].ip + ciServers.servers[cacheIndex].tcpPort
+				client := &http.Client{}
+				var req *http.Request
+				req, _ = http.NewRequest("GET", target+"/test_logs/"+path[2], nil)
+				response, _ := client.Do(req)
+				buf, _ := ioutil.ReadAll(response.Body)
+				w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
+				w.Write(buf)
+			}
 		}
 	case "":
 		b, _ := ioutil.ReadFile(staticAssetsDir + "/html/contest.html") // just pass the file name

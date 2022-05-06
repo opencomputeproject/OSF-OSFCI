@@ -50,7 +50,36 @@ $(document).ready(function() {
 				console.log(response)
                                 console.log("Test console started");
                                 $('#testsem100console').attr("src", window.location+"console");
+                                $('#dltestreport').prop("disabled", false);
 			}
 		});
 	});
+	$("#dltestreport").click(function(){
+                $("#modalDownloadBody").html("Downloading your test logs ...");
+                $('#p-downloadtests').css("display", "");
+                $('#progress-downloadtests').css("width","0%");
+                $.ajax({
+                        type: "POST",
+                        url: window.location.origin + '/test/logs/' + localStorage.getItem('username'),
+                        contentType: 'application/octet-stream',
+                        xhrFields:{
+                           responseType: 'blob',
+                           onprogress: function(progress){
+                                   var percentage = Math.floor((progress.loaded / progress.total) * 100);
+                                   $('#progress-downloadtests').css("width",percentage+"%");
+                                   console.log(percentage)
+                           }
+                        },
+                        success: function(response){
+                                $("#modalDownload").modal("hide");
+                                $("#modalDownloadBody").html("Download completed");
+                                var link=document.createElement('a');
+                                var url = window.URL || window.webkitURL;
+                                link.href=url.createObjectURL(response);
+                                link.download="contest_log.zip";
+                                link.click();
+                        }
+                });
+        });
+
 });
