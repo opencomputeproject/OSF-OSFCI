@@ -49,7 +49,7 @@ var RomEm100Command *exec.Cmd = nil
 //Test Console ttyd
 var contestStartCmd *exec.Cmd = nil
 
-// Testcases info
+//TestLists holds test-case(s) info
 type TestLists struct {
 	Name string
 	Path string
@@ -179,7 +179,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 			file, handler, _ := r.FormFile("fichier")
 
 			defer file.Close()
-			f, err := os.OpenFile(firmwaresPath+"/_"+username+"_"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+			f, err := os.OpenFile(firmwaresPath+"/_"+username+"_"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0644)
 			if err != nil {
 				fmt.Println(err)
 				return
@@ -263,7 +263,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 			file, handler, _ := r.FormFile("fichier")
 
 			defer file.Close()
-			f, err := os.OpenFile(firmwaresPath+"/_"+username+"_"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+			f, err := os.OpenFile(firmwaresPath+"/_"+username+"_"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0644)
 			if err != nil {
 				fmt.Println(err)
 				return
