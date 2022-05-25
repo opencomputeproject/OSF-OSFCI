@@ -1,143 +1,189 @@
+<head>
+	<link rel="stylesheet" href="css/tooltipStyle.css">
+</head>
+
 <div class="container-fluid">
 	<div class="row" style="margin-top:10px; margin-bottom:10px">
-			<div class="container-fluid">
-				<div class="row" style="margin-top:10px; margin-bottom:10px">
-					<div class="col-sm">
-						<div class="form-inline">
-                                                        <center style="flex-grow:1">
-                                                                <div class="form-group">
-									<button id="btnbmc" class="btn btn-success" type="start" style="margin-right:5px">load standard OpenBMC</button>
-									Or
-                                                                        <input type="text" class="form-control" id="githubopenbmc" placeholder="Specify a github repo and a branch (space seperated)" style="flex-grow:1; margin-left:5px">
-                                                                        <button id="btnbuildopenbmc" class="btn btn-success" type="start" style="margin-left:5px">build</button>
-                                                                        <button id="btnLoadbuiltopenbmc" class="btn btn-success" type="start" style="margin-left:5px; margin-right:5px">Load my Firmware</button>
-									<button type="button" class="btn btn-success" id='DownloadOpenBMC' style="margin-left:5px;"
-									        data-toggle="modal" data-target="#modalDownload" >DL</button>
-								</div>
-                                                        </center>
-                                                </div>
-						<center><h5>Or</h5></center>
-						<div class="upload-drop-zone" id="drop-zone-bmc">
-					            Just drag and drop your bmc firmware here
-						</div>
-						<!-- Progress Bar -->
-					 	<div class="progress">
-					            <div id="progress-bmc" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
-					              <span class="sr-only">0% Complete</span>
-					            </div>
-						</div>
-						<!-- Upload Finished -->
-						<div id="bmcuploaded" class="js-upload-finished" style="display:none; margin-top:10px;">
-							<div class="list-group">
-								<a href="#" id="bmcfirmwarefeedback"class="list-group-item list-group-item-success">
-									<span class="badge alert-success pull-right">Success</span>
-								</a>
+		<div class="container-fluid">
+			<div class="row" style="margin-top:10px; margin-bottom:10px">
+				<div class="col-sm">
+					<div class="form-inline">
+						<center style="flex-grow:1">
+							<div class="form-group">
+								<button id="btnbmc" class="btn btn-success" type="start" style="margin-right:5px">load
+									standard OpenBMC <span class="tooltiptext">Load only the standard openBMC firmware
+									</span></button>
+								Or
+								<input type="text" class="form-control" id="githubopenbmc"
+									placeholder="Specify a github repo and a branch (space seperated)"
+									style="flex-grow:1; margin-left:5px">
+								<button id="btnbuildopenbmc" class="btn btn-success" type="start"
+									style="margin-left:5px">build <span class="tooltiptext">After entering the github
+										repo it needs to be build</span></button>
+								<button id="btnLoadbuiltopenbmc" class="btn btn-success" type="start"
+									style="margin-left:5px; margin-right:5px">Load my Firmware <span
+										class="tooltiptext">After entering a github repo and building it, openBMC
+										firmware needs to be loaded</span></button>
+								<button type="button" class="btn btn-success" id='DownloadOpenBMC'
+									style="margin-left:5px;" data-toggle="modal" data-target="#modalDownload">DL <span
+										class="tooltiptext">Download the openbmc.rom firmware file</span></button>
 							</div>
+						</center>
+					</div>
+					<center>
+						<h5>Or</h5>
+					</center>
+					<div class="upload-drop-zone" id="drop-zone-bmc">
+						Just drag and drop your bmc firmware here
+					</div>
+					<!-- Progress Bar -->
+					<div class="progress">
+						<div id="progress-bmc" class="progress-bar" role="progressbar" aria-valuenow="0"
+							aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+							<span class="sr-only">0% Complete</span>
 						</div>
 					</div>
-					<div class="col-sm">
-						<div class="embed-responsive embed-responsive-16by9" style="margin-top:10px">
-			                          <iframe class="embed-responsive-item" id="bmcem100console" allowfullscreen style="background-color:#444444;"></iframe>
-			                        </div>
+					<!-- Upload Finished -->
+					<div id="bmcuploaded" class="js-upload-finished" style="display:none; margin-top:10px;">
+						<div class="list-group">
+							<a href="#" id="bmcfirmwarefeedback" class="list-group-item list-group-item-success">
+								<span class="badge alert-success pull-right">Success</span>
+							</a>
+						</div>
+					</div>
+				</div>
+				<div class="col-sm">
+					<div class="embed-responsive embed-responsive-16by9" style="margin-top:10px">
+						<iframe class="embed-responsive-item" id="bmcem100console" allowfullscreen
+							style="background-color:#444444;"></iframe>
 					</div>
 				</div>
 			</div>
+		</div>
 	</div>
 	<div class="row" style="margin-top:10px; margin-bottom:10px">
-			<div class="container-fluid">
-				<div class="row" style="margin-top:10px; margin-bottom:10px">
-					<div class="col-sm">
-						<div class="form-inline">
-							<center style="flex-grow:1">
-								<div class="form-group">
-									<button id="btnsmbios" class="btn btn-success" type="start" style="margin-right:5px">load standard bios</button>
-									Or
-									<input type="text" class="form-control" id="githubLinuxboot" placeholder="Specify a github repo and a branch (space seperated)" style="flex-grow:1; margin-left:5px">
-									<button id="btnbuildsmbios" class="btn btn-success" type="start" style="margin-left:5px">build</button>
-									<button id="btnLoadbuiltsmbios" class="btn btn-success" type="start" style="margin-left:5px; margin-right:5px">Load my Firmware</button>
-									<button type="button" class="btn btn-success" id='DownloadLinuxboot' style="margin-left:5px;"
-                                                                                data-toggle="modal" data-target="#modalDownload" >DL</button>
-								</div>
-							</center>
+		<div class="container-fluid">
+			<div class="row" style="margin-top:10px; margin-bottom:10px">
+				<div class="col-sm">
+					<div class="form-inline">
+						<center style="flex-grow:1">
+							<div class="form-group">
+								<button id="btnsmbios" class="btn btn-success" type="start"
+									style="margin-right:5px">load standard bios <span class="tooltiptext">Load only the
+										standard BIOS firmware</span></button>
+								Or
+								<input type="text" class="form-control" id="githubLinuxboot"
+									placeholder="Specify a github repo and a branch (space seperated)"
+									style="flex-grow:1; margin-left:5px">
+								<button id="btnbuildsmbios" class="btn btn-success" type="start"
+									style="margin-left:5px">build <span class="tooltiptext">After entering the github
+										repo it needs to be build</span></button>
+								<button id="btnLoadbuiltsmbios" class="btn btn-success" type="start"
+									style="margin-left:5px; margin-right:5px">Load my Firmware <span
+										class="tooltiptext">After entering a github repo and building it, ILO firmware
+										needs to be loaded</span></button>
+								<button type="button" class="btn btn-success" id='DownloadLinuxboot'
+									style="margin-left:5px;" data-toggle="modal" data-target="#modalDownload">DL <span
+										class="tooltiptext">Download the linuxboot.rom firmware file</span></button>
+							</div>
+						</center>
+					</div>
+					<center>
+						<h5>Or</h5>
+					</center>
+					<div class="upload-drop-zone" id="drop-zone-bios">
+						Just drag and drop your system bios here
+					</div>
+					<!-- Progress Bar -->
+					<div class="progress">
+						<div id="progress-bios" class="progress-bar" role="progressbar" aria-valuenow="0"
+							aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+							<span class="sr-only">0% Complete</span>
 						</div>
-						<center><h5>Or</h5></center>
-						<div class="upload-drop-zone" id="drop-zone-bios">
-                                                    Just drag and drop your system bios here
-                                                </div>
-						<!-- Progress Bar -->
-                                                <div class="progress">
-                                                    <div id="progress-bios" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
-                                                      <span class="sr-only">0% Complete</span>
-                                                    </div>
-                                                </div>
-                                                <!-- Upload Finished -->
-                                                <div id="biosuploaded" class="js-upload-finished" style="display:none; margin-top:10px;">
-                                                        <div class="list-group">
-                                                                <a href="#" id="biosfirmwarefeedback" class="list-group-item list-group-item-success">
-                                                                        <span class="badge alert-success pull-right">Success</span>
-                                                                </a>
-                                                        </div>
-                                                </div>
-               			        </div>
-					<div class="col-sm">
-						<div class="embed-responsive embed-responsive-16by9" style="margin-top:10px">
-	                       			  <iframe class="embed-responsive-item" id="smbiosem100console" src="" allowfullscreen style="background-color:#444444;"></iframe>
+					</div>
+					<!-- Upload Finished -->
+					<div id="biosuploaded" class="js-upload-finished" style="display:none; margin-top:10px;">
+						<div class="list-group">
+							<a href="#" id="biosfirmwarefeedback" class="list-group-item list-group-item-success">
+								<span class="badge alert-success pull-right">Success</span>
+							</a>
 						</div>
-	                        	</div>
+					</div>
+				</div>
+				<div class="col-sm">
+					<div class="embed-responsive embed-responsive-16by9" style="margin-top:10px">
+						<iframe class="embed-responsive-item" id="smbiosem100console" src="" allowfullscreen
+							style="background-color:#444444;"></iframe>
+					</div>
 				</div>
 			</div>
+		</div>
 	</div>
 	<div class="row" style="margin-top:10px; margin-bottom:10px">
-			<div class="container-fluid">
-				<div class="row" style="margin-top:10px; margin-bottom:10px">
-					<div class="col-sm">
-						<div style="margin-top:10px">
-							<div class="dropdown" id="osChoices">
-							  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-							    Operating System Installer
-							  </button>
-							</div>
-							<iframe div="osloader" class="embed-responsive-item" id="osloader" src="" allowfullscreen style="background-color:#444444; border:0; margin-top:10px " width="100%" height="10%" ></iframe>
+		<div class="container-fluid">
+			<div class="row" style="margin-top:10px; margin-bottom:10px">
+				<div class="col-sm">
+					<div style="margin-top:10px">
+						<div class="dropdown" id="osChoices">
+							<button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton"
+								data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+								Operating System Installer
+							</button>
 						</div>
-						<center>
-                                                        <button id="bmcbutton" class="btn btn-success" type="start" style="display:none">BMC Web</button>
-                                                        <button id="btnpoweron" class="btn btn-warning" type="start" >connect power</button>
-                                                        <button id="btnpoweroff" class="btn btn-danger" type="start" >disconnect power</button>
-                                                        <button id="bmctest" class="btn btn-success" type="start" style="display:none">Test Web</button>
-                                                </center>
+						<iframe div="osloader" class="embed-responsive-item" id="osloader" src="" allowfullscreen
+							style="background-color:#444444; border:0; margin-top:10px " width="100%"
+							height="10%"></iframe>
 					</div>
-					<div class="col-sm">
-						<div class="embed-responsive embed-responsive-16by9" style="margin-top:10px">
-						 <iframe div="bmcconsole" class="embed-responsive-item" id="bmcconsole" src="" allowfullscreen style="background-color:#444444;"></iframe>
-						</div>
+					<center>
+						<button id="bmcbutton" class="btn btn-success" type="start" style="display:none">BMC
+							Web <span class="tooltiptext">Open openBMC interactive console, Login using
+								root/0penBmc</span></button>
+						<button id="bmctest" class="btn btn-success" type="start" style="display:none">Contest
+							Web <span class="tooltiptext">Open openBMC test environment</span></button>
+						<button id="btnpoweron" class="btn btn-warning" type="start">connect power <span
+								class="tooltiptext">Connect power once the BIOS and the openBMC firmware is
+								loaded</span></button>
+						<button id="btnpoweroff" class="btn btn-danger" type="start">disconnect power <span
+								class="tooltiptext">Disconnecting power will remove BIOS and openBMC
+								firmware</span></button>
+					</center>
+				</div>
+				<div class="col-sm">
+					<div class="embed-responsive embed-responsive-16by9" style="margin-top:10px">
+						<iframe div="bmcconsole" class="embed-responsive-item" id="bmcconsole" src="" allowfullscreen
+							style="background-color:#444444;"></iframe>
 					</div>
 				</div>
 			</div>
+		</div>
 	</div>
 </div>
-<div class="modal fade" id="modalDownload" tabindex="-1" role="dialog" aria-labelledby="ModalDownloadCenterTitle" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header" id="modalDowndloadHeader">
-        <h5 class="modal-title" id="modalDownloadTitle">Your Download is about to start</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body" id="modalDownloadBody">
-      </div>
-      <div class="progress" id="p-downloadbmc" style="display:none;">
-      	<div id="progress-downloadbmc" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
-      		<span class="sr-only">0% Complete</span>
-      	</div>
-      </div>
-      <div class="progress" id="p-downloadlinuxboot" style="display:none;">
-        <div id="progress-downloadlinuxboot" class="progress-bar" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
-                <span class="sr-only">0% Complete</span>
-        </div>
-      </div>
-      <div class="modal-footer">
-      </div>
-    </div>
-  </div>
+<div class="modal fade" id="modalDownload" tabindex="-1" role="dialog" aria-labelledby="ModalDownloadCenterTitle"
+	aria-hidden="true">
+	<div class="modal-dialog modal-dialog-centered" role="document">
+		<div class="modal-content">
+			<div class="modal-header" id="modalDowndloadHeader">
+				<h5 class="modal-title" id="modalDownloadTitle">Your Download is about to start</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body" id="modalDownloadBody">
+			</div>
+			<div class="progress" id="p-downloadbmc" style="display:none;">
+				<div id="progress-downloadbmc" class="progress-bar" role="progressbar" aria-valuenow="0"
+					aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+					<span class="sr-only">0% Complete</span>
+				</div>
+			</div>
+			<div class="progress" id="p-downloadlinuxboot" style="display:none;">
+				<div id="progress-downloadlinuxboot" class="progress-bar" role="progressbar" aria-valuenow="0"
+					aria-valuemin="0" aria-valuemax="100" style="width: 0%;">
+					<span class="sr-only">0% Complete</span>
+				</div>
+			</div>
+			<div class="modal-footer">
+			</div>
+		</div>
+	</div>
 </div>
