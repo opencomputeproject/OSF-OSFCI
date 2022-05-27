@@ -19,8 +19,9 @@
       margin-left: -60px; /* Use half of the width (120/2 = 60), to center the tooltip */
       position: absolute;
       z-index: 1;
+      
     }
-    
+
     /* Show the tooltip text when you mouse over the tooltip container */
     .btn:hover .tooltiptext {
       visibility: visible;

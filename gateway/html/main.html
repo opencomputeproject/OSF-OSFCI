@@ -11,22 +11,22 @@
 						<center style="flex-grow:1">
 							<div class="form-group">
 								<button id="btnbmc" class="btn btn-success" type="start" style="margin-right:5px">load
-									standard OpenBMC <span class="tooltiptext">Load only the standard openBMC firmware
+									standard OpenBMC <span class="tooltiptext" style="display:none;">Load only the standard openBMC firmware
 									</span></button>
 								Or
 								<input type="text" class="form-control" id="githubopenbmc"
 									placeholder="Specify a github repo and a branch (space seperated)"
 									style="flex-grow:1; margin-left:5px">
 								<button id="btnbuildopenbmc" class="btn btn-success" type="start"
-									style="margin-left:5px">build <span class="tooltiptext">After entering the github
+									style="margin-left:5px">build <span class="tooltiptext" style="display:none;">After entering the github
 										repo it needs to be build</span></button>
 								<button id="btnLoadbuiltopenbmc" class="btn btn-success" type="start"
 									style="margin-left:5px; margin-right:5px">Load my Firmware <span
-										class="tooltiptext">After entering a github repo and building it, openBMC
+										class="tooltiptext" style="display:none;">After entering a github repo and building it, openBMC
 										firmware needs to be loaded</span></button>
 								<button type="button" class="btn btn-success" id='DownloadOpenBMC'
 									style="margin-left:5px;" data-toggle="modal" data-target="#modalDownload">DL <span
-										class="tooltiptext">Download the openbmc.rom firmware file</span></button>
+										class="tooltiptext" style="display:none;">Download the openbmc.rom firmware file</span></button>
 							</div>
 						</center>
 					</div>
@@ -69,22 +69,22 @@
 						<center style="flex-grow:1">
 							<div class="form-group">
 								<button id="btnsmbios" class="btn btn-success" type="start"
-									style="margin-right:5px">load standard bios <span class="tooltiptext">Load only the
+									style="margin-right:5px">load standard bios <span class="tooltiptext" style="display:none;">Load only the
 										standard BIOS firmware</span></button>
 								Or
 								<input type="text" class="form-control" id="githubLinuxboot"
 									placeholder="Specify a github repo and a branch (space seperated)"
 									style="flex-grow:1; margin-left:5px">
 								<button id="btnbuildsmbios" class="btn btn-success" type="start"
-									style="margin-left:5px">build <span class="tooltiptext">After entering the github
+									style="margin-left:5px">build <span class="tooltiptext" style="display:none;">After entering the github
 										repo it needs to be build</span></button>
 								<button id="btnLoadbuiltsmbios" class="btn btn-success" type="start"
 									style="margin-left:5px; margin-right:5px">Load my Firmware <span
-										class="tooltiptext">After entering a github repo and building it, ILO firmware
+										class="tooltiptext" style="display:none;">After entering a github repo and building it, ILO firmware
 										needs to be loaded</span></button>
 								<button type="button" class="btn btn-success" id='DownloadLinuxboot'
 									style="margin-left:5px;" data-toggle="modal" data-target="#modalDownload">DL <span
-										class="tooltiptext">Download the linuxboot.rom firmware file</span></button>
+										class="tooltiptext" style="display:none;">Download the linuxboot.rom firmware file</span></button>
 							</div>
 						</center>
 					</div>
@@ -136,15 +136,15 @@
 					</div>
 					<center>
 						<button id="bmcbutton" class="btn btn-success" type="start" style="display:none">BMC
-							Web <span class="tooltiptext">Open openBMC interactive console, Login using
+							Web <span class="tooltiptext" style="display:none;">Open openBMC interactive console, Login using
 								root/0penBmc</span></button>
 						<button id="bmctest" class="btn btn-success" type="start" style="display:none">Contest
-							Web <span class="tooltiptext">Open openBMC test environment</span></button>
+							Web <span class="tooltiptext" style="display:none;">Open openBMC test environment</span></button>
 						<button id="btnpoweron" class="btn btn-warning" type="start">connect power <span
-								class="tooltiptext">Connect power once the BIOS and the openBMC firmware is
+								class="tooltiptext" style="display:none;">Connect power once the BIOS and the openBMC firmware is
 								loaded</span></button>
 						<button id="btnpoweroff" class="btn btn-danger" type="start">disconnect power <span
-								class="tooltiptext">Disconnecting power will remove BIOS and openBMC
+								class="tooltiptext" style="display:none;">Disconnecting power will remove BIOS and openBMC
 								firmware</span></button>
 					</center>
 				</div>
