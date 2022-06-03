@@ -100,6 +100,20 @@ $('#features').on("click", function(event) {
 	loadHTML("html/features.html");
 });
 
+// tooltip element will appear/hide once the helptoggle is clicked
+function enableDisableToolTip() {
+    let toolTip = document.getElementsByClassName('tooltiptext')
+    for (var i = 0; i < toolTip.length; i++) {
+      if (typeof toolTip[i] === "undefined") {
+        return
+      }
+      else if (toolTip[i].style.display == 'none') {
+        toolTip[i].style.display = ''
+      } else {
+        toolTip[i].style.display = 'none'
+      }
+    }
+  }
 
 // We have to build the navbar production option
 
