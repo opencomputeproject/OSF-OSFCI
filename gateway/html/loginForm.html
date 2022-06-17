@@ -1,6 +1,15 @@
 <div class="col center-block my-auto">
 	<center>
-		<form id="login" class="form-signin" style="background-color:#F8F8F8; border-radius:3px; width:30%">
+		<form id="verifylogin" class="form-signin" style="background-color:#F8F8F8; border-radius:3px; width:30%">
+			<img class="mb-4" style="margin-top:1.5rem" src="images/tools.png" alt="" width="72" height="72">
+			<h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+			<label for="user" class="sr-only">Nickname</label>
+			<input type="nickname" id="user" class="form-control" placeholder="Username or Email" required autofocus style="width:75%">
+			<p></p>
+			<button id="btnNext" class="btn btn-lg btn-primary btn-block" type="submit" style="width:75%">Next</button>
+			<p class="mt-5 mb-3 text-muted">&copy; 2020 Hewlett-Packard Enterprise LP</p>
+		</form>
+		<form id="login" class="form-signin" style="background-color:#F8F8F8; border-radius:3px; width:30%;display:none;">
 			<img class="mb-4" style="margin-top:1.5rem" src="images/tools.png" alt="" width="72" height="72">
 			<h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
 			<label for="username" class="sr-only">Nickname</label>
