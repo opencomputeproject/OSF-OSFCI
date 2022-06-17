@@ -15,3 +15,29 @@ function managePasswordForgotten() {
                 loadHTML("footer.html");
 	});
 }
+$(document).ready(function () {
+	$('#login').hide();
+	$("#verifylogin").submit(function (e) {
+		e.preventDefault()
+		var username = $("#user").val()
+		var Url = '/user/'+username+'/verify_user';
+                $.ajax({
+                        type: "GET",
+			contentType: 'application/json',
+                        url: Url, 
+                        success: function(response){
+				var data = JSON.parse(response)
+				console.log(data)
+				if (data.Exists == 1){
+					$('#verifylogin').hide();
+					$('#login').show();
+        				$('input#username').val(username);
+				} else {
+					location.href = data.Redirect
+				}
+                        }
+                });
+
+	});
+});
+
