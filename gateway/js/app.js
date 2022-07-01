@@ -3,6 +3,8 @@ var mylocalStorage = {};
 window.mylocalStorage = mylocalStorage;
 var BMCUP=0;
 var isPool=1;
+var signupwindowObjectReference = null
+var profilewindowObjectReference = null
 
 function clearDocument(){
 	$(document.body).empty();
@@ -845,6 +847,16 @@ function BuildSignedAuth(uri, op, contentType, callback) {
 
 function myAccount()
 {
+        if ( mylocalStorage['osfciauth'] !== undefined && mylocalStorage['osfciauth'] == true){
+                if (profilewindowObjectReference == null || profilewindowObjectReference.closed){
+                        var URL = 'https://auth.hpe.com/profile'
+                        var strWindowFeatures = "location=yes,height=600,width=800,scrollbars=yes,status=yes";
+                        profilewindowObjectReference = window.open(URL, "_blank", strWindowFeatures);
+                } else {
+                        profilewindowObjectReference.focus()
+                }
+                return
+        }
 	clearDocument();
 	loadHTML("html/navbar.html");
         loadJS("js/navbar.js");
@@ -870,9 +882,22 @@ function logged()
 
 function disconnect()
 {
+        if ( mylocalStorage['osfciauth'] !== undefined && mylocalStorage['osfciauth'] == true){
+		var url = '/user/' + mylocalStorage['username'] + '/authlogout'
+		$.get(url , function(data){
+			console.log(data)
+			var jsonobj = JSON.parse(JSON.stringify(data))
+			if (Object.hasOwn(jsonobj, 'Error')){
+				console.log("Error")
+				return
+			}
+			location.href = jsonobj.Redirect
+		}, "json");
+	}
 	delete mylocalStorage['accessKey'];
 	delete mylocalStorage['secretKey'];
 	delete mylocalStorage['username'];
+	delete mylocalStorage['osfciauth'];
 	localStorage.clear()
 	// Wait 5s and redirect to mainpage
 	setTimeout(function () {
@@ -903,7 +928,19 @@ function mainpage(){
 	loadJS("js/forms.js");
 	loadJS("js/base.js");
 	loadHTML("footer.html");
-	formSubmission('#signup','create_user','User created - Please check your email','User exist');
+	//formSubmission('#signup','create_user','User created - Please check your email','User exist');
+	document.getElementById("signup-btn1").onclick = function () {
+        	//location.href = "https://auth-itg.hpe.com/signin/register";
+		console.log("Hello")
+		if (signupwindowObjectReference == null || signupwindowObjectReference.closed){
+			var URL = 'https://auth.hpe.com/signin/register'
+			var strWindowFeatures = "location=yes,height=600,width=800,scrollbars=yes,status=yes";
+			signupwindowObjectReference = window.open(URL, "_blank", strWindowFeatures);
+		} else {
+			signupwindowObjectReference.focus()
+		}
+
+    	};
 }
 
 function main(){
@@ -959,8 +996,14 @@ function main(){
 				}
 			});
 
-                }
-		else
+                } else if ( getUrlParameter('is_authenicated') == "1" ){
+			clearDocument();
+                        loadHTML("html/navbar.html");
+                        loadJS("js/navbar.js");
+			$("#dropdownMaster").hide()
+                        loadHTML("html/loader.html");
+                        loadJS("js/auth.js");
+		} else
 		{
 			clearDocument();
 			loadHTML("html/navbar.html");
@@ -980,7 +1023,17 @@ function main(){
 			loadJS("js/forms.js");
 			loadJS("js/base.js");
 			loadHTML("html/footer.html");
-			formSubmission('#signup','create_user','User created - Please check your email','User exist');
+			//formSubmission('#signup','create_user','User created - Please check your email','User exist');
+			document.getElementById("signup-btn1").onclick = function () {
+				//location.href = "https://auth-itg.hpe.com/signin/register";
+				if (signupwindowObjectReference == null || signupwindowObjectReference.closed){
+					var URL = 'https://auth.hpe.com/signin/register'
+					var strWindowFeatures = "location=yes,height=600,width=800,scrollbars=yes,status=yes";
+					signupwindowObjectReference = window.open(URL, "_blank", strWindowFeatures);
+				} else {
+					signupwindowObjectReference.focus()
+				}
+			};
 		}
 	}
 }

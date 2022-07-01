@@ -2,17 +2,26 @@ package main
 
 import (
 	"base/base"
+	"bytes"
 	"crypto/rand"
 	"encoding/base64"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	verifier "github.com/okta/okta-jwt-verifier-golang"
 	"github.com/spf13/viper"
 	"io"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
+)
+
+var (
+	state = generateState()
+	nonce = ""
 )
 
 //StorageURI is read from config
@@ -24,6 +33,21 @@ var StorageTCPPORT string
 //CredentialURI is read from config
 var CredentialURI string
 
+//ClientID for Okta
+var ClientID string
+
+//Issuer URL for Okta
+var Issuer string
+
+//ClientSecret for Okta
+var ClientSecret string
+
+//RedirectURL Signin Redirect URL defined in the Okta
+var RedirectURL string
+
+//LogoutRedirectURL Logout Redirect URL defined in the Okta
+var LogoutRedirectURL string
+
 type cacheEntry struct {
 	Nickname string
 	Cookie   string
@@ -31,6 +55,20 @@ type cacheEntry struct {
 }
 
 var cache []cacheEntry
+
+// Struct to store the new user details
+type authUser struct {
+	Nickname    string
+	TokenType   string
+	TokenAuth   string
+	TokenSecret string
+	Email       string
+	TokenID     string
+	AccessToken string
+}
+
+//UserDB To store the hash of user details after login
+var UserDB map[string]*authUser
 
 // Upercase is mandatory for JSON library parsing
 
@@ -54,6 +92,17 @@ type userPublic struct {
 	EmailLABEL       string
 }
 
+//Exchange - Token structure returned by Okta
+type Exchange struct {
+	Error            string `json:"error,omitempty"`
+	ErrorDescription string `json:"error_description,omitempty"`
+	AccessToken      string `json:"access_token,omitempty"`
+	TokenType        string `json:"token_type,omitempty"`
+	ExpiresIn        int    `json:"expires_in,omitempty"`
+	Scope            string `json:"scope,omitempty"`
+	IdToken          string `json:"id_token,omitempty"`
+}
+
 //Initialize User config
 func initUserconfig() error {
 	viper.SetConfigName("gatewayconf")
@@ -72,6 +121,65 @@ func initUserconfig() error {
 	StorageTCPPORT = viper.GetString("STORAGE_TCPPORT")
 	CredentialURI = viper.GetString("CREDENTIALS_TCPPORT")
 	return nil
+}
+
+func initAuthconfig() error {
+	UserDB = make(map[string]*authUser)
+	config := viper.New()
+	config.SetConfigName("hpeauth")
+	config.SetConfigType("yaml")
+	config.AddConfigPath(os.Getenv("CONFIG_PATH"))
+
+	err := config.ReadInConfig()
+	if err != nil {
+		return err
+	}
+	//StorageURI set from config file
+
+	ClientID = config.GetString("CLIENT_ID")
+	ClientSecret = config.GetString("CLIENT_SECRET")
+	Issuer = config.GetString("ISSUER")
+	RedirectURL = config.GetString("REDIRECT_URL")
+	LogoutRedirectURL = config.GetString("SIGNOUT_REDIRECT_URL")
+	return nil
+}
+
+func verifyToken(t string) (*verifier.Jwt, error) {
+	tv := map[string]string{}
+	tv["nonce"] = nonce
+	tv["aud"] = ClientID
+	jv := verifier.JwtVerifier{
+		Issuer:           Issuer,
+		ClaimsToValidate: tv,
+	}
+
+	result, err := jv.New().VerifyIdToken(t)
+	if err != nil {
+		return nil, fmt.Errorf("%s", err)
+	}
+
+	if result != nil {
+		return result, nil
+	}
+
+	return nil, fmt.Errorf("token could not be verified: %s", "")
+}
+
+func generateState() string {
+	// Generate a random byte array for state paramter
+	b := make([]byte, 16)
+	rand.Read(b)
+	return hex.EncodeToString(b)
+}
+
+func generateNonce() (string, error) {
+	nonceBytes := make([]byte, 32)
+	_, err := rand.Read(nonceBytes)
+	if err != nil {
+		return "", fmt.Errorf("could not generate nonce")
+	}
+
+	return base64.URLEncoding.EncodeToString(nonceBytes), nil
 }
 
 func userExist(username string) bool {
@@ -478,9 +586,29 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 			var result *base.User
 			// Serve the resource.
 			fmt.Printf("Requesting %s\n", username)
-			result = userGetInternalInfo(username)
-			b, _ := json.Marshal(*result)
-			fmt.Fprint(w, string(b))
+			if userExist(username) {
+				result = userGetInternalInfo(username)
+				b, _ := json.Marshal(*result)
+				fmt.Fprint(w, string(b))
+				return
+			}
+			user, ok := UserDB[username]
+			if ok == true {
+				result = new(base.User)
+				result.Nickname = username
+				result.Email = username
+				result.TokenAuth = user.TokenAuth
+				result.TokenSecret = user.TokenSecret
+				result.TokenType = user.TokenType
+				result.CreationDate = ""
+				result.Password = ""
+				result.Lastlogin = ""
+				result.Active = 1
+				result.ValidationString = ""
+				b, _ := json.Marshal(*result)
+				fmt.Fprint(w, string(b))
+			}
+			return
 		case "userGetInfo":
 			var result *userPublic
 			// Serve the resource.
@@ -506,6 +634,150 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 			recipe = path[4]
 			getLinuxBootBuildLog(username, w, recipe)
 			base.Zlog.Infof("%s Downloaded LinuxBoot log via IP: %s", username, base.GetClientIP(r))
+		case "authverify":
+			code := r.URL.Query().Get("code")
+			if code == "" {
+				base.Zlog.Infof("The code was not returned or is not accessible")
+				return
+			}
+			authHeader := base64.StdEncoding.EncodeToString([]byte(ClientID + ":" + ClientSecret))
+			q := r.URL.Query()
+			q.Add("grant_type", "authorization_code")
+			q.Set("code", code)
+			q.Add("redirect_uri", RedirectURL)
+
+			url := Issuer + "/v1/token?" + q.Encode()
+
+			req, _ := http.NewRequest("POST", url, bytes.NewReader([]byte("")))
+			h := req.Header
+			h.Add("Authorization", "Basic "+authHeader)
+			h.Add("Accept", "application/json")
+			h.Add("Content-Type", "application/x-www-form-urlencoded")
+			h.Add("Connection", "close")
+			h.Add("Content-Length", "0")
+
+			client := &http.Client{}
+			resp, _ := client.Do(req)
+			body, _ := ioutil.ReadAll(resp.Body)
+			defer resp.Body.Close()
+			var exchange Exchange
+			json.Unmarshal(body, &exchange)
+			if exchange.Error != "" {
+				base.Zlog.Infof(exchange.Error)
+				base.Zlog.Infof(exchange.ErrorDescription)
+				return
+			}
+			_, verificationError := verifyToken(exchange.IdToken)
+			if verificationError != nil {
+				base.Zlog.Warnf(verificationError.Error())
+				return
+			}
+			reqURL := Issuer + "/v1/userinfo"
+
+			req, _ = http.NewRequest("GET", reqURL, bytes.NewReader([]byte("")))
+			h = req.Header
+			h.Add("Authorization", "Bearer "+exchange.AccessToken)
+			h.Add("Accept", "application/json")
+
+			client = &http.Client{}
+			resp, _ = client.Do(req)
+			body, _ = ioutil.ReadAll(resp.Body)
+			defer resp.Body.Close()
+			profile := make(map[string]string)
+			json.Unmarshal(body, &profile)
+			base.Zlog.Infof(profile["email"])
+
+			var user = new(authUser)
+			user.Nickname = profile["name"]
+			user.Email = profile["email"]
+			user.TokenAuth = base.GenerateAccountACKLink(20)
+			user.TokenSecret = base.GenerateAuthToken("mac", 40)
+			user.TokenType = "mac"
+			user.AccessToken = exchange.AccessToken
+			user.TokenID = exchange.IdToken
+			UserDB[user.Email] = user
+			cookie := http.Cookie{Name: "OSFCIAUTH", Value: user.Email, Path: "/", HttpOnly: true, MaxAge: int(30)}
+			http.SetCookie(w, &cookie)
+			http.Redirect(
+				w, r,
+				"https://"+r.Host+"/ci/?is_authenicated=1",
+				http.StatusFound,
+			)
+			base.Zlog.Infof("End of User Redirect")
+		case "authtoken":
+			base.Zlog.Infof("Inside Auth token")
+			returnData := make(map[string]interface{})
+			usercookie, err := r.Cookie("OSFCIAUTH")
+			if err != nil || usercookie.Value == "" {
+				returnData["Error"] = "Unable to fetch User profile"
+				returnValue, _ := json.Marshal(returnData)
+				fmt.Fprintf(w, string(returnValue))
+				return
+			}
+			base.Zlog.Infof(usercookie.Value)
+			user, ok := UserDB[usercookie.Value]
+			if ok == false {
+				returnData["Error"] = "Error:Unable to fetch User profile"
+				returnValue, _ := json.Marshal(returnData)
+				fmt.Fprintf(w, string(returnValue))
+				return
+			}
+
+			returnData["accessKey"] = user.TokenAuth
+			returnData["secretKey"] = user.TokenSecret
+			returnData["username"] = usercookie.Value
+			returnData["osfciauth"] = true
+			returnValue, _ := json.Marshal(returnData)
+			sessionid := getSessionID(usercookie.Value)
+			cookie := http.Cookie{Name: "osfci_cookie", Value: sessionid, Path: "/", HttpOnly: true, MaxAge: int(base.MaxAge)}
+			http.SetCookie(w, &cookie)
+			fmt.Fprintf(w, string(returnValue))
+		case "verify_user":
+			// We have to validate the user, then display the right return page
+			returndata := make(map[string]interface{})
+			exist := userExist(username)
+			returndata["Exists"] = 0
+			if exist {
+				returndata["Exists"] = 1
+				returnValue, _ := json.Marshal(returndata)
+				w.Write([]byte(returnValue))
+				return
+			}
+			nonce, _ = generateNonce()
+			var redirectPath string
+
+			q := r.URL.Query()
+			q.Add("client_id", ClientID)
+			q.Add("response_type", "code")
+			q.Add("response_mode", "query")
+			q.Add("scope", "openid profile email")
+			q.Add("login_hint", username)
+			q.Add("redirect_uri", RedirectURL)
+			q.Add("state", state)
+			q.Add("prompt", "login")
+			q.Add("nonce", nonce)
+
+			redirectPath = Issuer + "/v1/authorize?" + q.Encode()
+			base.Zlog.Infof(redirectPath)
+			returndata["Redirect"] = redirectPath
+			returnValue, _ := json.Marshal(returndata)
+			w.Write([]byte(returnValue))
+			return
+		case "authlogout":
+			returndata := make(map[string]interface{})
+			base.Zlog.Infof(username)
+			user, ok := UserDB[username]
+			if ok == false {
+				returndata["Error"] = "Unable to find the user"
+			} else {
+				q := r.URL.Query()
+				q.Add("id_token_hint", user.TokenID)
+				q.Add("post_logout_redirect_uri", LogoutRedirectURL)
+				redirectPath := Issuer + "/v1/logout?" + q.Encode()
+				returndata["Redirect"] = redirectPath
+			}
+			returnValue, _ := json.Marshal(returndata)
+			w.Write([]byte(returnValue))
 		default:
 		}
 	case http.MethodPut:
@@ -614,6 +886,12 @@ func main() {
 	err = base.InitProhibitedIPs()
 	if err != nil {
 		base.Zlog.Warnf("IP filter initialization error: %s", err.Error())
+	}
+
+	// Initializing the list of  blocked Domain and IP
+	err = initAuthconfig()
+	if err != nil {
+		base.Zlog.Warnf("Auth initialization error: %s", err.Error())
 	}
 
 	mux := http.NewServeMux()

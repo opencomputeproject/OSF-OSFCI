@@ -173,6 +173,14 @@ func checkAccess(w http.ResponseWriter, r *http.Request, login string, command s
 		return r.Method == http.MethodGet || r.Method == http.MethodPost
 	case "validate_user":
 		return true
+	case "verify_user":
+		return true
+	case "authverify":
+		return true
+	case "authtoken":
+		return true
+	case "authlogout":
+		return true
 	case "reset_password":
 		return true
 	case "generate_password_lnk_rst":
