@@ -1,4 +1,3 @@
-
 var mylocalStorage = {};
 window.mylocalStorage = mylocalStorage;
 var BMCUP=0;
@@ -847,11 +846,11 @@ function BuildSignedAuth(uri, op, contentType, callback) {
 
 function myAccount()
 {
+        loadJS("js/config.js");
         if ( mylocalStorage['osfciauth'] !== undefined && mylocalStorage['osfciauth'] == true){
                 if (profilewindowObjectReference == null || profilewindowObjectReference.closed){
-                        var URL = 'https://auth.hpe.com/profile'
                         var strWindowFeatures = "location=yes,height=600,width=800,scrollbars=yes,status=yes";
-                        profilewindowObjectReference = window.open(URL, "_blank", strWindowFeatures);
+                        profilewindowObjectReference = window.open(PROFILE, "_blank", strWindowFeatures);
                 } else {
                         profilewindowObjectReference.focus()
                 }
@@ -927,15 +926,13 @@ function mainpage(){
 //	loadJS("js/projects.js");
 	loadJS("js/forms.js");
 	loadJS("js/base.js");
+	loadJS("js/config.js");
 	loadHTML("footer.html");
 	//formSubmission('#signup','create_user','User created - Please check your email','User exist');
 	document.getElementById("signup-btn1").onclick = function () {
-        	//location.href = "https://auth-itg.hpe.com/signin/register";
-		console.log("Hello")
 		if (signupwindowObjectReference == null || signupwindowObjectReference.closed){
-			var URL = 'https://auth.hpe.com/signin/register'
 			var strWindowFeatures = "location=yes,height=600,width=800,scrollbars=yes,status=yes";
-			signupwindowObjectReference = window.open(URL, "_blank", strWindowFeatures);
+			signupwindowObjectReference = window.open(REGISTER, "_blank", strWindowFeatures);
 		} else {
 			signupwindowObjectReference.focus()
 		}
@@ -1022,14 +1019,13 @@ function main(){
 			}
 			loadJS("js/forms.js");
 			loadJS("js/base.js");
+			loadJS("js/config.js");
 			loadHTML("html/footer.html");
 			//formSubmission('#signup','create_user','User created - Please check your email','User exist');
 			document.getElementById("signup-btn1").onclick = function () {
-				//location.href = "https://auth-itg.hpe.com/signin/register";
 				if (signupwindowObjectReference == null || signupwindowObjectReference.closed){
-					var URL = 'https://auth.hpe.com/signin/register'
 					var strWindowFeatures = "location=yes,height=600,width=800,scrollbars=yes,status=yes";
-					signupwindowObjectReference = window.open(URL, "_blank", strWindowFeatures);
+					signupwindowObjectReference = window.open(REGISTER, "_blank", strWindowFeatures);
 				} else {
 					signupwindowObjectReference.focus()
 				}
