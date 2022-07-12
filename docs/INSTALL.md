@@ -15,3 +15,7 @@ Edit the build_all.sh or build_go.sh scripts first and adapt the environment var
 OR
 
 ./build_go.sh <PATH to the OSFCI Tree>
+
+### Configuration
+
+Please configure the yaml files in /config as well as config.js in gateway/js as per your server preferences at installation.
