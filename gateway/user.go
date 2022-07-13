@@ -575,7 +575,6 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 			if !validateUser(username, path[4]) {
 				http.Error(w, "401 Validation string error", 401)
 			} else {
-				print("REDIRECTION")
 				http.Redirect(
 					w, r,
 					"https://"+r.Host+"/ci/?reset_password=1&username="+username+"&validation="+path[4],
@@ -871,11 +870,6 @@ func init() {
 func main() {
 	base.Zlog.Infof("Starting user...")
 	// http to https redirection
-	print("=============================== \n")
-	print("| Starting user credentials   |\n")
-	print("| Development version -       |\n")
-	print("| Private use only            |\n")
-	print("=============================== \n")
 
 	err := initUserconfig()
 	if err != nil {
@@ -895,7 +889,6 @@ func main() {
 	}
 
 	mux := http.NewServeMux()
-	print("Attaching to " + CredentialURI + "\n")
 	// Serve one page site dynamic pages
 	mux.HandleFunc("/user/", userCallback)
 	if err := http.ListenAndServe(CredentialURI, mux); err != http.ErrServerClosed {
