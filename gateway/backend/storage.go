@@ -341,11 +341,6 @@ func init() {
 
 func main() {
 	base.Zlog.Infof("Starting storage backend...")
-	print("=============================== \n")
-	print("| Starting storage backend    |\n")
-	print("| Development version -       |\n")
-	print("| Private use only            |\n")
-	print("=============================== \n")
 
 	err := initStorageconfig()
 	if err != nil {

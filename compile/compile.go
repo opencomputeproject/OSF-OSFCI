@@ -406,10 +406,6 @@ func init() {
 
 func main() {
 	base.Zlog.Infof("Starting compiler backend...")
-	print("=============================== \n")
-	print("| Starting Compiler backend   |\n")
-	print("| Development version -       |\n")
-	print("=============================== \n")
 
 	err := initCompilerconfig()
 	if err != nil {

@@ -712,10 +712,6 @@ func init() {
 
 func main() {
 	base.Zlog.Infof("Starting controller...")
-	print("=============================== \n")
-	print("| Starting frontend           |\n")
-	print("| Development version -       |\n")
-	print("=============================== \n")
 
 	err := initCtrlconfig()
 	if err != nil {

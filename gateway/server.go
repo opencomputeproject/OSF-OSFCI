@@ -1005,12 +1005,6 @@ func init() {
 
 func main() {
 	base.Zlog.Infof("Starting server...")
-	print("=============================== \n")
-	print("| Starting frontend           |\n")
-	print("| Development version -       |\n")
-	print("| Private use only            |\n")
-	print("=============================== \n")
-	print(" Please do not forget to set TLS_CERT_PATH/TLS_KEY_PATH/STATIC_ASSETS_DIR to there relevant path\n")
 
 	err := initServerconfig()
 	//If there is error reading the config file log error and exit
