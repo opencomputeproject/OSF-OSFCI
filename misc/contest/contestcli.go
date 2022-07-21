@@ -70,7 +70,7 @@ func start(addr string, user string, testlist string, userDir string) {
 		zipwriter, _ := writer.Create("contestlogs/" + "test_" + testname + "_output.json")
 		if _, ok := jobData["Data"]; ok {
 			jobID := fmt.Sprintf("%d", int(jobData["Data"].(map[string]interface{})["JobID"].(float64)))
-			log.Printf("Job started succesfully, Job ID: %s\n", jobID)
+			log.Printf("Job started successfully, Job ID: %s\n", jobID)
 			log.Printf("\nWaiting for job to complete\n")
 			time.Sleep(5 * time.Second)
 			out, err := status(addr, user, jobID)
