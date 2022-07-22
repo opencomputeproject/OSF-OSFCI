@@ -1,8 +1,9 @@
-/*Package base logger notes: varied FOSS projects, gists, blogs etc inspired this effort to adapt ZAP and Lumberjack
+/*
+
+Package base logger notes: varied FOSS projects, gists, blogs etc inspired this effort to adapt ZAP and Lumberjack
 for OSFCI's base library. There are many proects to list and if someone can find a go package that closely represents
 all the functions here, please let us know.
 
-We may very well release a seperate library based off this in the future to help others do the same.
 */
 package base
 

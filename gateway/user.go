@@ -166,7 +166,7 @@ func verifyToken(t string) (*verifier.Jwt, error) {
 }
 
 func generateState() string {
-	// Generate a random byte array for state paramter
+	// Generate a random byte array for state parameter
 	b := make([]byte, 16)
 	rand.Read(b)
 	return hex.EncodeToString(b)

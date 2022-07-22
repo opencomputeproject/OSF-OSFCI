@@ -18,7 +18,7 @@ const (
 	Warn = "warn"
 	//Error for error logs
 	Error = "error"
-	//Fatal is for logging fatal messages. The sytem shutsdown after logging the message.
+	//Fatal is for logging fatal messages. The system shutsdown after logging the message.
 	Fatal = "fatal"
 )
 
