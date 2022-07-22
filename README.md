@@ -1,3 +1,5 @@
+[![Go Report Card](https://goreportcard.com/badge/github.com/opencomputeproject/osf-osfci)](https://goreportcard.com/report/github.com/opencomputeproject/osf-osfci) [![License](https://img.shields.io/badge/license-MIT-green)](https://github.com/opencomputeproject/OSF-OSFCI/blob/master/LICENSE)
+
 # osfci
 Open Source Firmware Continuous Integration source code
 
