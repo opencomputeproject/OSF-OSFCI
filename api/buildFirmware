@@ -101,6 +101,8 @@ curl -s -b $HOME/.osfci/$username.jar -d"$git $branch $machine 0" -X PUT \
 -H "Authorization: OSF ${accessKey}:${signature}" \
 "https://osfci.tech/ci/$command/$username"
 
+sleep 10
+
 if [ "$waitServer" == "1" ]
 then
 waitStatus="1"

@@ -95,7 +95,7 @@ curl -s -o $HOME/.osfci/credential.txt -b $HOME/.osfci/$username.jar -X GET \
 -H "mydate: ${dateFormatted}" \
 -H "Content-Type: ${contentType}" \
 -H "Authorization: OSF ${accessKey}:${signature}" \
-"https://osfci.tech/ci/get_server"
+"https://osfci.tech/ci/get_server/DL360_GEN10"
 
 chmod -Rf 700 $HOME/.osfci/credential.txt
 

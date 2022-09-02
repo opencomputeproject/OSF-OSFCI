@@ -55,14 +55,16 @@ secretKey=`cat $HOME/.osfci/auth | awk '{ print $3 }'`
 dateFormatted=`TZ=GMT date -R`
 if [ "$firmware" == "linuxboot" ] 
 then
-command="getLinuxBoot"
+command="https://osfci.tech/user/$username/getLinuxBoot/dl360gen10"
+relativePath="/user/$username/getLinuxBoot/dl360gen10"
 else
 	if [ "$firmware" == "openbmc" ]
 	then
-command="getOpenBMC"
+command="https://osfci.tech/user/$username/getOpenBMC/dl360poc"
+relativePath="/user/$username/getOpenBMC/dl360poc"
 	fi
 fi
-relativePath="/user/$username/$command"
+#relativePath="/user/$username/$command"
 contentType="application/octet-stream"
 stringToSign="GET\n\n${contentType}\n${dateFormatted}\n${relativePath}"
 signature=`echo -en ${stringToSign} | openssl sha1 -hmac ${secretKey} -binary | base64`
@@ -71,4 +73,4 @@ curl --output $firmware.rom -X GET \
 -H "mydate: ${dateFormatted}" \
 -H "Content-Type: ${contentType}" \
 -H "Authorization: OSF ${accessKey}:${signature}" \
-"https://osfci.tech/user/$username/$command"
+$command

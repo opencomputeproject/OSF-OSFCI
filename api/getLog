@@ -55,11 +55,11 @@ secretKey=`cat $HOME/.osfci/auth | awk '{ print $3 }'`
 dateFormatted=`TZ=GMT date -R`
 if [ "$firmware" == "linuxboot" ] 
 then
-command="getLinuxBootLog"
+command="getLinuxBootLog/dl360gen10"
 else
 	if [ "$firmware" == "openbmc" ]
 	then
-command="getOpenBMCLog"
+command="getOpenBMCLog/dl360poc"
 	fi
 fi
 relativePath="/user/$username/$command"
