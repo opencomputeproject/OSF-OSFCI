@@ -188,10 +188,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 			}
 			defer f.Close()
 			io.Copy(f, file)
-			
+
 			// Truncate the file, if already exists
-			if _, fileerr := os.Stat(solLogPath + "openbmc_sol_" + username + ".log"); fileerr == nil{
-				os.Truncate(solLogPath + "openbmc_sol_" + username + ".log", 0)
+			if _, fileerr := os.Stat(solLogPath + "openbmc_sol_" + username + ".log"); fileerr == nil {
+				os.Truncate(solLogPath+"openbmc_sol_"+username+".log", 0)
 			}
 			// we must forward the request to the relevant test server
 			fmt.Printf("Ilo start received\n")
@@ -230,7 +230,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 			argsConsole = append(argsConsole, "screen")
 			argsConsole = append(argsConsole, "-L")
 			argsConsole = append(argsConsole, "-Logfile")
-			argsConsole = append(argsConsole, solLogPath + "openbmc_sol_" + username + ".log")
+			argsConsole = append(argsConsole, solLogPath+"openbmc_sol_"+username+".log")
 			argsConsole = append(argsConsole, bmcSerial)
 			argsConsole = append(argsConsole, "115200")
 			bmcSerialConsoleCmd = exec.Command(binariesPath+"/ttyd", argsConsole...)
@@ -395,8 +395,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 		f.Write([]byte(myfirmware))
 		fmt.Printf("BMC start received\n")
 		// Truncate the file, if already exists
-		if _, fileerr := os.Stat(solLogPath + "openbmc_sol_" + login + ".log"); fileerr == nil{
-			os.Truncate(solLogPath + "openbmc_sol_" + login + ".log", 0)
+		if _, fileerr := os.Stat(solLogPath + "openbmc_sol_" + login + ".log"); fileerr == nil {
+			os.Truncate(solLogPath+"openbmc_sol_"+login+".log", 0)
 		}
 
 		var args []string
@@ -433,7 +433,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		argsConsole = append(argsConsole, "screen")
 		argsConsole = append(argsConsole, "-L")
 		argsConsole = append(argsConsole, "-Logfile")
-		argsConsole = append(argsConsole, solLogPath + "openbmc_sol_" + login + ".log")
+		argsConsole = append(argsConsole, solLogPath+"openbmc_sol_"+login+".log")
 		argsConsole = append(argsConsole, bmcSerial)
 		argsConsole = append(argsConsole, "115200")
 		bmcSerialConsoleCmd = exec.Command(binariesPath+"/ttyd", argsConsole...)
@@ -466,8 +466,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 		username := tail[1:]
 		fmt.Printf("BMC start received\n")
 		// Truncate the file, if already exists
-		if _, fileerr := os.Stat(solLogPath + "openbmc_sol_" + username + ".log"); fileerr == nil{
-			os.Truncate(solLogPath + "openbmc_sol_" + username + ".log", 0)
+		if _, fileerr := os.Stat(solLogPath + "openbmc_sol_" + username + ".log"); fileerr == nil {
+			os.Truncate(solLogPath+"openbmc_sol_"+username+".log", 0)
 		}
 		var args []string
 		args = append(args, "-p")
@@ -503,7 +503,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		argsConsole = append(argsConsole, "screen")
 		argsConsole = append(argsConsole, "-L")
 		argsConsole = append(argsConsole, "-Logfile")
-		argsConsole = append(argsConsole, solLogPath + "openbmc_sol_" + username + ".log")
+		argsConsole = append(argsConsole, solLogPath+"openbmc_sol_"+username+".log")
 		argsConsole = append(argsConsole, bmcSerial)
 		argsConsole = append(argsConsole, "115200")
 		bmcSerialConsoleCmd = exec.Command(binariesPath+"/ttyd", argsConsole...)
@@ -684,7 +684,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		path := strings.Split(tail, "/")
 		username := path[1]
 		base.Zlog.Infof("Fetching the SOL logs for user:%s", username)
-		logfile := solLogPath + "openbmc_sol_" + username + ".log" 
+		logfile := solLogPath + "openbmc_sol_" + username + ".log"
 		base.Zlog.Infof(logfile)
 		content, err := ioutil.ReadFile(logfile)
 		if err != nil {

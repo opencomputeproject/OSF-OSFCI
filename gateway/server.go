@@ -641,7 +641,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 			path := strings.Split(tail, "/")
 			client := &http.Client{}
 			var req *http.Request
-			req, _ = http.NewRequest("GET", "http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+"/start_bmc/" + path[2], nil)
+			req, _ = http.NewRequest("GET", "http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+"/start_bmc/"+path[2], nil)
 			_, _ = client.Do(req)
 		}
 	case "start_smbios":
@@ -792,7 +792,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 			target := "http://" + ciServers.servers[cacheIndex].ip + ciServers.servers[cacheIndex].tcpPort
 			client := &http.Client{}
 			var req *http.Request
-			req, err := http.NewRequest("GET", target + "/get_sol_logs/" + path[2], nil)
+			req, err := http.NewRequest("GET", target+"/get_sol_logs/"+path[2], nil)
 			if err != nil {
 				base.Zlog.Errorf("Unable to create request: %s", err.Error())
 				return
