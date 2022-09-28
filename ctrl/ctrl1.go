@@ -38,6 +38,7 @@ var biosrecipe string
 var testPath string
 var testLog string
 var contestServer string
+var solLogPath string
 
 //OpenBMCEm100Command string
 var OpenBMCEm100Command *exec.Cmd = nil
@@ -85,6 +86,7 @@ func initCtrlconfig() error {
 	testPath = viper.GetString("TEST_PATH")
 	testLog = viper.GetString("TEST_LOG")
 	contestServer = viper.GetString("CONTEST_SERVER")
+	solLogPath = viper.GetString("SOL_LOG")
 
 	return nil
 }
@@ -186,6 +188,11 @@ func home(w http.ResponseWriter, r *http.Request) {
 			}
 			defer f.Close()
 			io.Copy(f, file)
+
+			// Truncate the file, if already exists
+			if _, fileerr := os.Stat(solLogPath + "openbmc_sol_" + username + ".log"); fileerr == nil {
+				os.Truncate(solLogPath+"openbmc_sol_"+username+".log", 0)
+			}
 			// we must forward the request to the relevant test server
 			fmt.Printf("Ilo start received\n")
 
@@ -221,6 +228,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 			argsConsole = append(argsConsole, "-s")
 			argsConsole = append(argsConsole, "9")
 			argsConsole = append(argsConsole, "screen")
+			argsConsole = append(argsConsole, "-L")
+			argsConsole = append(argsConsole, "-Logfile")
+			argsConsole = append(argsConsole, solLogPath+"openbmc_sol_"+username+".log")
 			argsConsole = append(argsConsole, bmcSerial)
 			argsConsole = append(argsConsole, "115200")
 			bmcSerialConsoleCmd = exec.Command(binariesPath+"/ttyd", argsConsole...)
@@ -384,6 +394,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 		defer f.Close()
 		f.Write([]byte(myfirmware))
 		fmt.Printf("BMC start received\n")
+		// Truncate the file, if already exists
+		if _, fileerr := os.Stat(solLogPath + "openbmc_sol_" + login + ".log"); fileerr == nil {
+			os.Truncate(solLogPath+"openbmc_sol_"+login+".log", 0)
+		}
 
 		var args []string
 		args = append(args, "-p")
@@ -417,6 +431,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 		argsConsole = append(argsConsole, "-s")
 		argsConsole = append(argsConsole, "9")
 		argsConsole = append(argsConsole, "screen")
+		argsConsole = append(argsConsole, "-L")
+		argsConsole = append(argsConsole, "-Logfile")
+		argsConsole = append(argsConsole, solLogPath+"openbmc_sol_"+login+".log")
 		argsConsole = append(argsConsole, bmcSerial)
 		argsConsole = append(argsConsole, "115200")
 		bmcSerialConsoleCmd = exec.Command(binariesPath+"/ttyd", argsConsole...)
@@ -444,7 +461,14 @@ func home(w http.ResponseWriter, r *http.Request) {
 		conn.Close()
 
 	case "start_bmc":
+		// We must get the username from the request
+		_, tail := ShiftPath(r.URL.Path)
+		username := tail[1:]
 		fmt.Printf("BMC start received\n")
+		// Truncate the file, if already exists
+		if _, fileerr := os.Stat(solLogPath + "openbmc_sol_" + username + ".log"); fileerr == nil {
+			os.Truncate(solLogPath+"openbmc_sol_"+username+".log", 0)
+		}
 		var args []string
 		args = append(args, "-p")
 		args = append(args, "7681")
@@ -477,6 +501,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 		argsConsole = append(argsConsole, "-s")
 		argsConsole = append(argsConsole, "9")
 		argsConsole = append(argsConsole, "screen")
+		argsConsole = append(argsConsole, "-L")
+		argsConsole = append(argsConsole, "-Logfile")
+		argsConsole = append(argsConsole, solLogPath+"openbmc_sol_"+username+".log")
 		argsConsole = append(argsConsole, bmcSerial)
 		argsConsole = append(argsConsole, "115200")
 		bmcSerialConsoleCmd = exec.Command(binariesPath+"/ttyd", argsConsole...)
@@ -644,6 +671,20 @@ func home(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		logfile := strings.TrimSpace(string(out[:]))
+		base.Zlog.Infof(logfile)
+		content, err := ioutil.ReadFile(logfile)
+		if err != nil {
+			base.Zlog.Infof(err.Error())
+			return
+		}
+		w.Header().Add("Content-Length", strconv.Itoa(len(content)))
+		w.Write(content)
+	case "get_sol_logs":
+		_, tail := ShiftPath(r.URL.Path)
+		path := strings.Split(tail, "/")
+		username := path[1]
+		base.Zlog.Infof("Fetching the SOL logs for user:%s", username)
+		logfile := solLogPath + "openbmc_sol_" + username + ".log"
 		base.Zlog.Infof(logfile)
 		content, err := ioutil.ReadFile(logfile)
 		if err != nil {
