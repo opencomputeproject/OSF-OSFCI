@@ -49,7 +49,7 @@ function homebutton(){
 		$.ajax({
     			type: "GET",
 	                contentType: 'application/json',
-    			url: window.location.origin + '/ci/start_bmc/',
+    			url: window.location.origin + '/ci/start_bmc/' + mylocalStorage['username'],
 			success: function(response){
 				console.log("Bmc em100 started");
 				$('#bmcem100console').contents().find("head").remove();
@@ -80,6 +80,7 @@ function homebutton(){
                         success: function(response){
                                 console.log("Bmc console started");
                                 $('#bmcconsole').attr("src", window.location+"/bmc_console");
+				$('#bmcconsolelog').css("display","");
                         }
                 });
         });
@@ -104,6 +105,11 @@ function homebutton(){
                                 console.log("System stopped");
                         }
                 });
+        });
+        $('#bmcconsolelog > span').on("click", function() {
+                // we must redirect to the home page
+                var win = window.open(window.location.origin + '/ci/sol_logs/' + mylocalStorage['username']), '_blank');
+                win.focus();
         });
 }
 
