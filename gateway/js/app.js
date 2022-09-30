@@ -108,7 +108,7 @@ function homebutton(){
         });
         $('#bmcconsolelog > span').on("click", function() {
                 // we must redirect to the home page
-                var win = window.open(window.location.origin + '/ci/sol_logs/' + mylocalStorage['username']), '_blank');
+                var win = window.open(window.location.origin + '/ci/sol_logs/' + mylocalStorage['username'], '_blank');
                 win.focus();
         });
 }
@@ -153,7 +153,7 @@ function start_ci(machine) {
 				var minutes = Math.floor((secondWait % ( 60 * 60)) / 60);
   				var seconds = Math.floor((secondWait % ( 60)) );
 
-  				$("#countdown").html(days + "d " + hours + "h " + minutes + "m " + seconds + "s");
+  				$("#countdown").html("Wait-time to get " + machine + " is " + days + "d " + hours + "h " + minutes + "m " + seconds + "s");
 				$("#users").html(answer.Queue);
 				secondWait = secondWait - 1;
 				// If the count down is finished, write some text
@@ -237,7 +237,7 @@ function run_ci(servername, RemainingSecond) {
                    var minutes = Math.floor((RemainingSecond % ( 60 * 60)) / 60);
                    var seconds = Math.floor((RemainingSecond % ( 60)) );
 
-                   $("#counter").html(days + "d " + hours + "h " + minutes + "m " + seconds + "s");
+                   $("#counter").html("Time remaining on: " + servername + " is " + days + "d " + hours + "h " + minutes + "m " + seconds + "s");
                    RemainingSecond = RemainingSecond - 1;
                    // If the count down is finished, write some text
 
