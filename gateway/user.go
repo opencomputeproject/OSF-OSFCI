@@ -235,6 +235,7 @@ func userGetInternalInfo(nickname string) *base.User {
 	var returnValue *base.User
 	var result string
 	if userExist(nickname) {
+		base.Zlog.Infof("User exists")
 		result = base.HTTPGetRequest("http://" + StorageURI + StorageTCPPORT + "/user/" + nickname)
 		returnValue = new(base.User)
 		json.Unmarshal([]byte(result), returnValue)
@@ -535,6 +536,61 @@ func getLinuxBootBuildLog(username string, w http.ResponseWriter, recipe string)
 	w.Write(buf)
 }
 
+func authHpe(username string, password string, w http.ResponseWriter){
+	payload := map[string]string{"username":username, "password":password}
+	byts, _ := json.Marshal(payload)
+	url := "https://auth.hpe.com/api/v1/authn"
+	req, err := http.NewRequest("POST", url, bytes.NewReader(byts))
+	if err != nil {
+		base.Zlog.Errorf(err.Error())
+		http.Error(w, "Authentication failed", 401)
+		return
+	}
+	req.Header.Set("Content-Type", "application/json; charset=UTF-8")
+	client := &http.Client{}
+	resp, err := client.Do(req)
+	if err != nil {
+		base.Zlog.Errorf(err.Error())
+		http.Error(w, "Authentication failed", 401)
+		return
+	}
+	body, err:= ioutil.ReadAll(resp.Body)
+	if err != nil {
+		base.Zlog.Errorf(err.Error())
+		http.Error(w, "Authentication failed", 401)
+		return
+	}
+	base.Zlog.Infof(string(body))
+	response := make(map[string]interface{})
+	json.Unmarshal(body, &response)
+	_, is_logged := response["status"]
+	if is_logged && response["status"].(string) == "SUCCESS"{
+		base.Zlog.Infof(response["status"].(string))
+		profile := response["_embedded"].(map[string]interface{})["user"].(map[string]interface{})["profile"].(map[string]interface{})
+		var user = new(authUser)
+		user.Nickname = profile["firstName"].(string) + profile["lastName"].(string)
+		user.Email = profile["login"].(string)
+		user.TokenAuth = base.GenerateAccountACKLink(20)
+		user.TokenSecret = base.GenerateAuthToken("mac", 40)
+		user.TokenType = "mac"
+		user.AccessToken = response["stateToken"].(string)
+		user.TokenID = response["sessionToken"].(string)
+		UserDB[user.Email] = user
+		returnData := map[string]string{}
+		returnData["accessKey"] = user.TokenAuth
+		returnData["secretKey"] = user.TokenSecret
+		returnValue, _ := json.Marshal(returnData)
+		sessionid := getSessionID(user.Email)
+		cookie := http.Cookie{Name: "osfci_cookie", Value: sessionid, Path: "/", HttpOnly: true, MaxAge: int(base.MaxAge)}
+		http.SetCookie(w, &cookie)
+		fmt.Fprintf(w, string(returnValue))
+	}else{
+		base.Zlog.Errorf("Authentication failed")
+		http.Error(w, "Authentication failed", 401)
+	}
+	defer resp.Body.Close()
+}
+
 func userCallback(w http.ResponseWriter, r *http.Request) {
 	var username, command string
 	var recipe string
@@ -802,6 +858,12 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 			password := r.FormValue("password")
 			var result *base.User
 			result = userGetInternalInfo(username)
+			base.Zlog.Infof("User check done")
+			if result == nil{
+				base.Zlog.Infof("Trying to authenticate using HPE Auth")
+				authHpe(username, password, w)
+				return
+			}
 			if !base.CheckPasswordHash(password, result.Password) {
 				http.Error(w, "401 Password error", 401)
 				base.Zlog.Infof("Password error: %s - %s %s %s", r.RemoteAddr, r.Proto, r.Method, r.URL.RequestURI())
