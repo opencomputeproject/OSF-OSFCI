@@ -498,6 +498,12 @@ func home(w http.ResponseWriter, r *http.Request) {
 				conn.Close()
 				// The controller is up
 				Up = "1"
+				base.Zlog.Infof("ROM sol log start send\n")
+				client := &http.Client{}
+				var req *http.Request
+				req, _ = http.NewRequest("POST", "http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+"/rom_sol_log?bmcip="+bmcIP, nil)
+				_, _ = client.Do(req)
+
 			} else {
 				Up = "0"
 			}
@@ -783,16 +789,40 @@ func home(w http.ResponseWriter, r *http.Request) {
 			req, _ = http.NewRequest("GET", "http://"+ciServers.servers[cacheIndex].ip+ciServers.servers[cacheIndex].tcpPort+"/load_from_storage_bmc/"+login, nil)
 			_, _ = client.Do(req)
 		}
-	case "sol_logs":
+	case "sol_bmc_logs":
 		if cacheIndex != -1 {
 			_, tail = ShiftPath(r.URL.Path)
 			path := strings.Split(tail, "/")
 			base.Zlog.Infof(tail)
-			base.Zlog.Infof("Fetching the SOL logs")
+			base.Zlog.Infof("Fetching the BMC SOL logs")
 			target := "http://" + ciServers.servers[cacheIndex].ip + ciServers.servers[cacheIndex].tcpPort
 			client := &http.Client{}
 			var req *http.Request
-			req, err := http.NewRequest("GET", target+"/get_sol_logs/"+path[2], nil)
+			req, err := http.NewRequest("GET", target+"/get_bmc_logs/"+path[2], nil)
+			if err != nil {
+				base.Zlog.Errorf("Unable to create request: %s", err.Error())
+				return
+			}
+			response, err := client.Do(req)
+			if err != nil {
+				base.Zlog.Errorf("Unable to send request: %s", err.Error())
+				return
+			}
+			buf, err := ioutil.ReadAll(response.Body)
+			if err != nil {
+				base.Zlog.Errorf("Response is null: %s", err.Error())
+				return
+			}
+			w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
+			w.Write(buf)
+		}
+	case "sol_bios_logs":
+		if cacheIndex != -1 {
+			base.Zlog.Infof("Fetching the BIOS SOL logs")
+			target := "http://" + ciServers.servers[cacheIndex].ip + ciServers.servers[cacheIndex].tcpPort
+			client := &http.Client{}
+			var req *http.Request
+			req, err := http.NewRequest("GET", target+"/get_bios_logs", nil)
 			if err != nil {
 				base.Zlog.Errorf("Unable to create request: %s", err.Error())
 				return

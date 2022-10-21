@@ -1,0 +1,7 @@
+#!/bin/bash
+set -m
+IP=$1
+LOGPATH=''
+USER=''
+PWD=''
+screen -dm -S bioslogging -L -Logfile ${LOGPATH} sshpass -p $PWD ssh -q -p 2200 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ConnectionAtte$

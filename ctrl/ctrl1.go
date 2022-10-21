@@ -46,6 +46,7 @@ var bmcSerialConsoleCmd *exec.Cmd = nil
 
 //RomEm100Command string
 var RomEm100Command *exec.Cmd = nil
+var romSerialConsoleCmd *exec.Cmd = nil
 
 //Test Console ttyd
 var contestStartCmd *exec.Cmd = nil
@@ -531,6 +532,25 @@ func home(w http.ResponseWriter, r *http.Request) {
 		}
 		conn.Close()
 
+	case "rom_sol_log":
+		// We must get the username from the request
+		base.Zlog.Infof("ROM sol log start received")
+		// Truncate the file, if already exists
+		if _, fileerr := os.Stat(solLogPath + "bios_sol.log"); fileerr == nil {
+			os.Truncate(solLogPath+"bios_sol.log", 0)
+		}
+
+		// we need to start also the console
+		sutIP := r.FormValue("bmcip")
+		base.Zlog.Infof("SUTIP:", sutIP)
+
+		var argsConsole []string
+		argsConsole = append(argsConsole, sutIP)
+		romSerialConsoleCmd = exec.Command("/usr/local/production/bin/bioslog", argsConsole...)
+		romSerialConsoleCmd.Start()
+		go func() {
+			romSerialConsoleCmd.Wait()
+		}()
 	case "start_smbios":
 		// we must forward the request to the relevant test server
 		fmt.Printf("System BIOS start received\n")
@@ -679,12 +699,23 @@ func home(w http.ResponseWriter, r *http.Request) {
 		}
 		w.Header().Add("Content-Length", strconv.Itoa(len(content)))
 		w.Write(content)
-	case "get_sol_logs":
+	case "get_bmc_logs":
 		_, tail := ShiftPath(r.URL.Path)
 		path := strings.Split(tail, "/")
 		username := path[1]
-		base.Zlog.Infof("Fetching the SOL logs for user:%s", username)
+		base.Zlog.Infof("Fetching the SOL BMC logs for user:%s", username)
 		logfile := solLogPath + "openbmc_sol_" + username + ".log"
+		base.Zlog.Infof(logfile)
+		content, err := ioutil.ReadFile(logfile)
+		if err != nil {
+			base.Zlog.Infof(err.Error())
+			return
+		}
+		w.Header().Add("Content-Length", strconv.Itoa(len(content)))
+		w.Write(content)
+	case "get_bios_logs":
+		base.Zlog.Infof("Fetching the BIOS logs")
+		logfile := solLogPath + "bios_sol.log"
 		base.Zlog.Infof(logfile)
 		content, err := ioutil.ReadFile(logfile)
 		if err != nil {
