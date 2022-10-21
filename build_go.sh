@@ -10,11 +10,11 @@ local=`realpath .`
 #export GOPATH=$local:$mypath
 #echo $GOPATH
 if [ -f "go.mod" ] ; then
-	echo "deleting go.mod in build dir\n"
+        echo "deleting go.mod in build dir\n"
         rm -f "go.mod"
 fi
 if [ -f "go.sum" ] ; then
-	echo "deleting go.sum in build dir\n"
+        echo "deleting go.sum in build dir\n"
         rm -f "go.sum"
 fi
 cd $1/base/
@@ -22,7 +22,8 @@ pwd
 go get -u go.uber.org/zap
 go get gopkg.in/natefinch/lumberjack.v2
 go mod init base/base
-go mod tidy
+#go mod tidy
+go mod tidy -compat=1.17
 cd /home/ciadmin/build/
 pwd
 go get golang.org/x/crypto/acme/autocert
@@ -32,14 +33,17 @@ go mod init github.com/spf13
 go mod edit -replace base/base=$1/base
 go mod tidy
 echo "Building Server.go ...\n"
-go get base/base
 go get github.com/spf13/viper
 go get golang.org/x/crypto/acme/autocert
 go get github.com/fsnotify/fsnotify@v1.4.9
+go mod download github.com/spf13/viper
+go get base/base
 go build -ldflags="-s" $1/gateway/server.go
 echo "Building ctrl1.go ...\n"
 go build -ldflags="-s" $1/ctrl/ctrl1.go
 echo "Building user.go ...\n"
+go get github.com/gorilla/sessions
+go get github.com/okta/okta-jwt-verifier-golang
 go build -ldflags="-s" $1/gateway/user.go
 echo "Building storage.go ...\n"
 go build -ldflags="-s" $1/gateway/backend/storage.go
@@ -49,7 +53,8 @@ go get github.com/docker/docker/client
 echo "Building compile.go ...\n"
 go build -ldflags="-s" $1/compile/compile.go
 if [ -f "$1/base/go.mod" ] ; then
-	echo "Deleting go.mod in base after build"
+        echo "Deleting go.mod in base after build"
         rm -f "$1/base/go.mod"
 fi
 exit 1
+
