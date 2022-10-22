@@ -533,7 +533,6 @@ func home(w http.ResponseWriter, r *http.Request) {
 		conn.Close()
 
 	case "rom_sol_log":
-		// We must get the username from the request
 		base.Zlog.Infof("ROM sol log start received")
 		// Truncate the file, if already exists
 		if _, fileerr := os.Stat(solLogPath + "bios_sol.log"); fileerr == nil {
