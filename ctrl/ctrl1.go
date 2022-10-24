@@ -545,7 +545,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 
 		var argsConsole []string
 		argsConsole = append(argsConsole, sutIP)
-		romSerialConsoleCmd = exec.Command("/usr/local/production/bin/bioslog", argsConsole...)
+		romSerialConsoleCmd = exec.Command(binariesPath+"/bioslog", argsConsole...)
 		romSerialConsoleCmd.Start()
 		go func() {
 			romSerialConsoleCmd.Wait()
