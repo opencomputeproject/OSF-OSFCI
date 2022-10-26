@@ -81,6 +81,7 @@ function homebutton(){
                                 console.log("Bmc console started");
                                 $('#bmcconsole').attr("src", window.location+"/bmc_console");
 				$('#bmcconsolelog').css("display","");
+				$('#biosconsolelog').css("display","");
                         }
                 });
         });
@@ -108,7 +109,12 @@ function homebutton(){
         });
         $('#bmcconsolelog > span').on("click", function() {
                 // we must redirect to the home page
-                var win = window.open(window.location.origin + '/ci/sol_logs/' + mylocalStorage['username'], '_blank');
+                var win = window.open(window.location.origin + '/ci/sol_bmc_logs/' + mylocalStorage['username'], '_blank');
+                win.focus();
+        });
+        $('#biosconsolelog > span').on("click", function() {
+                // we must redirect to the home page
+                var win = window.open(window.location.origin + '/ci/sol_bios_logs/', '_blank');
                 win.focus();
         });
 }

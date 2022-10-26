@@ -91,15 +91,6 @@ $("#Home").on("click", function(event) {
 	mainpage();
 });
 
-$('#features').on("click", function(event) {
-        clearDocument();
-        loadHTML("html/navbar.html");
-        loadJS("js/navbar.js");
-        navbarHover();
-        loginBtn();
-	loadHTML("html/features.html");
-});
-
 // tooltip element will appear/hide once the helptoggle is clicked
 function enableDisableToolTip() {
     let toolTip = document.getElementsByClassName('tooltiptext')
