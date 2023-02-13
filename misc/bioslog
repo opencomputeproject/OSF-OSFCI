@@ -4,4 +4,22 @@ IP=$1
 LOGPATH=''
 USER=''
 PWD=''
-screen -dm -S bioslogging -L -Logfile ${LOGPATH} sshpass -p $PWD ssh -q -p 2200 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ConnectionAtte$
+try=1
+echo "START" > #replace with loaation e.g. /tmp/bios.log
+while [ $try -le 10 ]
+do
+	echo sshpass -p $PWD ssh -p 2200 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ConnectionAttempts=30 -o ServerAliveInterval=240 -o ServerAliveCountMax=30 ${USER}@${IP}
+	screen -dm -S bioslogging -L -Logfile ${LOGPATH} sshpass -p $PWD ssh -p 2200 -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o ConnectionAttempts=30 -o ServerAliveInterval=240 -o ServerAliveCountMax=30 ${USER}@${IP}
+	sleep 10 
+	pid=`pgrep "sshpass"`
+	echo $try >> #replace with loaation e.g. /tmp/bios.log
+	echo $pid >> #replace with loaation e.g. /tmp/bios.log
+	if [ -z "$pid"]
+	then
+		echo "Retrying to start the BIOS logging" >> #replace with loaation e.g. /tmp/bios.log
+	else
+		echo "Process started, PID:" $pid  >> #replace with loaation e.g. /tmp/bios.log
+		break
+	fi
+	try=$(( $try + 1))
+done
