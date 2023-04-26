@@ -74,16 +74,19 @@ type serverProduct struct {
 var ciServersProducts []serverProduct
 
 type serverEntry struct {
-	servername   string
-	ip           string
-	tcpPort      string
-	compileIP    string
-	bmcIP        string
-	currentOwner string
-	gitToken     string
-	queue        int
-	expiration   time.Time
-	ProductIndex int
+	servername      string
+	ip              string
+	tcpPort         string
+	compileIP       string
+	compilePort     string
+	compileBmcPort  string
+	compileBiosPort string
+	bmcIP           string
+	currentOwner    string
+	gitToken        string
+	queue           int
+	expiration      time.Time
+	ProductIndex    int
 }
 
 type serversList struct {
@@ -295,7 +298,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].ip+ciServers.servers[i].tcpPort+"/power_off", nil)
 						_, _ = client.Do(req)
 						client = &http.Client{}
-						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+"/clean_up", nil)
+						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+ciServers.servers[i].compilePort+"/clean_up", nil)
 						_, _ = client.Do(req)
 						ciServers.mux.Unlock()
 					} else {
@@ -384,7 +387,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 							req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].ip+ciServers.servers[i].tcpPort+"/power_off", nil)
 							_, _ = client.Do(req)
 							client = &http.Client{}
-							req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+"/clean_up", nil)
+							req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+ciServers.servers[i].compilePort+"/clean_up", nil)
 							_, _ = client.Do(req)
 							w.Write([]byte(returnData))
 							return
@@ -399,7 +402,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 							req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].ip+ciServers.servers[i].tcpPort+"/power_off", nil)
 							_, _ = client.Do(req)
 							client = &http.Client{}
-							req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+"/clean_up", nil)
+							req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+ciServers.servers[i].compilePort+"/clean_up", nil)
 							_, _ = client.Do(req)
 							myoutput.Servername = ciServers.servers[i].servername
 							myoutput.Waittime = "0"
@@ -452,7 +455,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 						ciServers.servers[i].gitToken = ""
 						client := &http.Client{}
 						var req *http.Request
-						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+compileTCPPort+"/clean_up", nil)
+						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+ciServers.servers[i].compilePort+"/clean_up", nil)
 						_, _ = client.Do(req)
 					}
 				}
@@ -530,9 +533,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 		}
 	case "is_running":
 		if cacheIndex != -1 {
-			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIP + compileTCPPort)
+			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIP + ciServers.servers[cacheIndex].compilePort)
 			proxy := httputil.NewSingleHostReverseProxy(url)
-			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIP + compileTCPPort
+			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIP + ciServers.servers[cacheIndex].compilePort
 			//fmt.Printf("Tail %s\n", tail)
 			base.Zlog.Infof("Tail %s", tail)
 			r.URL.Path = tail
@@ -572,9 +575,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 		}
 	case "smbios_build_console":
 		if cacheIndex != -1 {
-			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIP + ":7681")
+			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIP + ciServers.servers[cacheIndex].compileBiosPort)
 			proxy := httputil.NewSingleHostReverseProxy(url)
-			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIP + TTYDem100Bios
+			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIP + ciServers.servers[cacheIndex].compileBiosPort
 			filePath := strings.Split(tail, "/")
 			r.URL.Path = "/"
 			if len(filePath) > 2 {
@@ -585,9 +588,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 		}
 	case "bmc_build_console":
 		if cacheIndex != -1 {
-			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIP + ":7682")
+			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIP + ciServers.servers[cacheIndex].compileBmcPort)
 			proxy := httputil.NewSingleHostReverseProxy(url)
-			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIP + TTYDem100BMC
+			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIP + ciServers.servers[cacheIndex].compileBmcPort
 			filePath := strings.Split(tail, "/")
 			r.URL.Path = "/"
 			if len(filePath) > 2 {
@@ -735,9 +738,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 			// the code to connect to the ttyd daemon
 			//fmt.Printf("Forward biosfirmware build\n")
 			base.Zlog.Infof("Forward bios firmware build")
-			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIP + compileTCPPort)
+			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIP + ciServers.servers[cacheIndex].compilePort)
 			proxy := httputil.NewSingleHostReverseProxy(url)
-			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIP + compileTCPPort
+			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIP + ciServers.servers[cacheIndex].compilePort
 			// This approach is not really safe we shall transfer the Token through a specific call
 			r.URL.Path = tail + "/" + ciServers.servers[cacheIndex].gitToken
 			r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
@@ -758,9 +761,9 @@ func home(w http.ResponseWriter, r *http.Request) {
 			// the code to connect to the ttyd daemon
 			//fmt.Printf("Forward bmcfirmware build\n")
 			base.Zlog.Infof("Forward bmc firmware build")
-			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIP + compileTCPPort)
+			url, _ := url.Parse("http://" + ciServers.servers[cacheIndex].compileIP + ciServers.servers[cacheIndex].compilePort)
 			proxy := httputil.NewSingleHostReverseProxy(url)
-			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIP + compileTCPPort
+			r.URL.Host = "http://" + ciServers.servers[cacheIndex].compileIP + ciServers.servers[cacheIndex].compilePort
 			r.URL.Path = tail + "/" + ciServers.servers[cacheIndex].gitToken
 			r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 			proxy.ServeHTTP(w, r)
@@ -1118,6 +1121,9 @@ func main() {
 			newEntry.ip = viper.GetString(ipstring)
 			newEntry.tcpPort = viper.GetString(tcpportstring)
 			newEntry.compileIP = viper.GetString(compileripstring)
+			newEntry.compilePort = viper.GetString(viperstring + ".compilePort")
+			newEntry.compileBmcPort = viper.GetString(viperstring + ".compileBmcPort")
+			newEntry.compileBiosPort = viper.GetString(viperstring + ".compileBiosPort")
 			newEntry.currentOwner = ""
 			newEntry.gitToken = ""
 			newEntry.expiration = time.Now()
@@ -1130,6 +1136,7 @@ func main() {
 				newEntry.ProductIndex = 0
 			case "DL325_GEN10PLUS":
 				newEntry.ProductIndex = 1
+
 			}
 			ciServers.mux.Lock()
 			ciServers.servers = append(ciServers.servers, newEntry)
