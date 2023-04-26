@@ -1,0 +1,34 @@
+FROM ubuntu:18.04
+
+# Set the Current Working Directory inside the container
+WORKDIR /app
+
+# lets build
+
+RUN apt-get --allow-unauthenticated update --allow-insecure-repositories
+RUN apt-get update && apt install -qq -y locales
+RUN sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    locale-gen
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+RUN apt install -y apt-utils
+RUN apt-get update && apt-get install --no-install-recommends -y ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN cat /etc/apt/sources.list
+RUN DEBIAN_FRONTEND=noninteractive apt-get update && DEBIAN_FRONTEND=noninteractive  apt install -qq -y build-essential libcurl4-gnutls-dev libexpat1-dev gettext unzip wget
+RUN apt-get -y install git apt-transport-https ca-certificates curl gnupg2 software-properties-common
+RUN curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg > /tmp/dkey; apt-key add /tmp/dkey
+RUN add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") $(lsb_release -cs) stable"
+RUN apt-get update && apt-get install -y docker-ce libssl-dev openssl libwebsockets-dev screen openssl libssl1.0.0
+RUN useradd -ms /bin/bash ciadmin
+RUN mkdir -p /usr/local/production && chown ciadmin:ciadmin /usr/local/production
+RUN usermod -aG docker ciadmin
+USER ciadmin
+RUN mkdir -p /usr/local/production/bin
+RUN mkdir -p /usr/local/production/tmp
+RUN mkdir -p /usr/local/production/docker
+RUN mkdir -p /usr/local/production/images
+RUN mkdir -p /usr/local/production/config
+RUN mkdir -p /usr/local/production/logs
+RUN mkfifo /usr/local/production/tmp/bios_fifo
+CMD ["/usr/local/production/bin/compile"]

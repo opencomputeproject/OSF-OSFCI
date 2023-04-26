@@ -1,0 +1,86 @@
+version: "3.9"
+services:
+  compiler1:
+    image: "compilernode"
+    container_name: "compiler1"
+    ports:
+      - "9101:9101"
+      - "7181:7681"
+      - "7182:7682"
+    volumes:
+      - '/usr/local/production/logs/compiler1:/usr/local/production/logs'
+      - '/usr/local/production/bin:/usr/local/production/bin' 
+      - '/usr/local/production/config:/usr/local/production/config' 
+      - '/usr/local/production/images:/usr/local/production/images' 
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - '/tmp:/tmp'
+  compiler2:
+    image: "compilernode"
+    container_name: "compiler2"
+    ports:
+      - "9201:9101"
+      - "7281:7681"
+      - "7282:7682"
+    volumes:
+      - '/usr/local/production/logs/compiler2:/usr/local/production/logs'
+      - '/usr/local/production/bin:/usr/local/production/bin' 
+      - '/usr/local/production/config:/usr/local/production/config' 
+      - '/usr/local/production/images:/usr/local/production/images' 
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - '/tmp:/tmp'
+  compiler3:
+    image: "compilernode"
+    container_name: "compiler3"
+    ports:
+      - "9301:9101"
+      - "7381:7681"
+      - "7382:7682"
+    volumes:
+      - '/usr/local/production/logs/compiler3:/usr/local/production/logs'
+      - '/usr/local/production/bin:/usr/local/production/bin' 
+      - '/usr/local/production/config:/usr/local/production/config' 
+      - '/usr/local/production/images:/usr/local/production/images' 
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - '/tmp:/tmp'
+  compiler4:
+    image: "compilernode"
+    container_name: "compiler4"
+    ports:
+      - "9401:9101"
+      - "7481:7681"
+      - "7482:7682"
+    volumes:
+      - '/usr/local/production/logs/compiler4:/usr/local/production/logs'
+      - '/usr/local/production/bin:/usr/local/production/bin' 
+      - '/usr/local/production/config:/usr/local/production/config' 
+      - '/usr/local/production/images:/usr/local/production/images' 
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - '/tmp:/tmp'
+  compiler5:
+    image: "compilernode"
+    container_name: "compiler5"
+    ports:
+      - "9501:9101"
+      - "7581:7681"
+      - "7582:7682"
+    volumes:
+      - '/usr/local/production/logs/compiler5:/usr/local/production/logs'
+      - '/usr/local/production/bin:/usr/local/production/bin' 
+      - '/usr/local/production/config:/usr/local/production/config' 
+      - '/usr/local/production/images:/usr/local/production/images' 
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - '/tmp:/tmp'
+  compiler6:
+    image: "compilernode"
+    container_name: "compiler6"
+    ports:
+      - "9601:9101"
+      - "7681:7681"
+      - "7682:7682"
+    volumes:
+      - '/usr/local/production/logs/compiler6:/usr/local/production/logs'
+      - '/usr/local/production/bin:/usr/local/production/bin' 
+      - '/usr/local/production/config:/usr/local/production/config' 
+      - '/usr/local/production/images:/usr/local/production/images' 
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      - '/tmp:/tmp'
