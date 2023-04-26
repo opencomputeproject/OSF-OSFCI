@@ -74,19 +74,19 @@ type serverProduct struct {
 var ciServersProducts []serverProduct
 
 type serverEntry struct {
-	servername   	string
-	ip           	string
-	tcpPort      	string
-	compileIP    	string
-	compilePort  	string
-	compileBmcPort	string
-	compileBiosPort	string
-	bmcIP        	string
-	currentOwner 	string
-	gitToken     	string
-	queue        	int
-	expiration   	time.Time
-	ProductIndex 	int
+	servername      string
+	ip              string
+	tcpPort         string
+	compileIP       string
+	compilePort     string
+	compileBmcPort  string
+	compileBiosPort string
+	bmcIP           string
+	currentOwner    string
+	gitToken        string
+	queue           int
+	expiration      time.Time
+	ProductIndex    int
 }
 
 type serversList struct {
@@ -298,7 +298,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].ip+ciServers.servers[i].tcpPort+"/power_off", nil)
 						_, _ = client.Do(req)
 						client = &http.Client{}
-						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP + ciServers.servers[i].compilePort +"/clean_up", nil)
+						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+ciServers.servers[i].compilePort+"/clean_up", nil)
 						_, _ = client.Do(req)
 						ciServers.mux.Unlock()
 					} else {
@@ -387,7 +387,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 							req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].ip+ciServers.servers[i].tcpPort+"/power_off", nil)
 							_, _ = client.Do(req)
 							client = &http.Client{}
-							req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP + ciServers.servers[i].compilePort + "/clean_up", nil)
+							req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+ciServers.servers[i].compilePort+"/clean_up", nil)
 							_, _ = client.Do(req)
 							w.Write([]byte(returnData))
 							return
@@ -402,7 +402,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 							req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].ip+ciServers.servers[i].tcpPort+"/power_off", nil)
 							_, _ = client.Do(req)
 							client = &http.Client{}
-							req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP + ciServers.servers[i].compilePort + "/clean_up", nil)
+							req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+ciServers.servers[i].compilePort+"/clean_up", nil)
 							_, _ = client.Do(req)
 							myoutput.Servername = ciServers.servers[i].servername
 							myoutput.Waittime = "0"
@@ -455,7 +455,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 						ciServers.servers[i].gitToken = ""
 						client := &http.Client{}
 						var req *http.Request
-						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP + ciServers.servers[i].compilePort + "/clean_up", nil)
+						req, _ = http.NewRequest("GET", "http://"+ciServers.servers[i].compileIP+ciServers.servers[i].compilePort+"/clean_up", nil)
 						_, _ = client.Do(req)
 					}
 				}
