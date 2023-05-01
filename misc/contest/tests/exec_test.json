@@ -1,0 +1,58 @@
+{
+    "JobName": "Hostname validation",
+    "Runs": 1,
+    "RunInterval": "3s",
+    "Tags": ["taas"],
+    "Version":"1.0",
+    "TestDescriptors": [
+        {
+            "TargetManagerName": "TargetList",
+            "TargetManagerAcquireParameters": {
+                "Targets": [
+                    {
+                        "FQDN": "10.1.1.1",
+                        "ID": "12345"
+                    }
+                ]
+            },
+            "TargetManagerReleaseParameters": {
+            },
+            "TestFetcherName": "literal",
+            "TestFetcherFetchParameters": {
+                "TestName": "Literal test",
+                "Steps": [
+			{
+				"name": "exec",
+				"label": "label",
+				"parameters": {
+				    "bag": [
+					{
+					    "bin": {
+						"path": "PATH TO BIN FILE",
+						"args": ["-ip", "1.1.1.1"]
+					    },
+					    "transport": {
+						"proto": "local"
+					    },
+					    "constraints": {
+						"time_quota": "600s"
+					    },
+					    "ocp_output": true
+					}
+				    ]
+				}
+			}
+                ]
+            }
+        }
+    ],
+    "Reporting": {
+        "RunReporters": [
+        ],
+        "FinalReporters": [
+            {
+                "Name": "noop"
+            }
+        ]
+    }
+}
