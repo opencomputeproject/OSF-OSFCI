@@ -12,8 +12,10 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"net/http"
 	"strings"
 	"time"
+	"regexp"
 )
 
 func main() {
@@ -67,12 +69,12 @@ func start(addr string, user string, testlist string, userDir string) {
 		var jobData map[string]interface{}
 		json.Unmarshal(out.Bytes(), &jobData)
 		log.Println(out.String())
-		zipwriter, _ := writer.Create("contestlogs/" + "test_" + testname + "_output.json")
+		zipwriter, _ := writer.Create(testname + "_console_output.json")
 		if _, ok := jobData["Data"]; ok {
 			jobID := fmt.Sprintf("%d", int(jobData["Data"].(map[string]interface{})["JobID"].(float64)))
 			log.Printf("Job started successfully, Job ID: %s\n", jobID)
 			log.Printf("\nWaiting for job to complete\n")
-			time.Sleep(5 * time.Second)
+			time.Sleep(30 * time.Second)
 			out, err := status(addr, user, jobID)
 			if err != nil {
 				outhandler.WriteString(err.Error())
@@ -80,6 +82,20 @@ func start(addr string, user string, testlist string, userDir string) {
 			} else {
 				outhandler.WriteString(out.String())
 				io.WriteString(zipwriter, out.String())
+			}
+			log.Printf("Downloading the test logs from contest server")
+			reg := regexp.MustCompile(`(.+:)(\d+)`)
+			download_url := reg.ReplaceAllString(addr, "${1}8789") 
+			download_url = fmt.Sprintf("%s/logs/%s",download_url, jobID)
+			resp, _ := http.Get(download_url)
+			defer resp.Body.Close()
+			log.Printf("Log download status:", resp.Status)
+			if resp.StatusCode != 200 {
+				log.Printf("Unable to download")
+			} else {
+				filename := fmt.Sprintf("testlogs_%s.zip", jobID)
+				out, _ := writer.Create(filename)
+				io.Copy(out, resp.Body)
 			}
 		} else {
 			log.Println("Error: Unable to execute the testcase")
@@ -92,12 +108,32 @@ func start(addr string, user string, testlist string, userDir string) {
 
 func status(addr string, user string, jobID string) (bytes.Buffer, error) {
 	var out bytes.Buffer
-	input := []string{os.Args[0], "--addr", addr, "status", jobID}
-	if err := cli.CLIMain(input[0], input[1:], &out); err != nil {
-		log.Printf("%v\n", err)
-		return out, err
+	for attempt := 1; attempt <= 20; attempt++ {	
+		input := []string{os.Args[0], "--addr", addr, "status", jobID}
+		if err := cli.CLIMain(input[0], input[1:], &out); err != nil {
+			log.Printf("%v\n", err)
+			return out, err
+		}
+		var JobCompletionEvents = map[string]int{
+			"JobStateCompleted"	: 0, 
+			"JobStateFailed"	: 0, 
+			"JobStateCancelled"	: 0, 
+			"JobStateCancellationFailed" : 0,
+		}
+		var jobStatus map[string]interface{}
+		json.Unmarshal(out.Bytes(), &jobStatus)
+		status := jobStatus["Data"].(map[string]interface{})["Status"].(map[string]interface{})["State"].(string)
+		log.Println("Job status: ", status)
+		if _, ok := JobCompletionEvents[status]; !ok {
+			log.Println("Job is still running")
+			time.Sleep(30 * time.Second)
+			out.Reset()
+		} else { 
+			log.Println("Job is completed")
+			log.Println(out.String())	
+			break
+		}
 	}
-	log.Println(out.String())
 	return out, nil
 }
 
