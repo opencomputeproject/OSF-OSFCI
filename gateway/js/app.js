@@ -187,6 +187,8 @@ function run_ci(servername, RemainingSecond) {
 	$('#features').css("display","none");
 	$('#help').css("display","none");
 	$('#dropdown').css("display","none");
+	$('#download_key_button').css("display","none");
+
 
 
 	// We must add an input field into the navbar to gather the github Token entry
@@ -888,6 +890,9 @@ function myAccount()
 
 function logged()
 {
+	if (typeof(mylocalStorage['privKeyInfoAck'] == 'undefined')) {
+		mylocalStorage['privKeyInfoAck'] = 0;
+	}
 	mainpage();
 }
 
@@ -909,6 +914,7 @@ function disconnect()
 	delete mylocalStorage['secretKey'];
 	delete mylocalStorage['username'];
 	delete mylocalStorage['osfciauth'];
+	delete mylocalStorage['privKeyInfoAck'];
 	localStorage.clear()
 	// Wait 5s and redirect to mainpage
 	setTimeout(function () {
@@ -922,6 +928,10 @@ function mainpage(){
 	loadHTML("html/navbar.html");
 	loadJS("js/navbar.js");
 	navbarHover();
+	// pretty rudimentary I should probably keep this within the popUp function itself eventually
+	if (mylocalStorage['privKeyInfoAck'] != 1) {
+		popUp()
+	}
 	loginBtn();
 	loadHTML("html/home.html");
 	$('#background').css('background-image', 'url(images/landing.png)').fadeIn(3000);
