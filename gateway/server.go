@@ -11,8 +11,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
-	"github.com/spf13/viper"
-	"golang.org/x/crypto/acme/autocert"
 	"html/template"
 	"io/ioutil"
 	"net"
@@ -24,25 +22,28 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/spf13/viper"
+	"golang.org/x/crypto/acme/autocert"
 )
 
 var tlsCertPath string
 var tlsKeyPath string
 
-//DNSDomain is read from config
+// DNSDomain is read from config
 var DNSDomain string
 var staticAssetsDir string
 
-//TTYDTestConsole is read from config
+// TTYDTestConsole is read from config
 var TTYDTestConsole string
 
-//TTYDHostConsole is read from config
+// TTYDHostConsole is read from config
 var TTYDHostConsole string
 
-//TTYDem100Bios is read from config
+// TTYDem100Bios is read from config
 var TTYDem100Bios string
 
-//TTYDem100BMC is read from config
+// TTYDem100BMC is read from config
 var TTYDem100BMC string
 
 // TTYDOSLoader is read from config
@@ -56,13 +57,13 @@ var credentialPort string
 var compileURI string
 var compileTCPPort string
 
-//StorageURI is read from config
+// StorageURI is read from config
 var StorageURI string
 
-//StorageTCPPORT is read from config
+// StorageTCPPORT is read from config
 var StorageTCPPORT string
 
-//MaxServerAge is read from config
+// MaxServerAge is read from config
 var MaxServerAge int
 
 type serverProduct struct {
@@ -96,7 +97,7 @@ type serversList struct {
 
 var ciServers serversList
 
-//Initialize the config variables
+// Initialize the config variables
 func initServerconfig() error {
 	viper.SetConfigName("gatewayconf")
 	viper.SetConfigType("yaml")
@@ -339,6 +340,18 @@ func home(w http.ResponseWriter, r *http.Request) {
 			base.Zlog.Fatalf("JSON encoding error: %s", err.Error())
 		}
 		w.Write([]byte(returnData))
+
+	case "get_private_key":
+		returnData, err := ioutil.ReadFile("/usr/local/production/keys/customer_private_key.pem")
+		if err != nil {
+			base.Zlog.Fatalf("JSON encoding error: %s", err.Error())
+		}
+		//if read is sucessful, get some information about the person doing stuff
+		base.Zlog.Infof("get_private_key: %s - %s %s %s", r.RemoteAddr, r.Proto, r.Method, r.URL.RequestURI())
+
+		//Tell response writer to send the requester the file data in question
+		w.Write([]byte(returnData))
+
 	case "get_server":
 		base.Zlog.Infof("get_server: %s - %s %s %s", r.RemoteAddr, r.Proto, r.Method, r.URL.RequestURI())
 		var serverTypeIndex int
@@ -1045,7 +1058,7 @@ func testweb(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//Default Intialize
+// Default Intialize
 func init() {
 
 	config := base.Configuration{
