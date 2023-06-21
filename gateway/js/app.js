@@ -128,6 +128,7 @@ function start_ci(machine) {
 
         clearDocument();
         loadHTML("html/navbar.html");
+		$('#download_key_button').removeAttr("style");
         loadJS("js/navbar.js");
         navbarHover();
         loginBtn();
