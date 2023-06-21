@@ -926,6 +926,7 @@ function mainpage(){
 	clearDocument();
 	// Must load the default home page
 	loadHTML("html/navbar.html");
+	$('#download_key_button').css("display","show");
 	loadJS("js/navbar.js");
 	navbarHover();
 	// pretty rudimentary I should probably keep this within the popUp function itself eventually
@@ -934,6 +935,7 @@ function mainpage(){
 	}
 	loginBtn();
 	loadHTML("html/home.html");
+
 	$('#background').css('background-image', 'url(images/landing.png)').fadeIn(3000);
         $(document).ready(function () {
                     $('#background').animate({ opacity: 1 }, { duration: 2000 });
