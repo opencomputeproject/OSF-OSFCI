@@ -617,7 +617,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		if cacheIndex != -1 {
 			bmcIP := ciServers.servers[cacheIndex].bmcIP
 			url, _ := url.Parse("https://" + bmcIP + ":443")
-			ciServers.servers[cacheIndex].ReverseProxy := httputil.NewSingleHostReverseProxy(url)
+			ciServers.servers[cacheIndex].ReverseProxy = httputil.NewSingleHostReverseProxy(url)
 			var InsecureTransport http.RoundTripper = &http.Transport{
 				Dial: (&net.Dialer{
 					Timeout:   30 * time.Second,
@@ -625,6 +625,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 				}).Dial,
 				TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
 				TLSHandshakeTimeout: 10 * time.Second,
+				MaxIdleConns:        100,
+				MaxIdleConnsPerHost: 100,
 			}
 			// Our OpenBMC has a self signed certificate
 			ciServers.servers[cacheIndex].ReverseProxy.Transport = InsecureTransport
@@ -932,7 +934,7 @@ func bmcweb(w http.ResponseWriter, r *http.Request) {
 	proxy := ciServers.servers[cacheIndex].ReverseProxy
 	// Internal gateway IP address
 	// Must reroute on myself and port 443
-	url, _ = url.Parse("http://" + r.Header.Get("Host"))
+	url, _ := url.Parse("http://" + r.Header.Get("Host"))
 	r.URL.Host = "https://" + url.Hostname() + ":443/"
 	r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 	proxy.ServeHTTP(w, r)
@@ -1140,7 +1142,6 @@ func main() {
 				newEntry.ProductIndex = 0
 			case "DL325_GEN10PLUS":
 				newEntry.ProductIndex = 1
-
 			}
 			ciServers.mux.Lock()
 			ciServers.servers = append(ciServers.servers, newEntry)
