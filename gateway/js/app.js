@@ -919,7 +919,7 @@ function disconnect()
 	localStorage.clear()
 	// Wait 5s and redirect to mainpage
 	setTimeout(function () {
-		mainpage();
+		main();
     	}, 5000);
 }
 
