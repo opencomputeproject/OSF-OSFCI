@@ -1138,18 +1138,11 @@ func main() {
 			servertype := viper.GetString(typetring)
 			fmt.Println("servertype=", servertype)
 			switch servertype {
-			case "DL360_Gen10":
-				newEntry.ProductIndex = 0
-			case "DL325_GEN10PLUS":
-				newEntry.ProductIndex = 1
-
-			case "RL300_GEN11":
-				newEntry.ProductIndex = 2
-			case "DL360_GEN11":
-				newEntry.ProductIndex = 3
-			case "DL360_GEN10_DEV":
-				newEntry.ProductIndex = 4
 			case "DL385_GEN11":
+				newEntry.ProductIndex = 0
+			case "DL325_GEN11":
+				newEntry.ProductIndex = 1
+			case "RL300_GEN11":
 				newEntry.ProductIndex = 5
 			}
 			ciServers.mux.Lock()
