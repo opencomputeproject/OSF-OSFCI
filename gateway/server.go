@@ -87,6 +87,7 @@ type serverEntry struct {
 	gitToken        string
 	queue           int
 	expiration      time.Time
+	ReverseProxy 	*httputil.ReverseProxy
 	ProductIndex    int
 }
 
@@ -627,6 +628,21 @@ func home(w http.ResponseWriter, r *http.Request) {
 		}
 	case "power_on":
 		if cacheIndex != -1 {
+			bmcIP := ciServers.servers[cacheIndex].bmcIP
+			url, _ := url.Parse("https://" + bmcIP + ":443")
+			ciServers.servers[cacheIndex].ReverseProxy = httputil.NewSingleHostReverseProxy(url)
+			var InsecureTransport http.RoundTripper = &http.Transport{
+				Dial: (&net.Dialer{
+					Timeout:   30 * time.Second,
+					KeepAlive: 30 * time.Second,
+				}).Dial,
+				TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
+				TLSHandshakeTimeout: 10 * time.Second,
+				MaxIdleConns:        100,
+				MaxIdleConnsPerHost: 100,
+			}
+			// Our OpenBMC has a self signed certificate
+			ciServers.servers[cacheIndex].ReverseProxy.Transport = InsecureTransport
 			//fmt.Printf("Poweron request\n")
 			base.Zlog.Infof("Poweron request")
 			client := &http.Client{}
@@ -886,6 +902,7 @@ func bmcweb(w http.ResponseWriter, r *http.Request) {
 	// to the homepage !
 
 	bmcIP := ""
+	cacheIndex := -1
 	if err == nil {
 		if cookie.Value != "" {
 			// We must get the IP address from the cache
@@ -894,6 +911,7 @@ func bmcweb(w http.ResponseWriter, r *http.Request) {
 					if time.Now().Before(ciServers.servers[i].expiration) {
 						// We still own the server and we can go to the BMC
 						bmcIP = ciServers.servers[i].bmcIP
+						cacheIndex = i
 					}
 				}
 			}
@@ -926,22 +944,10 @@ func bmcweb(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	conn.Close()
-	// Must specify the iLo Web address
-	url, _ := url.Parse("https://" + bmcIP + ":443")
-	proxy := httputil.NewSingleHostReverseProxy(url)
-	var InsecureTransport http.RoundTripper = &http.Transport{
-		Dial: (&net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
-		}).Dial,
-		TLSClientConfig:     &tls.Config{InsecureSkipVerify: true},
-		TLSHandshakeTimeout: 10 * time.Second,
-	}
-	// Our OpenBMC has a self signed certificate
-	proxy.Transport = InsecureTransport
+	proxy := ciServers.servers[cacheIndex].ReverseProxy
 	// Internal gateway IP address
 	// Must reroute on myself and port 443
-	url, _ = url.Parse("http://" + r.Header.Get("Host"))
+	url, _ := url.Parse("http://" + r.Header.Get("Host"))
 	r.URL.Host = "https://" + url.Hostname() + ":443/"
 	r.Header.Set("X-Forwarded-Host", r.Header.Get("Host"))
 	proxy.ServeHTTP(w, r)
@@ -1145,11 +1151,12 @@ func main() {
 			servertype := viper.GetString(typetring)
 			fmt.Println("servertype=", servertype)
 			switch servertype {
-			case "DL360_Gen10":
+			case "DL385_GEN11":
 				newEntry.ProductIndex = 0
-			case "DL325_GEN10PLUS":
+			case "DL325_GEN11":
 				newEntry.ProductIndex = 1
-
+			case "RL300_GEN11":
+				newEntry.ProductIndex = 2 
 			}
 			ciServers.mux.Lock()
 			ciServers.servers = append(ciServers.servers, newEntry)
