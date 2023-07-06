@@ -372,7 +372,7 @@ function run_ci(servername, RemainingSecond) {
 						$("#EndSession").css("display","none");
 						$("#modalSession").modal('hide');
 						$('#modalSession').on('hidden.bs.modal', function (e) {
-							mainpage(); //This was main() before -> I think it was a mistake :) 
+							mainpage();
 						});
                                         }
                                 });
