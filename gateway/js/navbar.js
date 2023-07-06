@@ -106,6 +106,10 @@ function enableDisableToolTip() {
     }
   }
 
+function popUp() {
+	$('#myModal').modal('show');	
+}
+
 // We have to build the navbar production option
 
 $.ajax({

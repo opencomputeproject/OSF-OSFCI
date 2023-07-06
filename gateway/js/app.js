@@ -128,6 +128,7 @@ function start_ci(machine) {
 
         clearDocument();
         loadHTML("html/navbar.html");
+		$('#download_key_button').removeAttr("style");
         loadJS("js/navbar.js");
         navbarHover();
         loginBtn();
@@ -187,6 +188,8 @@ function run_ci(servername, RemainingSecond) {
 	$('#features').css("display","none");
 	$('#help').css("display","none");
 	$('#dropdown').css("display","none");
+	$('#download_key_button').css("display","none");
+
 
 
 	// We must add an input field into the navbar to gather the github Token entry
@@ -369,7 +372,7 @@ function run_ci(servername, RemainingSecond) {
 						$("#EndSession").css("display","none");
 						$("#modalSession").modal('hide');
 						$('#modalSession').on('hidden.bs.modal', function (e) {
-							main();
+							mainpage();
 						});
                                         }
                                 });
@@ -888,6 +891,9 @@ function myAccount()
 
 function logged()
 {
+	if (typeof(mylocalStorage['privKeyInfoAck'] == 'undefined')) {
+		mylocalStorage['privKeyInfoAck'] = 0;
+	}
 	mainpage();
 }
 
@@ -909,10 +915,11 @@ function disconnect()
 	delete mylocalStorage['secretKey'];
 	delete mylocalStorage['username'];
 	delete mylocalStorage['osfciauth'];
+	delete mylocalStorage['privKeyInfoAck'];
 	localStorage.clear()
 	// Wait 5s and redirect to mainpage
 	setTimeout(function () {
-		mainpage();
+		main();
     	}, 5000);
 }
 
@@ -920,10 +927,16 @@ function mainpage(){
 	clearDocument();
 	// Must load the default home page
 	loadHTML("html/navbar.html");
+	$('#download_key_button').removeAttr("style");
 	loadJS("js/navbar.js");
 	navbarHover();
+	// pretty rudimentary I should probably keep this within the popUp function itself eventually
+	if (mylocalStorage['privKeyInfoAck'] != 1) {
+		popUp()
+	}
 	loginBtn();
 	loadHTML("html/home.html");
+
 	$('#background').css('background-image', 'url(images/landing.png)').fadeIn(3000);
         $(document).ready(function () {
                     $('#background').animate({ opacity: 1 }, { duration: 2000 });
