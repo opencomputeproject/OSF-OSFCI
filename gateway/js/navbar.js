@@ -96,10 +96,10 @@ $("#download_key_button").click(function() {
 });
 
 $("#ack_button").click(function() {
-	let nameString = "downloaded"
+	let nameString = "priv_key_ack"
 	if (( "string" === typeof(mylocalStorage['secretKey']) ) & ( "string" === typeof(mylocalStorage['accessKey']) ))
 	{
-		nameString = nameString + " - username: " + mylocalStorage['username']
+		nameString = nameString + "_username_" + mylocalStorage['username']
 	}
     createCookie(nameString, 1, 30);
 });

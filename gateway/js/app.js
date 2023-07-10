@@ -961,9 +961,16 @@ function mainpage(){
 	loadJS("js/navbar.js");
 	navbarHover();
 	// pretty rudimentary I should probably keep this within the popUp function itself eventually
-	if (mylocalStorage['privKeyInfoAck'] != 1) {
+	AckCookieName = "priv_key_ack"
+	if (( "string" === typeof(mylocalStorage['secretKey']) ) & ( "string" === typeof(mylocalStorage['accessKey']) ))
+	{
+		AckCookieName = AckCookieName + "_username_" + mylocalStorage['username']
+	}
+	
+	if (readCookie(AckCookieName) != 1) {
 		popUp()
 	}
+	
 	loginBtn();
 	loadHTML("html/home.html");
 
