@@ -346,7 +346,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		priv_key_file := viper.GetString("CUSTOMER_PRIVATE_KEY")
 		returnData, err := ioutil.ReadFile(priv_key_file)
 		if err != nil {
-			base.Zlog.Fatalf("JSON encoding error: %s", err.Error())
+			base.Zlog.Fatalf("ReadFile error: %s", err.Error())
 		}
 
 		//Scrape file name type
