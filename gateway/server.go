@@ -18,6 +18,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -342,12 +343,20 @@ func home(w http.ResponseWriter, r *http.Request) {
 		w.Write([]byte(returnData))
 
 	case "get_private_key":
-		returnData, err := ioutil.ReadFile("/usr/local/production/keys/customer_private_key.pem")
+		priv_key_file := viper.GetString("CUSTOMER_PRIVATE_KEY")
+		returnData, err := ioutil.ReadFile(priv_key_file)
 		if err != nil {
 			base.Zlog.Fatalf("JSON encoding error: %s", err.Error())
 		}
+
+		//Scrape file name type
+		priv_key_file_type := filepath.Base(priv_key_file)
+
 		//if read is sucessful, get some information about the person doing stuff
 		base.Zlog.Infof("get_private_key: %s - %s %s %s", r.RemoteAddr, r.Proto, r.Method, r.URL.RequestURI())
+
+		//Set the response writer header to Content-Disposition to signify that the writer should initiate a download
+		w.Header().Set("Content-Disposition", "attachment; filename="+priv_key_file_type)
 
 		//Tell response writer to send the requester the file data in question
 		w.Write([]byte(returnData))
