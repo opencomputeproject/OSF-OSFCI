@@ -91,6 +91,20 @@ $("#Home").on("click", function(event) {
 	mainpage();
 });
 
+$("#download_key_button").click(function() {
+	window.location.href = "./get_private_key";
+});
+
+$("#ack_button").click(function() {
+	let nameString = "downloaded"
+	if (( "string" === typeof(mylocalStorage['secretKey']) ) & ( "string" === typeof(mylocalStorage['accessKey']) ))
+	{
+		nameString = nameString + " - username: " + mylocalStorage['username']
+	}
+    createCookie(nameString, 1, 30);
+});
+
+
 // tooltip element will appear/hide once the helptoggle is clicked
 function enableDisableToolTip() {
     let toolTip = document.getElementsByClassName('tooltiptext')
