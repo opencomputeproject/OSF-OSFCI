@@ -16,7 +16,8 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="mylocalStorage['privKeyInfoAck'] = 1">Acknowledge</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" id="ack_button">Acknowledge</button>
+
       </div>
     </div>
   </div>
@@ -66,11 +67,9 @@
 	data-toggle="modal" data-target="#modalSession" >End Session</button>
     
     <!-- Private Keys Button -->
-    <form method="get" action="/get_private_key">
-      <button type="submit" class="btn btn-primary" id="download_key_button" data-toggle="modal" data-target="#myModal" style="display: none;">
-        Download Private Key
-      </button>
-    </form>
+    <button type="submit" class="btn btn-primary" id="download_key_button" data-toggle="modal" data-target="#myModal" style="display: none;">
+      Download Private Key
+    </button>
     
     <!-- Dropdown -->
     <li class="nav-item dropdown ml-md-auto" id="dropdownMaster">
