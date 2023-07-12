@@ -536,8 +536,8 @@ func getLinuxBootBuildLog(username string, w http.ResponseWriter, recipe string)
 	w.Write(buf)
 }
 
-func authHpe(username string, password string, w http.ResponseWriter){
-	payload := map[string]string{"username":username, "password":password}
+func authHpe(username string, password string, w http.ResponseWriter) {
+	payload := map[string]string{"username": username, "password": password}
 	byts, _ := json.Marshal(payload)
 	url := "https://auth.hpe.com/api/v1/authn"
 	req, err := http.NewRequest("POST", url, bytes.NewReader(byts))
@@ -554,7 +554,7 @@ func authHpe(username string, password string, w http.ResponseWriter){
 		http.Error(w, "Authentication failed", 401)
 		return
 	}
-	body, err:= ioutil.ReadAll(resp.Body)
+	body, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		base.Zlog.Errorf(err.Error())
 		http.Error(w, "Authentication failed", 401)
@@ -564,7 +564,7 @@ func authHpe(username string, password string, w http.ResponseWriter){
 	response := make(map[string]interface{})
 	json.Unmarshal(body, &response)
 	_, is_logged := response["status"]
-	if is_logged && response["status"].(string) == "SUCCESS"{
+	if is_logged && response["status"].(string) == "SUCCESS" {
 		base.Zlog.Infof(response["status"].(string))
 		profile := response["_embedded"].(map[string]interface{})["user"].(map[string]interface{})["profile"].(map[string]interface{})
 		var user = new(authUser)
@@ -584,7 +584,7 @@ func authHpe(username string, password string, w http.ResponseWriter){
 		cookie := http.Cookie{Name: "osfci_cookie", Value: sessionid, Path: "/", HttpOnly: true, MaxAge: int(base.MaxAge)}
 		http.SetCookie(w, &cookie)
 		fmt.Fprintf(w, string(returnValue))
-	}else{
+	} else {
 		base.Zlog.Errorf("Authentication failed")
 		http.Error(w, "Authentication failed", 401)
 	}
@@ -859,7 +859,7 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 			var result *base.User
 			result = userGetInternalInfo(username)
 			base.Zlog.Infof("User check done")
-			if result == nil{
+			if result == nil {
 				base.Zlog.Infof("Trying to authenticate using HPE Auth")
 				authHpe(username, password, w)
 				return
