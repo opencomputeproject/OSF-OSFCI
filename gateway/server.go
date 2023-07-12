@@ -25,7 +25,6 @@ import (
 	"time"
 
 	"github.com/spf13/viper"
-	"golang.org/x/crypto/acme/autocert"
 )
 
 var tlsCertPath string
@@ -49,8 +48,6 @@ var TTYDem100BMC string
 
 // TTYDOSLoader is read from config
 var TTYDOSLoader string
-
-var certStorage string
 
 // ExpectedBMCIp is read from config
 var credentialURI string
@@ -88,7 +85,7 @@ type serverEntry struct {
 	gitToken        string
 	queue           int
 	expiration      time.Time
-	ReverseProxy 	*httputil.ReverseProxy
+	ReverseProxy    *httputil.ReverseProxy
 	ProductIndex    int
 }
 
@@ -132,8 +129,6 @@ func initServerconfig() error {
 
 	//TTYDOSLoader set from config file
 	TTYDOSLoader = viper.GetString("TTYD_OS_LOADER")
-
-	certStorage = viper.GetString("CERT_STORAGE")
 
 	credentialURI = viper.GetString("CREDENTIALS_URI")
 	credentialPort = viper.GetString("CREDENTIALS_TCPPORT")
@@ -1165,7 +1160,7 @@ func main() {
 			case "DL325_GEN11":
 				newEntry.ProductIndex = 1
 			case "RL300_GEN11":
-				newEntry.ProductIndex = 2 
+				newEntry.ProductIndex = 2
 			}
 			ciServers.mux.Lock()
 			ciServers.servers = append(ciServers.servers, newEntry)
@@ -1181,40 +1176,10 @@ func main() {
 		base.Zlog.Warnf("IP filter initialization error: %s", err.Error())
 	}
 
-	if DNSDomain != "" {
-		// if DNS_DOMAIN is set then we run in a production environment
-		// we must get the directory where the certificates will be stored
-		certManager := autocert.Manager{
-			Prompt:     autocert.AcceptTOS,
-			Cache:      autocert.DirCache(certStorage),
-			HostPolicy: autocert.HostWhitelist(DNSDomain),
-		}
-
-		server := &http.Server{
-			Addr:         ":443",
-			Handler:      mux,
-			ReadTimeout:  600 * time.Second,
-			WriteTimeout: 600 * time.Second,
-			IdleTimeout:  120 * time.Second,
-			TLSConfig: &tls.Config{
-				GetCertificate: certManager.GetCertificate,
-			},
-		}
-
-		go func() {
-			h := certManager.HTTPHandler(nil)
-			if err := http.ListenAndServe(":http", h); err != http.ErrServerClosed {
-				base.Zlog.Fatalf("Server service error: %s", err.Error())
-			}
-		}()
-
-		server.ListenAndServeTLS("", "")
-	} else {
-		go http.ListenAndServe(":80", http.HandlerFunc(httpsRedirect))
-		// Launch TLS server
-		err := http.ListenAndServeTLS(":443", tlsCertPath, tlsKeyPath, mux)
-		if err != nil {
-			base.Zlog.Fatalf("Server TLS error: %s", err.Error())
-		}
+	go http.ListenAndServe(":80", http.HandlerFunc(httpsRedirect))
+	// Launch TLS server
+	err = http.ListenAndServeTLS(":443", tlsCertPath, tlsKeyPath, mux)
+	if err != nil {
+		base.Zlog.Fatalf("Server TLS error: %s", err.Error())
 	}
 }
