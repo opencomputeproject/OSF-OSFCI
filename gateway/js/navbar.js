@@ -72,7 +72,6 @@ function loginBtn() {
 				clearDocument();
 				loadHTML("html/navbar.html");
 				loadJS("js/navbar.js");
-				navbarHover();
 				loginBtn();
 		       		$(document.body).append("<center><h1>Welcome Back !</h1><center>");
 			       	loadHTML("html/loginForm.html");
@@ -84,24 +83,27 @@ function loginBtn() {
 		}
 	});
 
-	$('#MyAccount').on('click', function(e) {
-		myAccount();
-	});
 
 	// We must check if we are logged in or not ?
 	// and replace the button text
-	if ( typeof(mylocalStorage) !== 'undefined' )
-	if (( "string" === typeof(mylocalStorage['secretKey']) ) & ( "string" === typeof(mylocalStorage['accessKey']) ))
-	{
-	        // we must change the login button by a Disconnect button
-	        $('#loginNavbar').html('Logout');
-		// The navBar title must be the login name
-		$("#dropdownMaster").append(dropdownCodeToInsert);
-		$('#navbarDropdownMenuLink').html(mylocalStorage['username']);
-	}
-	else {
-		console.log("Error with html text insertion");
-	}
+	if ( typeof(mylocalStorage) !== 'undefined' ) {
+		if (( "string" === typeof(mylocalStorage['secretKey']) ) & ( "string" === typeof(mylocalStorage['accessKey']) ))
+		{
+			// we must change the login button by a Disconnect button
+			$('#loginNavbar').html('Logout');
+			// The navBar title must be the login name
+			$("#dropdownMaster").append(dropdownCodeToInsert);
+			$('#navbarDropdownMenuLink').html(mylocalStorage['username']);
+			navbarHover()
+			$('#MyAccount').on('click', function(e) {
+				myAccount();
+			});
+			get_server_models_for_dropdown()
+		}
+		else {
+			console.log("Error with html text insertion");
+		}
+	}	
 		
 }
 
@@ -143,24 +145,25 @@ function popUp() {
 }
 
 // We have to build the navbar production option
-
-$.ajax({
-	type: "GET",
-	contentType: 'application/json',
-	url: window.location.origin + '/ci/get_server_models/',
-	success: function(response){
-			var obj = JSON.parse(response);
-			var htmlcode = "";
-			obj.forEach(function(item) {
-				htmlcode = htmlcode + '<li><a class="dropdown-item" id="'+item.Product+'">' + item.Product + '</a></li>';
-			});
-			$('#menuSecondary').html(htmlcode);
-			obj.forEach(function(item) {
-				$('#'+item.Product).on('click', function(e) {
-  				      InteractiveSession(item.Product);
+function get_server_models_for_dropdown() {
+	$.ajax({
+		type: "GET",
+		contentType: 'application/json',
+		url: window.location.origin + '/ci/get_server_models/',
+		success: function(response){
+				var obj = JSON.parse(response);
+				var htmlcode = "";
+				obj.forEach(function(item) {
+					htmlcode = htmlcode + '<li><a class="dropdown-item" id="'+item.Product+'">' + item.Product + '</a></li>';
 				});
-			});
-	}
-});
+				$('#menuSecondary').html(htmlcode);
+				obj.forEach(function(item) {
+					$('#'+item.Product).on('click', function(e) {
+						InteractiveSession(item.Product);
+					});
+				});
+		}
+	});
+}
 
 
