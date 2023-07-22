@@ -4,7 +4,6 @@ import (
 	"base/base"
 	"encoding/base64"
 	"fmt"
-	"github.com/spf13/viper"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -12,6 +11,8 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+
+	"github.com/spf13/viper"
 )
 
 var storageRoot string
@@ -19,7 +20,7 @@ var storageRoot string
 // write operation must be protected by a Mutex
 var file sync.RWMutex
 
-//Initialize storage config
+// Initialize storage config
 func initStorageconfig() error {
 	viper.SetConfigName("gatewayconf")
 	viper.SetConfigType("yaml")
@@ -319,7 +320,7 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//Default Intialize
+// Default Intialize
 func init() {
 
 	config := base.Configuration{

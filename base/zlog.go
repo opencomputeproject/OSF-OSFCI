@@ -3,10 +3,10 @@ package base
 
 import "errors"
 
-//Zlog A global variable so that log functions can be directly accessed
+// Zlog A global variable so that log functions can be directly accessed
 var Zlog Logger
 
-//Fields Type to pass when we want to call WithFields for structured logging
+// Fields Type to pass when we want to call WithFields for structured logging
 type Fields map[string]interface{}
 
 const (
@@ -31,7 +31,7 @@ var (
 	errInvalidLoggerInstance = errors.New("Invalid logger instance")
 )
 
-//Logger interface
+// Logger interface
 type Logger interface {
 	//Debugf level interface
 	Debugf(format string, args ...interface{})
@@ -58,7 +58,7 @@ type Configuration struct {
 	FileLocation      string
 }
 
-//NewLogger returns an instance of logger
+// NewLogger returns an instance of logger
 func NewLogger(config Configuration) error {
 	logger, err := newZapLogger(config)
 	if err != nil {
@@ -68,32 +68,32 @@ func NewLogger(config Configuration) error {
 	return nil
 }
 
-//Debugf interface impl
+// Debugf interface impl
 func Debugf(format string, args ...interface{}) {
 	Zlog.Debugf(format, args...)
 }
 
-//Infof interface impl
+// Infof interface impl
 func Infof(format string, args ...interface{}) {
 	Zlog.Infof(format, args...)
 }
 
-//Warnf interface impl
+// Warnf interface impl
 func Warnf(format string, args ...interface{}) {
 	Zlog.Warnf(format, args...)
 }
 
-//Errorf interface impl
+// Errorf interface impl
 func Errorf(format string, args ...interface{}) {
 	Zlog.Errorf(format, args...)
 }
 
-//Fatalf interface impl
+// Fatalf interface impl
 func Fatalf(format string, args ...interface{}) {
 	Zlog.Fatalf(format, args...)
 }
 
-//Panicf interface impl
+// Panicf interface impl
 func Panicf(format string, args ...interface{}) {
 	Zlog.Panicf(format, args...)
 }

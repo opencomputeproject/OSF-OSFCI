@@ -6,16 +6,17 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	"github.com/linuxboot/contest/cmds/clients/contestcli/cli"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
-	"net/http"
+	"regexp"
 	"strings"
 	"time"
-	"regexp"
+
+	"github.com/linuxboot/contest/cmds/clients/contestcli/cli"
 )
 
 func main() {
@@ -85,8 +86,8 @@ func start(addr string, user string, testlist string, userDir string) {
 			}
 			log.Printf("Downloading the test logs from contest server")
 			reg := regexp.MustCompile(`(.+:)(\d+)`)
-			download_url := reg.ReplaceAllString(addr, "${1}8789") 
-			download_url = fmt.Sprintf("%s/logs/%s",download_url, jobID)
+			download_url := reg.ReplaceAllString(addr, "${1}8789")
+			download_url = fmt.Sprintf("%s/logs/%s", download_url, jobID)
 			resp, _ := http.Get(download_url)
 			defer resp.Body.Close()
 			log.Printf("Log download status:", resp.Status)
@@ -108,17 +109,17 @@ func start(addr string, user string, testlist string, userDir string) {
 
 func status(addr string, user string, jobID string) (bytes.Buffer, error) {
 	var out bytes.Buffer
-	for attempt := 1; attempt <= 20; attempt++ {	
+	for attempt := 1; attempt <= 20; attempt++ {
 		input := []string{os.Args[0], "--addr", addr, "status", jobID}
 		if err := cli.CLIMain(input[0], input[1:], &out); err != nil {
 			log.Printf("%v\n", err)
 			return out, err
 		}
 		var JobCompletionEvents = map[string]int{
-			"JobStateCompleted"	: 0, 
-			"JobStateFailed"	: 0, 
-			"JobStateCancelled"	: 0, 
-			"JobStateCancellationFailed" : 0,
+			"JobStateCompleted":          0,
+			"JobStateFailed":             0,
+			"JobStateCancelled":          0,
+			"JobStateCancellationFailed": 0,
 		}
 		var jobStatus map[string]interface{}
 		json.Unmarshal(out.Bytes(), &jobStatus)
@@ -128,9 +129,9 @@ func status(addr string, user string, jobID string) (bytes.Buffer, error) {
 			log.Println("Job is still running")
 			time.Sleep(30 * time.Second)
 			out.Reset()
-		} else { 
+		} else {
 			log.Println("Job is completed")
-			log.Println(out.String())	
+			log.Println(out.String())
 			break
 		}
 	}

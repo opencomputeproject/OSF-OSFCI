@@ -1,25 +1,26 @@
 package main
 
-import "net/http"
-import "log"
-import "os"
-import "path"
-import "strings"
-import "archive/zip"
-import "io"
-import "fmt"
-import "path/filepath"
+import (
+	"archive/zip"
+	"fmt"
+	"io"
+	"log"
+	"net/http"
+	"os"
+	"path"
+	"path/filepath"
+	"strings"
+)
 
 // Go utility to fetch logs from the contest server
 // Its running on port 8789 on contest server
 
-
 var CONTEST_LOGDIR string
 
-func main(){
-	f, err := os.OpenFile("contest_log_server.log", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
+func main() {
+	f, err := os.OpenFile("contest_log_server.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-	    log.Fatalf("error opening file: %v", err)
+		log.Fatalf("error opening file: %v", err)
 	}
 	defer f.Close()
 
@@ -61,7 +62,7 @@ func home(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-    	writer := zip.NewWriter(w)
+	writer := zip.NewWriter(w)
 	defer writer.Close()
 	err := filepath.Walk(logdir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
@@ -70,7 +71,7 @@ func home(w http.ResponseWriter, req *http.Request) {
 		}
 		fmt.Printf("dir: %v: name: %s\n", info.IsDir(), path)
 		if info.IsDir() {
-		    return nil
+			return nil
 		}
 		file, err := os.Open(path)
 		if err != nil {
@@ -79,12 +80,12 @@ func home(w http.ResponseWriter, req *http.Request) {
 		defer file.Close()
 		f, err := writer.Create(info.Name())
 		if err != nil {
-		    return err
+			return err
 		}
 
 		_, err = io.Copy(f, file)
 		if err != nil {
-		    return err
+			return err
 		}
 
 		return nil
@@ -93,17 +94,16 @@ func home(w http.ResponseWriter, req *http.Request) {
 		fmt.Println(err)
 	}
 	w.Header().Set("Content-Type", "application/zip")
-	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s.zip\"", "contest_testlog_" + url[1] ))
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=\"%s.zip\"", "contest_testlog_"+url[1]))
 	return
 }
 
 // ShiftPath cleans up path
 func shiftPath(p string) (head, tail string) {
-        p = path.Clean("/" + p)
-        i := strings.Index(p[1:], "/") + 1
-        if i <= 0 {
-                return p[1:], "/"
-        }
-        return p[1:i], p[i:]
+	p = path.Clean("/" + p)
+	i := strings.Index(p[1:], "/") + 1
+	if i <= 0 {
+		return p[1:], "/"
+	}
+	return p[1:i], p[i:]
 }
-
