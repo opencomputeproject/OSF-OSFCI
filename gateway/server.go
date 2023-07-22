@@ -348,7 +348,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		//Scrape file name type
 		priv_key_file_type := filepath.Base(priv_key_file)
 
-		//if read is sucessful, get some information about the person doing stuff
+		//if read successfully, record user information
 		base.Zlog.Infof("get_private_key: %s - %s %s %s", r.RemoteAddr, r.Proto, r.Method, r.URL.RequestURI())
 
 		//Set the response writer header to Content-Disposition to signify that the writer should initiate a download
