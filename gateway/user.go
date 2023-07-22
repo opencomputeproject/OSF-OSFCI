@@ -8,8 +8,6 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
-	verifier "github.com/okta/okta-jwt-verifier-golang"
-	"github.com/spf13/viper"
 	"io"
 	"io/ioutil"
 	"net/http"
@@ -17,6 +15,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	verifier "github.com/okta/okta-jwt-verifier-golang"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -24,28 +25,28 @@ var (
 	nonce = ""
 )
 
-//StorageURI is read from config
+// StorageURI is read from config
 var StorageURI string
 
-//StorageTCPPORT is read from config
+// StorageTCPPORT is read from config
 var StorageTCPPORT string
 
-//CredentialURI is read from config
+// CredentialURI is read from config
 var CredentialURI string
 
-//ClientID for Okta
+// ClientID for Okta
 var ClientID string
 
-//Issuer URL for Okta
+// Issuer URL for Okta
 var Issuer string
 
-//ClientSecret for Okta
+// ClientSecret for Okta
 var ClientSecret string
 
-//RedirectURL Signin Redirect URL defined in the Okta
+// RedirectURL Signin Redirect URL defined in the Okta
 var RedirectURL string
 
-//LogoutRedirectURL Logout Redirect URL defined in the Okta
+// LogoutRedirectURL Logout Redirect URL defined in the Okta
 var LogoutRedirectURL string
 
 type cacheEntry struct {
@@ -67,7 +68,7 @@ type authUser struct {
 	AccessToken string
 }
 
-//UserDB To store the hash of user details after login
+// UserDB To store the hash of user details after login
 var UserDB map[string]*authUser
 
 // Upercase is mandatory for JSON library parsing
@@ -92,7 +93,7 @@ type userPublic struct {
 	EmailLABEL       string
 }
 
-//Exchange - Token structure returned by Okta
+// Exchange - Token structure returned by Okta
 type Exchange struct {
 	Error            string `json:"error,omitempty"`
 	ErrorDescription string `json:"error_description,omitempty"`
@@ -103,7 +104,7 @@ type Exchange struct {
 	IdToken          string `json:"id_token,omitempty"`
 }
 
-//Initialize User config
+// Initialize User config
 func initUserconfig() error {
 	viper.SetConfigName("gatewayconf")
 	viper.SetConfigType("yaml")
@@ -909,7 +910,7 @@ func userCallback(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//Default Intialize
+// Default Intialize
 func init() {
 
 	config := base.Configuration{

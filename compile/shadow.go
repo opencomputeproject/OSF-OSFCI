@@ -20,7 +20,7 @@ func main() {
 	}
 }
 
-//ndup n-plicates a stream ; O(n) is M*N
+// ndup n-plicates a stream ; O(n) is M*N
 func ndup(input []byte, output []byte, multiplier int) []byte {
 	for ; multiplier > 0; multiplier-- {
 		for i := 0; i < len(input); i++ {

@@ -7,8 +7,6 @@ import (
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
-	"github.com/spf13/viper"
-	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
 	"math/rand"
 	"net"
@@ -17,9 +15,12 @@ import (
 	"net/smtp"
 	"strings"
 	"time"
+
+	"github.com/spf13/viper"
+	"golang.org/x/crypto/bcrypt"
 )
 
-//User structure holds authorized users details
+// User structure holds authorized users details
 type User struct {
 	Nickname         string
 	Password         string
@@ -39,7 +40,7 @@ var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ012345
 var simpleLetters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
 var randInit = 0
 
-//MaxAge defines cookie expiration
+// MaxAge defines cookie expiration
 var MaxAge = 3600 * 24
 
 func randAlphaSlashPlus(n int) string {
@@ -64,23 +65,23 @@ func randAlpha(n int) string {
 	return string(b)
 }
 
-//GenerateAccountACKLink generates account verification link
+// GenerateAccountACKLink generates account verification link
 func GenerateAccountACKLink(length int) string {
 	return randAlpha(length)
 }
 
-//GenerateAuthToken creates auth token for created user
+// GenerateAuthToken creates auth token for created user
 func GenerateAuthToken(TokenType string, length int) string {
 	return randAlphaSlashPlus(length)
 }
 
-//HashPassword gets hash from password
+// HashPassword gets hash from password
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(bytes), err
 }
 
-//CheckPasswordHash checks given password
+// CheckPasswordHash checks given password
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
@@ -111,7 +112,7 @@ func initSmtpconfig() error {
 	return nil
 }
 
-//SendEmail provides email function for varied interactions
+// SendEmail provides email function for varied interactions
 func SendEmail(email string, subject string, validationString string) {
 	var auth smtp.Auth
 	err := initSmtpconfig()
@@ -267,7 +268,7 @@ func SendEmail(email string, subject string, validationString string) {
 
 }
 
-//Request handler
+// Request handler
 func Request(method string, resURI string, Path string, Data string, content []byte, query string, Key string, SecretKey string) (*http.Response, error) {
 
 	client := &http.Client{}

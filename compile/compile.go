@@ -9,10 +9,6 @@ import (
 	"crypto/md5"
 	"encoding/hex"
 	"fmt"
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/client"
-	"github.com/spf13/viper"
-	"golang.org/x/sys/unix"
 	"io"
 	"net"
 	"net/http"
@@ -21,6 +17,11 @@ import (
 	"path"
 	"strings"
 	"time"
+
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/client"
+	"github.com/spf13/viper"
+	"golang.org/x/sys/unix"
 )
 
 var compileTCPPort string
@@ -31,29 +32,29 @@ var firmwaresPath string
 var storageURI string
 var storageTCPPort string
 
-//OpenBMCCommand  initialized
+// OpenBMCCommand  initialized
 var OpenBMCCommand *exec.Cmd = nil
 
-//OpenBMCOutput type such that it can be managed
+// OpenBMCOutput type such that it can be managed
 var OpenBMCOutput io.ReadCloser
 
-//LinuxBOOTCommand  initialized
+// LinuxBOOTCommand  initialized
 var LinuxBOOTCommand *exec.Cmd = nil
 
-//LinuxBOOTOutput type such that it can be managed
+// LinuxBOOTOutput type such that it can be managed
 var LinuxBOOTOutput io.ReadCloser
 
-//OpenBMCBuildChannel chan setup
+// OpenBMCBuildChannel chan setup
 var OpenBMCBuildChannel chan string
 
-//LinuxBOOTBuildChannel chan setup
+// LinuxBOOTBuildChannel chan setup
 var LinuxBOOTBuildChannel chan string
 var dockerClient *client.Client
 var username string
 var linuxbootDockerID string
 var openbmcDockerID string
 
-//initialize compiler config
+// initialize compiler config
 func initCompilerconfig() error {
 	viper.SetConfigName("compiler1conf")
 	viper.SetConfigType("yaml")
@@ -384,7 +385,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-//Default Intialize
+// Default Intialize
 func init() {
 
 	config := base.Configuration{

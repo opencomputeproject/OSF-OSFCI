@@ -6,8 +6,6 @@ import (
 	"base/base"
 	"encoding/json"
 	"fmt"
-	"github.com/spf13/viper"
-	"golang.org/x/sys/unix"
 	"io"
 	"io/ioutil"
 	"net"
@@ -18,6 +16,9 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/spf13/viper"
+	"golang.org/x/sys/unix"
 )
 
 var binariesPath string
@@ -40,24 +41,24 @@ var testLog string
 var contestServer string
 var solLogPath string
 
-//OpenBMCEm100Command string
+// OpenBMCEm100Command string
 var OpenBMCEm100Command *exec.Cmd = nil
 var bmcSerialConsoleCmd *exec.Cmd = nil
 
-//RomEm100Command string
+// RomEm100Command string
 var RomEm100Command *exec.Cmd = nil
 var romSerialConsoleCmd *exec.Cmd = nil
 
-//Test Console ttyd
+// Test Console ttyd
 var contestStartCmd *exec.Cmd = nil
 
-//TestLists holds test-case(s) info
+// TestLists holds test-case(s) info
 type TestLists struct {
 	Name string
 	Path string
 }
 
-//Initialize controller1 config
+// Initialize controller1 config
 func initCtrlconfig() error {
 	viper.SetConfigName("ctrl1conf")
 	viper.SetConfigType("yaml")
@@ -761,7 +762,7 @@ func getTestName(testpath string) (string, error) {
 	return path.Base(testpath), nil
 }
 
-//Default Intialize
+// Default Intialize
 func init() {
 
 	config := base.Configuration{
