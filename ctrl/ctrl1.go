@@ -40,6 +40,8 @@ var testPath string
 var testLog string
 var contestServer string
 var solLogPath string
+var bmcChip string
+var biosChip string
 
 // OpenBMCEm100Command string
 var OpenBMCEm100Command *exec.Cmd = nil
@@ -89,6 +91,8 @@ func initCtrlconfig() error {
 	testLog = viper.GetString("TEST_LOG")
 	contestServer = viper.GetString("CONTEST_SERVER")
 	solLogPath = viper.GetString("SOL_LOG")
+	bmcChip = viper.GetString("BMC_CHIP")
+	biosChip = viper.GetString("BIOS_CHIP")
 
 	return nil
 }
@@ -207,7 +211,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 			args = append(args, "unbuffer")
 			args = append(args, binariesPath+"/em100")
 			args = append(args, "-c")
-			args = append(args, "MX25L25635E")
+			args = append(args, bmcChip)
 			args = append(args, "-x")
 			args = append(args, em100Bmc)
 			args = append(args, "-T")
@@ -293,7 +297,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 			args = append(args, "unbuffer")
 			args = append(args, binariesPath+"/em100")
 			args = append(args, "-c")
-			args = append(args, "MX25L51245G")
+			args = append(args, biosChip)
 			args = append(args, "-x")
 			args = append(args, em100Bios)
 			args = append(args, "-T")
@@ -349,7 +353,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		args = append(args, "unbuffer")
 		args = append(args, binariesPath+"/em100")
 		args = append(args, "-c")
-		args = append(args, "MX25L51245G")
+		args = append(args, biosChip)
 		args = append(args, "-x")
 		args = append(args, em100Bios)
 		args = append(args, "-T")
@@ -410,7 +414,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		args = append(args, "unbuffer")
 		args = append(args, binariesPath+"/em100")
 		args = append(args, "-c")
-		args = append(args, "MX25L25635E")
+		args = append(args, bmcChip)
 		args = append(args, "-x")
 		args = append(args, em100Bmc)
 		args = append(args, "-T")
@@ -480,7 +484,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		args = append(args, "unbuffer")
 		args = append(args, binariesPath+"/em100")
 		args = append(args, "-c")
-		args = append(args, "MX25L25635E")
+		args = append(args, bmcChip)
 		args = append(args, "-x")
 		args = append(args, em100Bmc)
 		args = append(args, "-T")
@@ -563,7 +567,7 @@ func home(w http.ResponseWriter, r *http.Request) {
 		args = append(args, "unbuffer")
 		args = append(args, binariesPath+"/em100")
 		args = append(args, "-c")
-		args = append(args, "MX25L51245G")
+		args = append(args, biosChip)
 		args = append(args, "-x")
 		args = append(args, em100Bios)
 		args = append(args, "-T")
