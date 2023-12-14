@@ -1,9 +1,7 @@
 # Maintainers
 
-Jean-Marie Verdun (Founder & Lead)
+Jean-Marie Verdun (Founder)
 
 Gregg Shick
-
-Susmith Poochali
   
 Arun Darlie Koshy
