@@ -147,9 +147,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 				argsConsole = append(argsConsole, "bmc")
 				resetEm100Cmd := exec.Command(binariesPath+"/reset_em100", argsConsole...)
 				resetEm100Cmd.Start()
-				go func() {
-					resetEm100Cmd.Wait()
-				}()
+				resetEm100Cmd.Wait()
+				//go func() {
+				//	resetEm100Cmd.Wait()
+				//}()
 			}
 			if bmcSerialConsoleCmd != nil {
 				unix.Kill(bmcSerialConsoleCmd.Process.Pid, unix.SIGTERM)
@@ -165,9 +166,10 @@ func home(w http.ResponseWriter, r *http.Request) {
 					argsConsole = append(argsConsole, "rom")
 					resetEm100Cmd := exec.Command(binariesPath+"/reset_em100", argsConsole...)
 					resetEm100Cmd.Start()
-					go func() {
-						resetEm100Cmd.Wait()
-					}()
+					resetEm100Cmd.Wait()
+					//go func() {
+					//	resetEm100Cmd.Wait()
+					//}()
 				}
 			} else {
 				w.Write([]byte(emulator))
