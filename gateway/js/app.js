@@ -659,7 +659,7 @@ function run_ci(servername, RemainingSecond) {
                         $.ajax({
                                 type: "GET",
                                 contentType: 'application/json',
-                                url: window.location.origin + '/ci/resetEmulator/rom',
+                                url: window.location.origin + '/ci/reset_emulator/rom',
                                 success: function(response){
                                         console.log('ROM emulator has been reset');
                                 }
