@@ -1,6 +1,19 @@
 #!/bin/bash
 # (c) 2020 Hewlett-Packard LP.
+
+
+
+#Gregg 1/4/2024 - I am taking all this code out, it is not needed anymore.  No detection necessary to find the emulators, we will just turn off ports 1/2 on the hub
+
+
+
 BINARIES_PATH=$(grep -A0 'BINARIES_PATH' "/usr/local/production/config/ctrl1conf.yaml" | cut -d: -f2 | sed 's/[\" ]//g')
+EM100BMC=$(grep -A0 'EM100BMC' "/usr/local/production/config/ctrl1conf.yaml" | cut -d: -f2 | sed 's/[\" ]//g')
+EM100BIOS=$(grep -A0 'EM100BIOS' "/usr/local/production/config/ctrl1conf.yaml" | cut -d: -f2 | sed 's/[\" ]//g')
+
+
+<<'END_COMMENT'
+
 EM100BMC=$(grep -A0 'EM100BMC' "/usr/local/production/config/ctrl1conf.yaml" | cut -d: -f2 | sed 's/[\" ]//g')
 EM100BIOS=$(grep -A0 'EM100BIOS' "/usr/local/production/config/ctrl1conf.yaml" | cut -d: -f2 | sed 's/[\" ]//g')
 echo "reset" >> $BINARIES_PATH/.emulators/out
@@ -50,13 +63,65 @@ do
 done
 unset IFS
 echo "RESETTING hub $HUB port $PORTID"  >> $BINARIES_PATH/.emulators/out
-$BINARIES_PATH/uhubctl -l $HUB -p $PORTID -a off
-sleep 5
-$BINARIES_PATH/uhubctl -l $HUB -p $PORTID -a on
-sleep 5
-echo "done" >> $BINARIES_PATH/.emulators/out
-( $BINARIES_PATH/em100 -l ) >& $BINARIES_PATH/.emulators/config_em100.txt
-( cat $BINARIES_PATH/.emulators/config_em100.txt | sed 's/EM/DP/g'  ) >& $BINARIES_PATH/.emulators/config_em100.txt.n
-mv $BINARIES_PATH/.emulators/config_em100.txt.n $BINARIES_PATH/.emulators/config_em100.txt
-( lsusb -t ) >& $BINARIES_PATH/.emulators/config_usb_tree.txt
-exit 0
+echo $HUB
+echo $PORTID
+
+END_COMMENT
+
+port=1
+hub=$($BINARIES_PATH/cusbi /Q:ttyUSB$port -F)
+echo $hub
+echo $port
+if [ "$hub" == "Query Err" ]
+then
+        port=0
+fi
+
+if [ "$1" == "bmc" ]
+then
+        $BINARIES_PATH/cusbi /S:ttyUSB$port 0:1
+        sleep 5s
+        $BINARIES_PATH/cusbi /S:ttyUSB$port 1:1
+        sleep 5s
+        exit 0
+elif [ "$1" == "rom" ]
+then
+	$BINARIES_PATH/cusbi /S:ttyUSB$port 0:2
+        sleep 5s
+        $BINARIES_PATH/cusbi /S:ttyUSB$port 1:2
+        sleep 5s
+        exit 0
+
+else 
+	$BINARIES_PATH/cusbi /S:ttyUSB$port 0:1,2
+	sleep 5s
+	$BINARIES_PATH/cusbi /S:ttyUSB$port 1:1,2
+	sleep 5s
+	exit 0
+fi
+
+#echo "done" >> $BINARIES_PATH/.emulators/out
+#( $BINARIES_PATH/em100 -l ) >& $BINARIES_PATH/.emulators/config_em100.txt
+#( cat $BINARIES_PATH/.emulators/config_em100.txt | sed 's/EM/DP/g'  ) >& $BINARIES_PATH/.emulators/config_em100.txt.n
+#mv $BINARIES_PATH/.emulators/config_em100.txt.n $BINARIES_PATH/.emulators/config_em100.txt
+#( lsusb -t ) >& $BINARIES_PATH/.emulators/config_usb_tree.txt
+	
+
+
+#$BINARIES_PATH/uhubctl -l $HUB -p $PORTID -a off
+#$BINARIES_PATH/cusbi /S:ttyUSB$port 0:1,2
+#/usr/local/production/bin/cusbi /S:ttyUSB$port 0:1,2
+#$BINARIES_PATH/cusbi /Q:ttyUSB$port 
+#sleep 5s
+#$BINARIES_PATH/uhubctl -l $HUB -p $PORTID -a on
+#$BINARIES_PATH/cusbi /S:ttyUSB$port 1:1,2
+#/usr/local/production/bin/cusbi /S:ttyUSB$port 1:1,2
+#$BINARIES_PATH/cusbi /Q:ttyUSB$port 
+#sleep 5s
+#echo "Is this 5 seconds"
+#echo "done" >> $BINARIES_PATH/.emulators/out
+#( $BINARIES_PATH/em100 -l ) >& $BINARIES_PATH/.emulators/config_em100.txt
+#( cat $BINARIES_PATH/.emulators/config_em100.txt | sed 's/EM/DP/g'  ) >& $BINARIES_PATH/.emulators/config_em100.txt.n
+#mv $BINARIES_PATH/.emulators/config_em100.txt.n $BINARIES_PATH/.emulators/config_em100.txt
+#( lsusb -t ) >& $BINARIES_PATH/.emulators/config_usb_tree.txt
+#exit 0

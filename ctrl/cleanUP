@@ -34,9 +34,12 @@ do
 	screen -wipe
 done
 fi
+
 #We have to reset the PCI bus
+#Now that we have a foolproof way or resetting the em100, I don't think this pci bus reset is necessary so I am editing this to call the reset_em100 script again.
 myid=`whoami`
-sudo -E $BINARIES_PATH/reset_bus $myid
+#sudo -E $BINARIES_PATH/reset_bus $myid
+$BINARIES_PATH/reset_em100
 $BINARIES_PATH/em100 -x $EM100BMC -s
 $BINARIES_PATH/em100 -x $EM100BIOS -s
 touch /tmp/cleanUpDONE
