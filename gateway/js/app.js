@@ -582,7 +582,8 @@ function run_ci(servername, RemainingSecond) {
                 	});
 			this.className = 'upload-drop-zone';
                         firmwarebmcuploaded =1;
-                        startUploadbmc(e.dataTransfer.files)
+                        //startUploadbmc(e.dataTransfer.files)
+			setTimeout(startUploadbmc, 5000, e.dataTransfer.files);
 		}
         }
 
@@ -666,7 +667,8 @@ function run_ci(servername, RemainingSecond) {
                         });
 			this.className = 'upload-drop-zone';
                         firmwarebiosuploaded=1;
-                        startUploadbios(e.dataTransfer.files)
+                        //startUploadbios(e.dataTransfer.files)
+			setTimeout(startUploadbios, 5000, e.dataTransfer.files);
 		}
         }
 
