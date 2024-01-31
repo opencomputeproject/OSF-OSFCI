@@ -80,16 +80,14 @@ fi
 if [ "$1" == "bmc" ]
 then
         $BINARIES_PATH/cusbi /S:ttyUSB$port 0:1
-        sleep 5s
+	sleep 2s
         $BINARIES_PATH/cusbi /S:ttyUSB$port 1:1
-        sleep 5s
         exit 0
 elif [ "$1" == "rom" ]
 then
 	$BINARIES_PATH/cusbi /S:ttyUSB$port 0:2
-        sleep 5s
+        sleep 2s
         $BINARIES_PATH/cusbi /S:ttyUSB$port 1:2
-        sleep 5s
         exit 0
 
 else 
