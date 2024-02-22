@@ -546,8 +546,8 @@ function run_ci(servername, RemainingSecond) {
                         var percent = e.loaded / e.total * 100;
                         $('#progress-bmc').css("width",Math.floor(percent)+"%");
                 }, false);
-                //xhr.send(formData);
-		setTimeout(xhr.send, 5000, formData);
+                xhr.send(formData);
+		//setTimeout(xhr.send, 5000, formData);
         }
 
         dropZonebmc.ondrop = function(e) {
@@ -583,7 +583,8 @@ function run_ci(servername, RemainingSecond) {
                 	});
 			this.className = 'upload-drop-zone';
                         firmwarebmcuploaded =1;
-                        startUploadbmc(e.dataTransfer.files)
+                        //startUploadbmc(e.dataTransfer.files)
+			setTimeout(startUploadbmc, 2000, e.dataTransfer.files);
 		}
         }
 
@@ -668,7 +669,7 @@ function run_ci(servername, RemainingSecond) {
 			this.className = 'upload-drop-zone';
                         firmwarebiosuploaded=1;
                         //startUploadbios(e.dataTransfer.files)
-			setTimeout(startUploadbios, 5000, e.dataTransfer.files);
+			setTimeout(startUploadbios, 2000, e.dataTransfer.files);
 		}
         }
 
