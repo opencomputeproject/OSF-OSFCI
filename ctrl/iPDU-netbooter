@@ -1,0 +1,13 @@
+#!/bin/bash
+#set -x #echo on
+#make sure to map the hostname 'netbooter' to the correct IP in /etc/hosts for this script to work properly
+
+if [ $1 = "on" ]
+then
+   echo "entered into power on"
+   curl --trace dump -X POST 'http://netbooter/cmd.cgi?$A7+1' --user "admin:admin"
+else
+   echo "entered into power off"
+   curl --trace dump -X POST 'http://netbooter/cmd.cgi?$A7+0' --user "admin:admin"
+fi
+
