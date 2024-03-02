@@ -582,7 +582,8 @@ function run_ci(servername, RemainingSecond) {
                 	});
 			this.className = 'upload-drop-zone';
                         firmwarebmcuploaded =1;
-                        startUploadbmc(e.dataTransfer.files)
+                        // startUploadbmc(e.dataTransfer.files)
+			setTimeout(startUploadbmc, 2000, e.dataTransfer.files);
 		}
         }
 
@@ -666,7 +667,8 @@ function run_ci(servername, RemainingSecond) {
                         });
 			this.className = 'upload-drop-zone';
                         firmwarebiosuploaded=1;
-                        startUploadbios(e.dataTransfer.files)
+                        // startUploadbios(e.dataTransfer.files)
+			setTimeout(startUploadbios, 2000, e.dataTransfer.files);
 		}
         }
 
@@ -957,6 +959,7 @@ function mainpage(){
 	loadHTML("html/navbar.html");
 	$('#download_key_button').removeAttr("style");
 	loadJS("js/navbar.js");
+	navbarHover();
 	// pretty rudimentary I should probably keep this within the popUp function itself eventually
 	AckCookieName = "priv_key_ack"
 	if (( "string" === typeof(mylocalStorage['secretKey']) ) & ( "string" === typeof(mylocalStorage['accessKey']) ))
