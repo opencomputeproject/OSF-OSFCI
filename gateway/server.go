@@ -1161,6 +1161,10 @@ func main() {
 				newEntry.ProductIndex = 1
 			case "RL300_GEN11":
 				newEntry.ProductIndex = 2
+			case "DL320_GEN11":
+				newEntry.ProductIndex = 3
+			case "DL380_GEN11":
+				newEntry.ProductIndex = 4
 			}
 			ciServers.mux.Lock()
 			ciServers.servers = append(ciServers.servers, newEntry)
