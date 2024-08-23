@@ -31,6 +31,7 @@ var storageTCPPort string
 var isEmulatorsPool string
 var em100Bios string
 var em100Bmc string
+var em100BmcArg string
 var bmcSerial string
 var originalBmc string
 var originalBios string
@@ -93,6 +94,7 @@ func initCtrlconfig() error {
 	solLogPath = viper.GetString("SOL_LOG")
 	bmcChip = viper.GetString("BMC_CHIP")
 	biosChip = viper.GetString("BIOS_CHIP")
+	em100BmcArg = viper.GetString("BMC_CARG")
 
 	return nil
 }
@@ -223,6 +225,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 			args = append(args, "0xFE0000000")
 			args = append(args, "-p")
 			args = append(args, "low")
+			args = append(args, "-m")
+			args = append(args, em100BmcArg)
 			OpenBMCEm100Command = exec.Command(binariesPath+"/ttyd", args...)
 			OpenBMCEm100Command.Start()
 
