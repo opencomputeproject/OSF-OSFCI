@@ -21,27 +21,30 @@ import (
 	"golang.org/x/sys/unix"
 )
 
-var binariesPath string
-var firmwaresPath string
-var distrosPath string
-var compileURI string
-var compileTCPPort string
-var storageURI string
-var storageTCPPort string
-var isEmulatorsPool string
-var em100Bios string
-var em100Bmc string
-var bmcSerial string
-var originalBmc string
-var originalBios string
-var bmcrecipe string
-var biosrecipe string
-var testPath string
-var testLog string
-var contestServer string
-var solLogPath string
-var bmcChip string
-var biosChip string
+var (
+	binariesPath    string
+	firmwaresPath   string
+	distrosPath     string
+	compileURI      string
+	compileTCPPort  string
+	storageURI      string
+	storageTCPPort  string
+	isEmulatorsPool string
+	em100Bios       string
+	em100Bmc        string
+	em100BmcArg     string
+	bmcSerial       string
+	originalBmc     string
+	originalBios    string
+	bmcrecipe       string
+	biosrecipe      string
+	testPath        string
+	testLog         string
+	contestServer   string
+	solLogPath      string
+	bmcChip         string
+	biosChip        string
+)
 
 // OpenBMCEm100Command string
 var OpenBMCEm100Command *exec.Cmd = nil
@@ -67,32 +70,41 @@ func initCtrlconfig() error {
 	viper.AddConfigPath("/usr/local/production/config/")
 	viper.AutomaticEnv()
 
-	err := viper.ReadInConfig()
-	if err != nil {
-		return err
+	if err := viper.ReadInConfig(); err != nil {
+		return fmt.Errorf("failed to read config: %w", err)
 	}
 
-	binariesPath = viper.GetString("BINARIES_PATH")
-	firmwaresPath = viper.GetString("FIRMWARES_PATH")
-	distrosPath = viper.GetString("DISTROS_PATH")
-	compileURI = viper.GetString("COMPILE_URI")
-	compileTCPPort = viper.GetString("COMPILE_TCPPORT")
-	storageURI = viper.GetString("STORAGE_URI")
-	storageTCPPort = viper.GetString("STORAGE_TCPPORT")
-	isEmulatorsPool = viper.GetString("IS_EMULATORS_POOL")
-	em100Bios = viper.GetString("EM100BIOS")
-	em100Bmc = viper.GetString("EM100BMC")
-	bmcSerial = viper.GetString("BMC_SERIAL")
-	originalBmc = viper.GetString("ORIGINAL_BMC")
-	originalBios = viper.GetString("ORIGINAL_BIOS")
-	bmcrecipe = viper.GetString("BMC_RECIPE")
-	biosrecipe = viper.GetString("BIOS_RECIPE")
-	testPath = viper.GetString("TEST_PATH")
-	testLog = viper.GetString("TEST_LOG")
-	contestServer = viper.GetString("CONTEST_SERVER")
-	solLogPath = viper.GetString("SOL_LOG")
-	bmcChip = viper.GetString("BMC_CHIP")
-	biosChip = viper.GetString("BIOS_CHIP")
+	requiredSettings := map[string]*string{
+		"BINARIES_PATH":     &binariesPath,
+		"FIRMWARES_PATH":    &firmwaresPath,
+		"DISTROS_PATH":      &distrosPath,
+		"COMPILE_URI":       &compileURI,
+		"COMPILE_TCPPORT":   &compileTCPPort,
+		"STORAGE_URI":       &storageURI,
+		"STORAGE_TCPPORT":   &storageTCPPort,
+		"IS_EMULATORS_POOL": &isEmulatorsPool,
+		"EM100BIOS":         &em100Bios,
+		"EM100BMC":          &em100Bmc,
+		"BMC_CARG":          &em100BmcArg,
+		"BMC_SERIAL":        &bmcSerial,
+		"ORIGINAL_BMC":      &originalBmc,
+		"ORIGINAL_BIOS":     &originalBios,
+		"BMC_RECIPE":        &bmcrecipe,
+		"BIOS_RECIPE":       &biosrecipe,
+		"TEST_PATH":         &testPath,
+		"TEST_LOG":          &testLog,
+		"CONTEST_SERVER":    &contestServer,
+		"SOL_LOG":           &solLogPath,
+		"BMC_CHIP":          &bmcChip,
+		"BIOS_CHIP":         &biosChip,
+	}
+
+	for key, ptr := range requiredSettings {
+		*ptr = viper.GetString(key)
+		if *ptr == "" {
+			return fmt.Errorf("missing required configuration: %s", key)
+		}
+	}
 
 	return nil
 }
@@ -223,6 +235,8 @@ func home(w http.ResponseWriter, r *http.Request) {
 			args = append(args, "0xFE0000000")
 			args = append(args, "-p")
 			args = append(args, "low")
+			args = append(args, "-m")
+			args = append(args, em100BmcArg)
 			OpenBMCEm100Command = exec.Command(binariesPath+"/ttyd", args...)
 			OpenBMCEm100Command.Start()
 
