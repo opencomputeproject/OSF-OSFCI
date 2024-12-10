@@ -128,6 +128,7 @@ function start_ci(machine) {
 
         clearDocument();
         loadHTML("html/navbar.html");
+                $('#download_repo_button').removeAttr("style");
 		$('#download_key_button').removeAttr("style");
         loadJS("js/navbar.js");
         loginBtn();
@@ -187,6 +188,7 @@ function run_ci(servername, RemainingSecond) {
 	$('#features').css("display","none");
 	$('#help').css("display","none");
 	$('#dropdown').css("display","none");
+	$('#download_repo_button').css("display","none");
 	$('#download_key_button').css("display","none");
 
 
@@ -957,6 +959,7 @@ function mainpage(){
 	clearDocument();
 	// Must load the default home page
 	loadHTML("html/navbar.html");
+	$('#download_repo_button').removeAttr("style");
 	$('#download_key_button').removeAttr("style");
 	loadJS("js/navbar.js");
 	navbarHover();

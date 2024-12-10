@@ -111,6 +111,10 @@ $("#Home").on("click", function(event) {
 	mainpage();
 });
 
+$("#download_repo_button").click(function() {
+	window.location.href = "./get_custom_repo";
+});
+
 $("#download_key_button").click(function() {
 	window.location.href = "./get_private_key";
 });
