@@ -3,24 +3,24 @@ package base
 import (
 	"bytes"
 	"crypto/hmac"
+	"crypto/rand"
 	"crypto/sha1"
 	"crypto/tls"
 	"encoding/base64"
 	"fmt"
+	"github.com/spf13/viper"
+	"golang.org/x/crypto/bcrypt"
 	"io/ioutil"
-	"math/rand"
+	"math/big"
 	"net"
 	"net/http"
 	"net/mail"
 	"net/smtp"
 	"strings"
 	"time"
-
-	"github.com/spf13/viper"
-	"golang.org/x/crypto/bcrypt"
 )
 
-// User structure holds authorized users details
+//User structure holds authorized users details
 type User struct {
 	Nickname         string
 	Password         string
@@ -38,50 +38,51 @@ type User struct {
 
 var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789+/")
 var simpleLetters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789")
-var randInit = 0
 
-// MaxAge defines cookie expiration
+//MaxAge defines cookie expiration
 var MaxAge = 3600 * 24
 
 func randAlphaSlashPlus(n int) string {
-	if randInit == 0 {
-		rand.Seed(time.Now().UnixNano())
-	}
 	b := make([]rune, n)
 	for i := range b {
-		b[i] = letters[rand.Intn(len(letters))]
+		idx, err := rand.Int(rand.Reader, big.NewInt(int64(len(letters))))
+		if err != nil {
+			panic("crypto/rand failed: " + err.Error())
+		}
+		b[i] = letters[idx.Int64()]
 	}
 	return string(b)
 }
 
 func randAlpha(n int) string {
-	if randInit == 0 {
-		rand.Seed(time.Now().UnixNano())
-	}
 	b := make([]rune, n)
 	for i := range b {
-		b[i] = simpleLetters[rand.Intn(len(simpleLetters))]
+		idx, err := rand.Int(rand.Reader, big.NewInt(int64(len(simpleLetters))))
+		if err != nil {
+			panic("crypto/rand failed: " + err.Error())
+		}
+		b[i] = simpleLetters[idx.Int64()]
 	}
 	return string(b)
 }
 
-// GenerateAccountACKLink generates account verification link
+//GenerateAccountACKLink generates account verification link
 func GenerateAccountACKLink(length int) string {
 	return randAlpha(length)
 }
 
-// GenerateAuthToken creates auth token for created user
+//GenerateAuthToken creates auth token for created user
 func GenerateAuthToken(TokenType string, length int) string {
 	return randAlphaSlashPlus(length)
 }
 
-// HashPassword gets hash from password
+//HashPassword gets hash from password
 func HashPassword(password string) (string, error) {
 	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	return string(bytes), err
 }
 
-// CheckPasswordHash checks given password
+//CheckPasswordHash checks given password
 func CheckPasswordHash(password, hash string) bool {
 	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
 	return err == nil
@@ -112,7 +113,7 @@ func initSmtpconfig() error {
 	return nil
 }
 
-// SendEmail provides email function for varied interactions
+//SendEmail provides email function for varied interactions
 func SendEmail(email string, subject string, validationString string) {
 	var auth smtp.Auth
 	err := initSmtpconfig()
@@ -268,7 +269,7 @@ func SendEmail(email string, subject string, validationString string) {
 
 }
 
-// Request handler
+//Request handler
 func Request(method string, resURI string, Path string, Data string, content []byte, query string, Key string, SecretKey string) (*http.Response, error) {
 
 	client := &http.Client{}
